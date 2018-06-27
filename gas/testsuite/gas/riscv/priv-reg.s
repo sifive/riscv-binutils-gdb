@@ -267,3 +267,10 @@
 	csr pmpaddr13
 	csr pmpaddr14
 	csr pmpaddr15
+
+# CLIC registers
+	csr mtvt
+	csr mnxti
+	csr mintstatus
+	csrrw sp,mscratchi,sp
+	csrrw sp,mscratcho,sp
