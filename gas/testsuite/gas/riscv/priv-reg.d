@@ -254,5 +254,4 @@ Disassembly of section .text:
 [ 	]+3d0:[ 	]+30702573[ 	]+csrr[ 	]+a0,mtvt
 [ 	]+3d4:[ 	]+34502573[ 	]+csrr[ 	]+a0,mnxti
 [ 	]+3d8:[ 	]+34602573[ 	]+csrr[ 	]+a0,mintstatus
-[ 	]+3dc:[ 	]+34811173[ 	]+csrrw[ 	]+sp,mscratchi,sp
-[ 	]+3e0:[ 	]+34911173[ 	]+csrrw[ 	]+sp,mscratcho,sp
+[ 	]+3dc:[ 	]+34811173[ 	]+csrrw[ 	]+sp,mscratchcsw,sp

@@ -272,5 +272,4 @@
 	csr mtvt
 	csr mnxti
 	csr mintstatus
-	csrrw sp,mscratchi,sp
-	csrrw sp,mscratcho,sp
+	csrrw sp,mscratchcsw,sp
