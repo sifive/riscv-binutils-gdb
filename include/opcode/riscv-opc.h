@@ -792,11 +792,10 @@
 #define CSR_DSCRATCH 0x7b2
 
 /* CLIC registers.  */
-#define CSR_MTVT 0x307 /* 0x306 conflicts with mcounteren.  ??? */
+#define CSR_MTVT 0x307
 #define CSR_MNXTI 0x345
 #define CSR_MINTSTATUS 0x346
-#define CSR_MSCRATCHI 0x348 /* Maybe only valid for csrrw.  ??? */
-#define CSR_MSCRATCHO 0x349 /* Maybe only valid for csrrw.  ??? */
+#define CSR_MSCRATCHCSW 0x348
 
 /* These registers are present in priv spec 1.9.1, dropped in 1.10.  */
 #define CSR_HSTATUS 0x200
@@ -1345,8 +1344,7 @@ DECLARE_CSR(dscratch, CSR_DSCRATCH)
 DECLARE_CSR(mtvt, CSR_MTVT)
 DECLARE_CSR(mnxti, CSR_MNXTI)
 DECLARE_CSR(mintstatus, CSR_MINTSTATUS)
-DECLARE_CSR(mscratchi, CSR_MSCRATCHI)
-DECLARE_CSR(mscratcho, CSR_MSCRATCHO)
+DECLARE_CSR(mscratchcsw, CSR_MSCRATCHCSW)
 
 /* These registers are present in priv spec 1.9.1, dropped in 1.10.  */
 DECLARE_CSR(hstatus, CSR_HSTATUS)
