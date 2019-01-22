@@ -2827,7 +2827,9 @@ find_abstract_instance_name (struct comp_unit *unit,
       info_ptr = unit->stash->info_ptr_memory;
       info_ptr_end = unit->stash->info_ptr_end;
       total = info_ptr_end - info_ptr;
-      if (!die_ref || die_ref >= total)
+      if (!die_ref)
+	return TRUE;
+      else if (die_ref >= total)
 	{
 	  _bfd_error_handler
 	    (_("Dwarf Error: Invalid abstract instance DIE ref."));
