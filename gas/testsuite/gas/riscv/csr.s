@@ -408,3 +408,9 @@
 	csr vl
 	csr vtype
 	csr vlenb
+
+	# SiFive CLIC
+	csr mtvt
+	csr mnxti
+	csr mintstatus
+	csrrw sp,mscratchcsw,sp
