@@ -106,6 +106,7 @@ enum riscv_csr_class
   CSR_CLASS_SSTC_AND_H_32,	/* Sstc RV32 only (with H) */
   CSR_CLASS_SSCTR,		/* Ssctr */
   CSR_CLASS_XTHEADVECTOR,	/* xtheadvector only */
+  CSR_CLASS_CLIC,	/* clic CSR */
 };
 
 /* This structure holds all restricted conditions for a CSR.  */
@@ -1159,6 +1160,8 @@ riscv_csr_address (const char *csr_name,
       break;
     case CSR_CLASS_SSCTR: extension = "ssctr"; break;
     case CSR_CLASS_DEBUG:
+    case CSR_CLASS_CLIC:
+      need_check_version = false;
       break;
     case CSR_CLASS_XTHEADVECTOR:
       extension = "xtheadvector";

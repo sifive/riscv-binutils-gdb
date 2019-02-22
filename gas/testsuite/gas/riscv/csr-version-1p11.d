@@ -933,3 +933,10 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+c2259073[ 	]+csrw[ 	]+vlenb,a1
 [ 	]+[0-9a-f]+:[ 	]+01702573[ 	]+csrr[ 	]+a0,jvt
 [ 	]+[0-9a-f]+:[ 	]+01759073[ 	]+csrw[ 	]+jvt,a1
+[ 	]+[0-9a-f]+:[ 	]+30702573[ 	]+csrr[ 	]+a0,mtvt
+[ 	]+[0-9a-f]+:[ 	]+30759073[ 	]+csrw[ 	]+mtvt,a1
+[ 	]+[0-9a-f]+:[ 	]+34502573[ 	]+csrr[ 	]+a0,mnxti
+[ 	]+[0-9a-f]+:[ 	]+34559073[ 	]+csrw[ 	]+mnxti,a1
+[ 	]+[0-9a-f]+:[ 	]+34602573[ 	]+csrr[ 	]+a0,mintstatus
+[ 	]+[0-9a-f]+:[ 	]+34659073[ 	]+csrw[ 	]+mintstatus,a1
+[ 	]+[0-9a-f]+:[ 	]+34811173[ 	]+csrrw[ 	]+sp,mscratchcsw,sp

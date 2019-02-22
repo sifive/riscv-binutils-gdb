@@ -541,3 +541,9 @@
 
 	# Zcmt
 	csr jvt
+
+	# SiFive CLIC
+	csr mtvt
+	csr mnxti
+	csr mintstatus
+	csrrw sp,mscratchcsw,sp
