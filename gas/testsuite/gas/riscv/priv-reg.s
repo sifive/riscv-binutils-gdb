@@ -275,3 +275,9 @@
 	csr vcsr
 	csr vl
 	csr vtype
+
+# CLIC registers
+	csr mtvt
+	csr mnxti
+	csr mintstatus
+	csrrw sp,mscratchcsw,sp
