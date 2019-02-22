@@ -251,3 +251,7 @@ Disassembly of section .text:
 [ 	]+3c4:[ 	]+3bd02573[ 	]+csrr[ 	]+a0,pmpaddr13
 [ 	]+3c8:[ 	]+3be02573[ 	]+csrr[ 	]+a0,pmpaddr14
 [ 	]+3cc:[ 	]+3bf02573[ 	]+csrr[ 	]+a0,pmpaddr15
+[ 	]+3d0:[ 	]+30702573[ 	]+csrr[ 	]+a0,mtvt
+[ 	]+3d4:[ 	]+34502573[ 	]+csrr[ 	]+a0,mnxti
+[ 	]+3d8:[ 	]+34602573[ 	]+csrr[ 	]+a0,mintstatus
+[ 	]+3dc:[ 	]+34811173[ 	]+csrrw[ 	]+sp,mscratchcsw,sp
