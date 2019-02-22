@@ -575,6 +575,8 @@
 #define MASK_CUSTOM3_RD_RS1  0x707f
 #define MATCH_CUSTOM3_RD_RS1_RS2 0x707b
 #define MASK_CUSTOM3_RD_RS1_RS2  0x707f
+
+/* These registers are in priv spec 1.10.  */
 #define CSR_USTATUS 0x0
 #define CSR_UIE 0x4
 #define CSR_UTVEC 0x5
@@ -796,6 +798,13 @@
 #define CSR_DCSR 0x7b0
 #define CSR_DPC 0x7b1
 #define CSR_DSCRATCH 0x7b2
+
+/* CLIC registers.  */
+#define CSR_MTVT 0x307
+#define CSR_MNXTI 0x345
+#define CSR_MINTSTATUS 0x346
+#define CSR_MSCRATCHCSW 0x348
+
 /* These registers are present in priv spec 1.9.1, dropped in 1.10.  */
 #define CSR_HSTATUS 0x200
 #define CSR_HEDELEG 0x202
@@ -1116,6 +1125,7 @@ DECLARE_INSN(custom3_rd_rs1, MATCH_CUSTOM3_RD_RS1, MASK_CUSTOM3_RD_RS1)
 DECLARE_INSN(custom3_rd_rs1_rs2, MATCH_CUSTOM3_RD_RS1_RS2, MASK_CUSTOM3_RD_RS1_RS2)
 #endif
 #ifdef DECLARE_CSR
+/* These registers are in priv spec 1.10.  */
 DECLARE_CSR(ustatus, CSR_USTATUS)
 DECLARE_CSR(uie, CSR_UIE)
 DECLARE_CSR(utvec, CSR_UTVEC)
@@ -1337,6 +1347,13 @@ DECLARE_CSR(tdata3, CSR_TDATA3)
 DECLARE_CSR(dcsr, CSR_DCSR)
 DECLARE_CSR(dpc, CSR_DPC)
 DECLARE_CSR(dscratch, CSR_DSCRATCH)
+
+/* These registers were added by the fast interrupt path spec.  */
+DECLARE_CSR(mtvt, CSR_MTVT)
+DECLARE_CSR(mnxti, CSR_MNXTI)
+DECLARE_CSR(mintstatus, CSR_MINTSTATUS)
+DECLARE_CSR(mscratchcsw, CSR_MSCRATCHCSW)
+
 /* These registers are present in priv spec 1.9.1, dropped in 1.10.  */
 DECLARE_CSR(hstatus, CSR_HSTATUS)
 DECLARE_CSR(hedeleg, CSR_HEDELEG)
@@ -1358,6 +1375,7 @@ DECLARE_CSR(mucounteren, CSR_MUCOUNTEREN)
 DECLARE_CSR(mscounteren, CSR_MSCOUNTEREN)
 DECLARE_CSR(mhcounteren, CSR_MHCOUNTEREN)
 #endif
+
 #ifdef DECLARE_CSR_ALIAS
 /* Ubadaddr is 0x043 in 1.9.1, but 0x043 is utval in 1.10.  */
 DECLARE_CSR_ALIAS(ubadaddr, CSR_UTVAL)
@@ -1368,6 +1386,7 @@ DECLARE_CSR_ALIAS(sptbr, CSR_SATP)
 /* Mbadaddr is 0x343 in 1.9.1, but 0x343 is mtval in 1.10.  */
 DECLARE_CSR_ALIAS(mbadaddr, CSR_MTVAL)
 #endif
+
 #ifdef DECLARE_CAUSE
 DECLARE_CAUSE("misaligned fetch", CAUSE_MISALIGNED_FETCH)
 DECLARE_CAUSE("fault fetch", CAUSE_FAULT_FETCH)
