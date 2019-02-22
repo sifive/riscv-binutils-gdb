@@ -256,3 +256,7 @@ Disassembly of section .text:
 [ 	]+3d8+:[ 	]+00a02573[ 	]+csrr[ 	]+a0,vxrm
 [ 	]+3dc+:[ 	]+c2002573[ 	]+csrr[ 	]+a0,vl
 [ 	]+3e0+:[ 	]+c2102573[ 	]+csrr[ 	]+a0,vtype
+[ 	]+3e4:[ 	]+30702573[ 	]+csrr[ 	]+a0,mtvt
+[ 	]+3e8:[ 	]+34502573[ 	]+csrr[ 	]+a0,mnxti
+[ 	]+3ec:[ 	]+34602573[ 	]+csrr[ 	]+a0,mintstatus
+[ 	]+3f0:[ 	]+34811173[ 	]+csrrw[ 	]+sp,mscratchcsw,sp

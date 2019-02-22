@@ -2328,6 +2328,8 @@ funct6 VM  VS2  VS1/RS1/IMM funct3 VD   opcode
 #define MASK_CUSTOM3_RD_RS1  0x707f
 #define MATCH_CUSTOM3_RD_RS1_RS2 0x707b
 #define MASK_CUSTOM3_RD_RS1_RS2  0x707f
+
+/* These registers are in priv spec 1.10.  */
 #define CSR_USTATUS 0x0
 #define CSR_UIE 0x4
 #define CSR_UTVEC 0x5
@@ -2557,6 +2559,12 @@ funct6 VM  VS2  VS1/RS1/IMM funct3 VD   opcode
 #define CSR_VL 0xc20
 #define CSR_VTYPE 0xc21
 #define CSR_VLENB 0xc22
+
+/* CLIC registers.  */
+#define CSR_MTVT 0x307
+#define CSR_MNXTI 0x345
+#define CSR_MINTSTATUS 0x346
+#define CSR_MSCRATCHCSW 0x348
 
 /* These registers are present in priv spec 1.9.1, dropped in 1.10.  */
 #define CSR_HSTATUS 0x200
@@ -3110,6 +3118,12 @@ DECLARE_CSR(vl, CSR_VL, CSR_CLASS_V)
 DECLARE_CSR(vtype, CSR_VTYPE, CSR_CLASS_V)
 DECLARE_CSR(vlenb, CSR_VLENB, CSR_CLASS_V)
 
+/* These registers were added by the fast interrupt path spec.  */
+DECLARE_CSR(mtvt, CSR_MTVT, CSR_CLASS_I)
+DECLARE_CSR(mnxti, CSR_MNXTI, CSR_CLASS_I)
+DECLARE_CSR(mintstatus, CSR_MINTSTATUS, CSR_CLASS_I)
+DECLARE_CSR(mscratchcsw, CSR_MSCRATCHCSW, CSR_CLASS_I)
+
 /* These registers are present in priv spec 1.9.1, dropped in 1.10.  */
 DECLARE_CSR(hstatus, CSR_HSTATUS, CSR_CLASS_I)
 DECLARE_CSR(hedeleg, CSR_HEDELEG, CSR_CLASS_I)
@@ -3131,6 +3145,7 @@ DECLARE_CSR(mucounteren, CSR_MUCOUNTEREN, CSR_CLASS_I)
 DECLARE_CSR(mscounteren, CSR_MSCOUNTEREN, CSR_CLASS_I)
 DECLARE_CSR(mhcounteren, CSR_MHCOUNTEREN, CSR_CLASS_I)
 #endif
+
 #ifdef DECLARE_CSR_ALIAS
 /* Ubadaddr is 0x043 in 1.9.1, but 0x043 is utval in 1.10.  */
 DECLARE_CSR_ALIAS(ubadaddr, CSR_UTVAL, CSR_CLASS_I)
@@ -3141,6 +3156,7 @@ DECLARE_CSR_ALIAS(sptbr, CSR_SATP, CSR_CLASS_I)
 /* Mbadaddr is 0x343 in 1.9.1, but 0x343 is mtval in 1.10.  */
 DECLARE_CSR_ALIAS(mbadaddr, CSR_MTVAL, CSR_CLASS_I)
 #endif
+
 #ifdef DECLARE_CAUSE
 DECLARE_CAUSE("misaligned fetch", CAUSE_MISALIGNED_FETCH)
 DECLARE_CAUSE("fault fetch", CAUSE_FAULT_FETCH)
