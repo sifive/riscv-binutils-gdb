@@ -460,7 +460,8 @@ enum riscv_csr_class
   CSR_CLASS_I_32,      /* rv32 only */
   CSR_CLASS_F,         /* f-ext only */
   CSR_CLASS_V,         /* v-ext only */
-  CSR_CLASS_DEBUG      /* debug CSR */
+  CSR_CLASS_DEBUG,     /* debug CSR */
+  CSR_CLASS_CLIC       /* clic CSR */
 };
 
 /* The current supported privilege spec versions.  */

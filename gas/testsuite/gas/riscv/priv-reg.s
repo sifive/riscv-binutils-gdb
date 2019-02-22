@@ -291,3 +291,9 @@
 	csr etrigger		# 0x7a1, alias to tdata1
 	csr textra32		# 0x7a3, alias to tdata3
 	csr textra64		# 0x7a3, alias to tdata3
+
+	# CLIC registers
+	csr mtvt
+	csr mnxti
+	csr mintstatus
+	csrrw sp,mscratchcsw,sp

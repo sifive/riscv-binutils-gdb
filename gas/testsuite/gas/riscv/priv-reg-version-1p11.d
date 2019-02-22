@@ -272,3 +272,7 @@ Disassembly of section .text:
 [     	]+[0-9a-f]+:[  	]+7a102573[    	]+csrr[        	]+a0,tdata1
 [     	]+[0-9a-f]+:[  	]+7a302573[    	]+csrr[        	]+a0,tdata3
 [     	]+[0-9a-f]+:[  	]+7a302573[    	]+csrr[        	]+a0,tdata3
+[     	]+[0-9a-f]+:[  	]+30702573[    	]+csrr[        	]+a0,mtvt
+[     	]+[0-9a-f]+:[  	]+34502573[    	]+csrr[        	]+a0,mnxti
+[     	]+[0-9a-f]+:[  	]+34602573[    	]+csrr[        	]+a0,mintstatus
+[     	]+[0-9a-f]+:[  	]+34811173[    	]+csrrw[        	]+sp,mscratchcsw,sp
