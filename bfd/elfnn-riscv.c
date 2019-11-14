@@ -1616,6 +1616,26 @@ riscv_global_pointer_value (struct bfd_link_info *info)
   return h->u.def.value + sec_addr (h->u.def.section);
 }
 
+/* Write VAL in uleb128 format to P, returning a pointer to the
+   following byte.
+   This code is copied from elf-attr.c.  */
+
+static bfd_byte *
+write_uleb128 (bfd_byte *p, unsigned int val)
+{
+  bfd_byte c;
+  do
+    {
+      c = val & 0x7f;
+      val >>= 7;
+      if (val)
+	c |= 0x80;
+      *(p++) = c;
+    }
+  while (val);
+  return p;
+}
+
 /* Emplace a static relocation.  */
 
 static bfd_reloc_status_type
@@ -1708,6 +1728,25 @@ perform_relocation (const reloc_howto_type *howto,
       else
 	value = ENCODE_CITYPE_LUI_IMM (RISCV_CONST_HIGH_PART (value));
       break;
+
+    case R_RISCV_SET_ULEB128:
+    case R_RISCV_SUB_ULEB128:
+      {
+	unsigned int len = 0;
+	bfd_byte *endp, *p;
+
+	_bfd_read_unsigned_leb128 (input_bfd, contents + rel->r_offset, &len);
+
+	/* Clean the contents value to zero.  Do not reduce the length.  */
+	p = contents + rel->r_offset;
+	endp = p + len -1;
+	memset (p, 0x80, len - 1);
+	*(endp) = 0;
+	p = write_uleb128 (p, value) - 1;
+	if (p < endp)
+	  *p |= 0x80;
+	return bfd_reloc_ok;
+      }
 
     case R_RISCV_32:
     case R_RISCV_64:
@@ -2004,6 +2043,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
   struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
   bfd_vma *local_got_offsets = elf_local_got_offsets (input_bfd);
   bool absolute;
+  bfd_vma uleb128_vma = 0;
+  Elf_Internal_Rela *uleb128_rel = NULL;
 
   if (!riscv_init_pcrel_relocs (&pcrel_relocs))
     return false;
@@ -2015,7 +2056,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
       struct elf_link_hash_entry *h;
       Elf_Internal_Sym *sym;
       asection *sec;
-      bfd_vma relocation;
+      bfd_vma relocation = 0;
       bfd_reloc_status_type r = bfd_reloc_ok;
       const char *name = NULL;
       bfd_vma off, ie_off;
@@ -2343,6 +2384,50 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	case R_RISCV_32_PCREL:
 	case R_RISCV_DELETE:
 	  /* These require no special handling beyond perform_relocation.  */
+	  break;
+
+	case R_RISCV_SET_ULEB128:
+	  if (!uleb128_rel)
+	    {
+	      /* Save the minuend to use later.  */
+	      uleb128_vma = relocation;
+	      uleb128_rel = rel;
+	      continue;
+	    }
+	  else
+	    {
+	      if (uleb128_rel->r_offset != rel->r_offset)
+		{
+		  msg = ("R_RISCV_SET_ULEB128 and R_RISCV_SUB_ULEB128 "
+			 "are mismatched. ");
+		  r = bfd_reloc_dangerous;
+		  break;
+		}
+	      relocation = relocation - uleb128_vma;
+	      uleb128_rel = NULL;
+	    }
+	  break;
+
+	case R_RISCV_SUB_ULEB128:
+	  if (!uleb128_rel)
+	    {
+	      /* Save the subtrahend to use later.  */
+	      uleb128_vma = relocation;
+	      uleb128_rel = rel;
+	      continue;
+	    }
+	  else
+	    {
+	      if (uleb128_rel->r_offset != rel->r_offset)
+		{
+		  msg = ("R_RISCV_SET_ULEB128 and R_RISCV_SUB_ULEB128 "
+			 "are mismatched. ");
+		  r = bfd_reloc_dangerous;
+		  break;
+		}
+	      relocation = uleb128_vma - relocation;
+	      uleb128_rel = NULL;
+	    }
 	  break;
 
 	case R_RISCV_GOT_HI20:
