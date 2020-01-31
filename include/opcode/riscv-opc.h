@@ -575,6 +575,13 @@
 #define MASK_CUSTOM3_RD_RS1  0x707f
 #define MATCH_CUSTOM3_RD_RS1_RS2 0x707b
 #define MASK_CUSTOM3_RD_RS1_RS2  0x707f
+/* SiFive specific cache control instruction.  */
+#define MATCH_CFLUSH_D_L1   0xfc000073
+#define MASK_CFLUSH_D_L1    0xfff07fff
+#define MATCH_CDISCARD_D_L1 0xfc200073
+#define MASK_CDISCARD_D_L1  0xfff07fff
+#define MATCH_CFLUSH_I_L1   0xfc100073
+#define MASK_CFLUSH_I_L1    0xffffffff
 
 /* These registers are in priv spec 1.10.  */
 #define CSR_USTATUS 0x0
@@ -1123,6 +1130,9 @@ DECLARE_INSN(custom3_rs1_rs2, MATCH_CUSTOM3_RS1_RS2, MASK_CUSTOM3_RS1_RS2)
 DECLARE_INSN(custom3_rd, MATCH_CUSTOM3_RD, MASK_CUSTOM3_RD)
 DECLARE_INSN(custom3_rd_rs1, MATCH_CUSTOM3_RD_RS1, MASK_CUSTOM3_RD_RS1)
 DECLARE_INSN(custom3_rd_rs1_rs2, MATCH_CUSTOM3_RD_RS1_RS2, MASK_CUSTOM3_RD_RS1_RS2)
+DECLARE_INSN(cflush_d_l1, MATCH_CFLUSH_D_L1, MASK_CFLUSH_D_L1)
+DECLARE_INSN(cdiscard_d_l1, MATCH_CDISCARD_D_L1, MASK_CDISCARD_D_L1)
+DECLARE_INSN(cflush_i_l1, MATCH_CFLUSH_I_L1, MASK_CFLUSH_I_L1)
 #endif
 #ifdef DECLARE_CSR
 /* These registers are in priv spec 1.10.  */
