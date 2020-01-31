@@ -1821,6 +1821,11 @@ const struct riscv_opcode riscv_opcodes[] =
 /* SiFive MNRET instruction.  */
 {"mnret",  0, INSN_CLASS_I, "", MATCH_MNRET, MASK_MNRET, match_opcode, 0 },
 
+/* SiFive cache control instruction.  */
+{"cflush.d.l1",   0, INSN_CLASS_I, "s", MATCH_CFLUSH_D_L1, MASK_CFLUSH_D_L1, match_opcode, 0 },
+{"cdiscard.d.l1", 0, INSN_CLASS_I, "s", MATCH_CDISCARD_D_L1, MASK_CDISCARD_D_L1, match_opcode, 0 },
+{"cflush.i.l1",   0, INSN_CLASS_I, "", MATCH_CFLUSH_I_L1, MASK_CFLUSH_I_L1, match_opcode, 0 },
+
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
 };

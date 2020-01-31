@@ -2104,6 +2104,13 @@
 /* SiFive MNRET instruction.  */
 #define MATCH_MNRET 0x70200073
 #define MASK_MNRET 0xffffffff
+/* SiFive cache control instruction.  */
+#define MATCH_CFLUSH_D_L1 0xfc000073
+#define MASK_CFLUSH_D_L1 0xfff07fff
+#define MATCH_CDISCARD_D_L1 0xfc200073
+#define MASK_CDISCARD_D_L1 0xfff07fff
+#define MATCH_CFLUSH_I_L1 0xfc100073
+#define MASK_CFLUSH_I_L1 0xffffffff
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01
@@ -2790,6 +2797,9 @@ DECLARE_INSN(hsv_h, MATCH_HSV_H, MASK_HSV_H)
 DECLARE_INSN(hsv_w, MATCH_HSV_W, MASK_HSV_W)
 DECLARE_INSN(hsv_d, MATCH_HSV_D, MASK_HSV_D)
 DECLARE_INSN(mnret, MATCH_MNRET, MASK_MNRET)
+DECLARE_INSN(cflush_d_l1, MATCH_CFLUSH_D_L1, MASK_CFLUSH_D_L1)
+DECLARE_INSN(cdiscard_d_l1, MATCH_CDISCARD_D_L1, MASK_CDISCARD_D_L1)
+DECLARE_INSN(cflush_i_l1, MATCH_CFLUSH_I_L1, MASK_CFLUSH_I_L1)
 #endif /* DECLARE_INSN */
 #ifdef DECLARE_CSR
 /* Unprivileged Counter/Timers CSRs.  */
