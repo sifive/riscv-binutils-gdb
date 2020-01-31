@@ -1267,6 +1267,11 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sfence.vma", 0, INSN_CLASS_I,   "s,t",  MATCH_SFENCE_VMA, MASK_SFENCE_VMA, match_opcode, 0 },
 {"wfi",        0, INSN_CLASS_I,   "",     MATCH_WFI, MASK_WFI, match_opcode, 0 },
 
+/* SiFive specific cache control instruction.  */
+{"cflush.d.l1",   0, INSN_CLASS_I,   "s",  MATCH_CFLUSH_D_L1, MASK_CFLUSH_D_L1, match_opcode, 0 },
+{"cdiscard.d.l1", 0, INSN_CLASS_I,   "s",  MATCH_CDISCARD_D_L1, MASK_CDISCARD_D_L1, match_opcode, 0 },
+{"cflush.i.l1",   0, INSN_CLASS_I,   "",   MATCH_CFLUSH_I_L1, MASK_CFLUSH_I_L1, match_opcode, 0 },
+
 /* RVV */
 {"vsetvl",     0, INSN_CLASS_V,  "d,s,t", MATCH_VSETVL, MASK_VSETVL, match_opcode, 0},
 {"vsetvli",    0, INSN_CLASS_V,  "d,s,Vc", MATCH_VSETVLI, MASK_VSETVLI, match_opcode, 0},
