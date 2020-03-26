@@ -1887,6 +1887,15 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
       vector_macro (ip);
       break;
 
+    case M_FLH:
+      pcrel_load (rd, rs1, imm_expr, "flh",
+		  BFD_RELOC_RISCV_PCREL_HI20, BFD_RELOC_RISCV_PCREL_LO12_I);
+      break;
+    case M_FSH:
+      pcrel_store (rs2, rs1, imm_expr, "fsh",
+		   BFD_RELOC_RISCV_PCREL_HI20, BFD_RELOC_RISCV_PCREL_LO12_S);
+      break;
+
     default:
       as_bad (_("internal: macro %s not implemented"), ip->insn_mo->name);
       break;
