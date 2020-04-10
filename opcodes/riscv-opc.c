@@ -97,84 +97,105 @@ const char * const riscv_vecm_names_numeric[NVECM] =
 #define MASK_VS2 (OP_MASK_VS2 << OP_SH_VS2)
 #define MASK_VMASK (OP_MASK_VMASK << OP_SH_VMASK)
 
-static int
-match_opcode (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_opcode (const struct riscv_opcode *op,
+	      insn_t insn,
+	      bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
   return ((insn ^ op->match) & op->mask) == 0;
 }
 
-static int
+static bfd_boolean
 match_never (const struct riscv_opcode *op ATTRIBUTE_UNUSED,
-	     insn_t insn ATTRIBUTE_UNUSED)
+	     insn_t insn ATTRIBUTE_UNUSED,
+	     bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
-  return 0;
+  return FALSE;
 }
 
-static int
-match_rs1_eq_rs2 (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_rs1_eq_rs2 (const struct riscv_opcode *op,
+		  insn_t insn,
+		  bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
   int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
   int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
-  return match_opcode (op, insn) && rs1 == rs2;
+  return match_opcode (op, insn, FALSE) && rs1 == rs2;
 }
 
-static int
-match_vs1_eq_vs2 (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_vs1_eq_vs2 (const struct riscv_opcode *op,
+		  insn_t insn,
+		  bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
   int vs1 = (insn & MASK_VS1) >> OP_SH_VS1;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
-  return match_opcode (op, insn) && vs1 == vs2;
+  return match_opcode (op, insn, FALSE) && vs1 == vs2;
 }
 
-static int
-match_vd_eq_vs1_eq_vs2 (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_vd_eq_vs1_eq_vs2 (const struct riscv_opcode *op,
+			insn_t insn,
+			bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
   int vd =  (insn & MASK_VD) >> OP_SH_VD;
   int vs1 = (insn & MASK_VS1) >> OP_SH_VS1;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
-  return match_opcode (op, insn) && vd == vs1 && vs1 == vs2;
+  return match_opcode (op, insn, FALSE) && vd == vs1 && vs1 == vs2;
 }
 
-static int
-match_rd_nonzero (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_rd_nonzero (const struct riscv_opcode *op,
+		  insn_t insn,
+		  bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
-  return match_opcode (op, insn) && ((insn & MASK_RD) != 0);
+  return match_opcode (op, insn, FALSE) && ((insn & MASK_RD) != 0);
 }
 
-static int
-match_c_add (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_c_add (const struct riscv_opcode *op,
+	     insn_t insn,
+	     bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
-  return match_rd_nonzero (op, insn) && ((insn & MASK_CRS2) != 0);
+  return match_rd_nonzero (op, insn, FALSE) && ((insn & MASK_CRS2) != 0);
 }
 
 /* We don't allow mv zero,X to become a c.mv hint, so we need a separate
    matching function for this.  */
 
-static int
-match_c_add_with_hint (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_c_add_with_hint (const struct riscv_opcode *op,
+		       insn_t insn,
+		       bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
-  return match_opcode (op, insn) && ((insn & MASK_CRS2) != 0);
+  return match_opcode (op, insn, FALSE) && ((insn & MASK_CRS2) != 0);
 }
 
-static int
-match_c_nop (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_c_nop (const struct riscv_opcode *op,
+	     insn_t insn,
+	     bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
-  return (match_opcode (op, insn)
+  return (match_opcode (op, insn, FALSE)
 	  && (((insn & MASK_RD) >> OP_SH_RD) == 0));
 }
 
-static int
-match_c_addi16sp (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_c_addi16sp (const struct riscv_opcode *op,
+		  insn_t insn,
+		  bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
-  return (match_opcode (op, insn)
+  return (match_opcode (op, insn, FALSE)
 	  && (((insn & MASK_RD) >> OP_SH_RD) == 2)
 	  && EXTRACT_RVC_ADDI16SP_IMM (insn) != 0);
 }
 
-static int
-match_c_lui (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_c_lui (const struct riscv_opcode *op,
+	     insn_t insn,
+	     bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
-  return (match_rd_nonzero (op, insn)
+  return (match_rd_nonzero (op, insn, FALSE)
 	  && (((insn & MASK_RD) >> OP_SH_RD) != 2)
 	  && EXTRACT_RVC_LUI_IMM (insn) != 0);
 }
@@ -182,206 +203,262 @@ match_c_lui (const struct riscv_opcode *op, insn_t insn)
 /* We don't allow lui zero,X to become a c.lui hint, so we need a separate
    matching function for this.  */
 
-static int
-match_c_lui_with_hint (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_c_lui_with_hint (const struct riscv_opcode *op,
+		       insn_t insn,
+		       bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
-  return (match_opcode (op, insn)
+  return (match_opcode (op, insn, FALSE)
 	  && (((insn & MASK_RD) >> OP_SH_RD) != 2)
 	  && EXTRACT_RVC_LUI_IMM (insn) != 0);
 }
 
-static int
-match_c_addi4spn (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_c_addi4spn (const struct riscv_opcode *op,
+		  insn_t insn,
+		  bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
-  return match_opcode (op, insn) && EXTRACT_RVC_ADDI4SPN_IMM (insn) != 0;
+  return match_opcode (op, insn, FALSE) && EXTRACT_RVC_ADDI4SPN_IMM (insn) != 0;
 }
 
 /* This requires a non-zero shift.  A zero rd is a hint, so is allowed.  */
 
-static int
-match_c_slli (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_c_slli (const struct riscv_opcode *op,
+	      insn_t insn,
+	      bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
-  return match_opcode (op, insn) && EXTRACT_RVC_IMM (insn) != 0;
+  return match_opcode (op, insn, FALSE) && EXTRACT_RVC_IMM (insn) != 0;
 }
 
 /* This requires a non-zero rd, and a non-zero shift.  */
 
-static int
-match_slli_as_c_slli (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_slli_as_c_slli (const struct riscv_opcode *op,
+		      insn_t insn,
+		      bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
-  return match_rd_nonzero (op, insn) && EXTRACT_RVC_IMM (insn) != 0;
+  return match_rd_nonzero (op, insn, FALSE) && EXTRACT_RVC_IMM (insn) != 0;
 }
 
 /* This requires a zero shift.  A zero rd is a hint, so is allowed.  */
 
-static int
-match_c_slli64 (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_c_slli64 (const struct riscv_opcode *op,
+		insn_t insn,
+		bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
-  return match_opcode (op, insn) && EXTRACT_RVC_IMM (insn) == 0;
+  return match_opcode (op, insn, FALSE) && EXTRACT_RVC_IMM (insn) == 0;
 }
 
 /* This is used for both srli and srai.  This requires a non-zero shift.
    A zero rd is not possible.  */
 
-static int
-match_srxi_as_c_srxi (const struct riscv_opcode *op, insn_t insn)
+static bfd_boolean
+match_srxi_as_c_srxi (const struct riscv_opcode *op,
+		      insn_t insn,
+		      bfd_boolean constraints ATTRIBUTE_UNUSED)
 {
-  return match_opcode (op, insn) && EXTRACT_RVC_IMM (insn) != 0;
+  return match_opcode (op, insn, FALSE) && EXTRACT_RVC_IMM (insn) != 0;
 }
 
 /* These are used to check the vector constraints.  */
 
-static int
+static bfd_boolean
 match_widen_vd_neq_vs1_neq_vs2_neq_vm (const struct riscv_opcode *op,
-				       insn_t insn)
+				       insn_t insn,
+				       bfd_boolean constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs1 = (insn & MASK_VS1) >> OP_SH_VS1;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
   int vm = (insn & MASK_VMASK) >> OP_SH_VMASK;
 
-  return (match_opcode (op, insn)
-	  && (vd % 2) == 0
-	  && (vs1 < vd || vs1 > (vd + 1))
-	  && (vs2 < vd || vs2 > (vd + 1))
-	  && (vm || vm < vd || vm > (vd + 1)));
+  if (constraints
+      && ((vd % 2) != 0
+	  || (vs1 >= vd && vs1 <= (vd + 1))
+	  || (vs2 >= vd && vs2 <= (vd + 1))
+	  || (!vm && vm >= vd && vm <= (vd + 1))))
+    return FALSE;
+
+  return match_opcode (op, insn, FALSE);
 }
 
-static int
+static bfd_boolean
 match_widen_vd_neq_vs1_neq_vm (const struct riscv_opcode *op,
-			       insn_t insn)
+			       insn_t insn,
+			       bfd_boolean constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs1 = (insn & MASK_VS1) >> OP_SH_VS1;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
   int vm = (insn & MASK_VMASK) >> OP_SH_VMASK;
 
-  return (match_opcode (op, insn)
-	  && (vd % 2) == 0
-	  && (vs2 % 2) == 0
-	  && (vs1 < vd || vs1 > (vd + 1))
-	  && (vm || vm < vd || vm > (vd + 1)));
+  if (constraints
+      && ((vd % 2) != 0
+	  || (vs2 % 2) != 0
+	  || (vs1 >= vd && vs1 <= (vd + 1))
+	  || (!vm && vm >= vd && vm <= (vd + 1))))
+    return FALSE;
+
+  return match_opcode (op, insn, FALSE);
 }
 
-static int
+static bfd_boolean
 match_widen_vd_neq_vs2_neq_vm (const struct riscv_opcode *op,
-			       insn_t insn)
+			       insn_t insn,
+			       bfd_boolean constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
   int vm = (insn & MASK_VMASK) >> OP_SH_VMASK;
 
-  return (match_opcode (op, insn)
-	  && (vd % 2) == 0
-	  && (vs2 < vd || vs2 > (vd + 1))
-	  && (vm || vm < vd || vm > (vd + 1)));
+  if (constraints
+      && ((vd % 2) != 0
+	  || (vs2 >= vd && vs2 <= (vd + 1))
+	  || (!vm && vm >= vd && vm <= (vd + 1))))
+    return FALSE;
+
+  return match_opcode (op, insn, FALSE);
 }
 
-static int
+static bfd_boolean
 match_widen_vd_neq_vm (const struct riscv_opcode *op,
-		       insn_t insn)
+		       insn_t insn,
+		       bfd_boolean constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
   int vm = (insn & MASK_VMASK) >> OP_SH_VMASK;
 
-  return (match_opcode (op, insn)
-	  && (vd % 2) == 0
-	  && (vs2 % 2) == 0
-	  && (vm || vm < vd || vm > (vd + 1)));
+  if (constraints
+      && ((vd % 2) != 0
+	  || (vs2 % 2) != 0
+	  || (!vm && vm >= vd && vm <= (vd + 1))))
+    return FALSE;
+
+  return match_opcode (op, insn, FALSE);
 }
 
-static int
+static bfd_boolean
 match_quad_vd_neq_vs1_neq_vs2_neq_vm (const struct riscv_opcode *op,
-				      insn_t insn)
+				      insn_t insn,
+				      bfd_boolean constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs1 = (insn & MASK_VS1) >> OP_SH_VS1;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
   int vm = (insn & MASK_VMASK) >> OP_SH_VMASK;
 
-  return (match_opcode (op, insn)
-	  && (vd % 4) == 0
-	  && (vs1 < vd || vs1 > (vd + 3))
-	  && (vs2 < vd || vs2 > (vd + 3))
-	  && (vm || vm < vd || vm > (vd + 3)));
+  if (constraints
+      && ((vd % 4) != 0
+	  || (vs1 >= vd && vs1 <= (vd + 3))
+	  || (vs2 >= vd && vs2 <= (vd + 3))
+	  || (!vm && vm >= vd && vm <= (vd + 3))))
+    return FALSE;
+
+  return match_opcode (op, insn, FALSE);
 }
 
-static int
+static bfd_boolean
 match_quad_vd_neq_vs2_neq_vm (const struct riscv_opcode *op,
-			      insn_t insn)
+			      insn_t insn,
+			      bfd_boolean constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
   int vm = (insn & MASK_VMASK) >> OP_SH_VMASK;
 
-  return (match_opcode (op, insn)
-	  && (vd % 4) == 0
-	  && (vs2 < vd || vs2 > (vd + 3))
-	  && (vm || vm < vd || vm > (vd + 3)));
+  if (constraints
+      && ((vd % 4) != 0
+	  || (vs2 >= vd && vs2 <= (vd + 3))
+	  || (!vm && vm >= vd && vm <= (vd + 3))))
+    return FALSE;
+
+  return match_opcode (op, insn, FALSE);
 }
 
-static int
+static bfd_boolean
 match_narrow_vd_neq_vs2 (const struct riscv_opcode *op,
-			 insn_t insn)
+			 insn_t insn,
+			 bfd_boolean constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
 
-  return (match_opcode (op, insn)
-	  && (vs2 % 2) == 0
-	  && (vd < vs2 || vd > (vs2 + 1)));
+  if (constraints
+      && ((vs2 % 2) != 0
+	  || (vd >= vs2 && vd <= (vs2 + 1))))
+    return FALSE;
+
+  return match_opcode (op, insn, FALSE);
 }
 
-static int
+static bfd_boolean
 match_vd_neq_vs1_neq_vs2_neq_vm (const struct riscv_opcode *op,
-				 insn_t insn)
+				 insn_t insn,
+				 bfd_boolean constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs1 = (insn & MASK_VS1) >> OP_SH_VS1;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
   int vm = (insn & MASK_VMASK) >> OP_SH_VMASK;
 
-  return (match_opcode (op, insn)
-	  && vs1 != vd
-	  && vs2 != vd
-	  && (vm || vm != vd));
+  if (constraints
+      && (vs1 == vd
+	  || vs2 == vd
+	  || (!vm && vm == vd)))
+    return FALSE;
+
+  return match_opcode (op, insn, FALSE);
 }
 
-static int
+static bfd_boolean
 match_vd_neq_vs2_neq_vm (const struct riscv_opcode *op,
-			 insn_t insn)
+			 insn_t insn,
+			 bfd_boolean constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
   int vm = (insn & MASK_VMASK) >> OP_SH_VMASK;
 
-  return (match_opcode (op, insn)
-	  && vs2 != vd
-	  && (vm || vm != vd));
+   if (constraints
+      && (vs2 == vd
+	  || (!vm && vm == vd)))
+    return FALSE;
+
+  return match_opcode (op, insn, FALSE);
 }
 
-static int
+static bfd_boolean
 match_vd_neq_vm (const struct riscv_opcode *op,
-		 insn_t insn)
+		 insn_t insn,
+		 bfd_boolean constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vm = (insn & MASK_VMASK) >> OP_SH_VMASK;
 
-  return match_opcode (op, insn) && (vm || vm != vd);
+  if (constraints && !vm && vm == vd)
+    return FALSE;
+
+  return match_opcode (op, insn, FALSE);
 }
 
-static int
+static bfd_boolean
 match_vmv_nf_rv (const struct riscv_opcode *op,
-		 insn_t insn)
+		 insn_t insn,
+		 bfd_boolean constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
   int nf = ((insn & (0x7 << 15) ) >> 15) + 1;
 
-  return (match_opcode (op, insn)
-	  && (vd % nf) == 0
-	  && (vs2 % nf) == 0);
+  if (constraints
+      && ((vd % nf) != 0
+	  || (vs2 % nf) != 0))
+    return FALSE;
+
+  return match_opcode (op, insn, FALSE);
 }
 
 const struct riscv_opcode riscv_opcodes[] =
@@ -1456,8 +1533,10 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vmsge.vv",   0, INSN_CLASS_V,  "Vd,Vs,VtVm", MATCH_VMSLEVV, MASK_VMSLEVV, match_opcode, INSN_ALIAS },
 {"vmsgeu.vv",  0, INSN_CLASS_V,  "Vd,Vs,VtVm", MATCH_VMSLEUVV, MASK_VMSLEUVV, match_opcode, INSN_ALIAS },
 {"vmslt.vi",   0, INSN_CLASS_V,  "Vd,Vt,VkVm", MATCH_VMSLEVI, MASK_VMSLEVI, match_opcode, INSN_ALIAS },
+{"vmsltu.vi",  0, INSN_CLASS_V,  "Vd,Vu,0Vm", MATCH_VMSNEVV, MASK_VMSNEVV, match_opcode, INSN_ALIAS },
 {"vmsltu.vi",  0, INSN_CLASS_V,  "Vd,Vt,VkVm", MATCH_VMSLEUVI, MASK_VMSLEUVI, match_opcode, INSN_ALIAS },
 {"vmsge.vi",   0, INSN_CLASS_V,  "Vd,Vt,VkVm", MATCH_VMSGTVI, MASK_VMSGTVI, match_opcode, INSN_ALIAS },
+{"vmsgeu.vi",  0, INSN_CLASS_V,  "Vd,Vu,0Vm", MATCH_VMSEQVV, MASK_VMSEQVV, match_opcode, INSN_ALIAS },
 {"vmsgeu.vi",  0, INSN_CLASS_V,  "Vd,Vt,VkVm", MATCH_VMSGTUVI, MASK_VMSGTUVI, match_opcode, INSN_ALIAS },
 
 {"vmsge.vx",   0, INSN_CLASS_V, "Vd,Vt,sVm", 0, (int) M_VMSGE, match_never, INSN_MACRO },

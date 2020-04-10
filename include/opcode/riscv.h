@@ -24,6 +24,7 @@
 #include "riscv-opc.h"
 #include <stdlib.h>
 #include <stdint.h>
+#include "bfd.h"
 
 typedef uint64_t insn_t;
 
@@ -395,8 +396,11 @@ struct riscv_opcode
      INSN_MACRO, then this field is the macro identifier.  */
   insn_t mask;
   /* A function to determine if a word corresponds to this instruction.
-     Usually, this computes ((word & mask) == match).  */
-  int (*match_func) (const struct riscv_opcode *op, insn_t word);
+     Usually, this computes ((word & mask) == match).  If the constraints
+     checking is disable, then most of the function should check only the
+     basic encoding for the instruction.  */
+  bfd_boolean (*match_func) (const struct riscv_opcode *op, insn_t word,
+			     bfd_boolean constraints);
   /* For a macro, this is INSN_MACRO.  Otherwise, it is a collection
      of bits describing the instruction, notably any relevant hazard
      information.  */
