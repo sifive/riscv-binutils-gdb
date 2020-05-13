@@ -66,7 +66,7 @@ struct _sim_cpu {
   sim_cia endbrk;
 
   struct {
-#define DECLARE_CSR(name, num) unsigned_word name;
+#define DECLARE_CSR(name, num, class) unsigned_word name;
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
   } csr;
