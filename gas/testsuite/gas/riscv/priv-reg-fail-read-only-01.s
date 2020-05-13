@@ -1,5 +1,5 @@
 	.macro csr val
-	csrr a0,\val
+	csrw \val, a1
 	.endm
 # 1.9.1 registers
 	csr ustatus
@@ -267,10 +267,3 @@
 	csr pmpaddr13
 	csr pmpaddr14
 	csr pmpaddr15
-
-# rvv registers
-	csr vstart
-	csr vxsat
-	csr vxrm
-	csr vl
-	csr vtype

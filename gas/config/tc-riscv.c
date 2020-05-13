@@ -83,6 +83,8 @@ struct riscv_set_options
   int rve; /* Generate RVE code.  */
   int relax; /* Emit relocs the linker is allowed to relax.  */
   int arch_attr; /* Emit arch attribute.  */
+  int check_constraints; /* Enable/disable the match_func checking.  */
+  int csr_check; /* Enable the CSR checking.  */
 };
 
 static struct riscv_set_options riscv_opts =
@@ -92,6 +94,8 @@ static struct riscv_set_options riscv_opts =
   0,	/* rve */
   1,	/* relax */
   DEFAULT_RISCV_ATTR, /* arch_attr */
+  0,	/* check_constraints */
+  0, 	/* csr_check */
 };
 
 static void
@@ -138,6 +142,19 @@ riscv_multi_subset_supports (enum riscv_insn_class insn_class)
       return riscv_subset_supports ("f") && riscv_subset_supports ("c");
 
     case INSN_CLASS_Q: return riscv_subset_supports ("q");
+    case INSN_CLASS_V: return riscv_subset_supports ("v");
+    case INSN_CLASS_V_AND_F:
+      return riscv_subset_supports ("v") && riscv_subset_supports ("f");
+    case INSN_CLASS_V_AND_ZVAMO:
+      return (riscv_subset_supports ("v")
+	      && riscv_subset_supports ("a")
+	      && riscv_subset_supports ("zvamo"));
+    case INSN_CLASS_V_AND_ZVEDIV:
+      return riscv_subset_supports ("v") && riscv_subset_supports ("zvediv");
+    case INSN_CLASS_V_AND_ZVLSSEG:
+      return riscv_subset_supports ("v") && riscv_subset_supports ("zvlsseg");
+    case INSN_CLASS_V_AND_ZVQMAC:
+      return riscv_subset_supports ("v") && riscv_subset_supports ("zvqmac");
 
     default:
       as_fatal ("Unreachable");
@@ -451,10 +468,13 @@ enum reg_class
   RCLASS_GPR,
   RCLASS_FPR,
   RCLASS_CSR,
+  RCLASS_VECR,
+  RCLASS_VECM,
   RCLASS_MAX
 };
 
 static struct hash_control *reg_names_hash = NULL;
+static struct hash_control *csr_extra_hash = NULL;
 
 #define ENCODE_REG_HASH(cls, n) \
   ((void *)(uintptr_t)((n) * RCLASS_MAX + (cls) + 1))
@@ -480,6 +500,88 @@ hash_reg_names (enum reg_class class, const char * const names[], unsigned n)
     hash_reg_name (class, names[i], i);
 }
 
+/* All RISC-V CSRs belong to one of these classes.  */
+
+enum riscv_csr_class
+{
+  CSR_CLASS_NONE,
+
+  CSR_CLASS_I,
+  CSR_CLASS_I_32,	/* rv32 only */
+  CSR_CLASS_F,		/* f-ext only */
+  CSR_CLASS_V,		/* v-ext only */
+};
+
+/* This structure holds all restricted conditions for a CSR.  */
+
+struct riscv_csr_extra
+{
+  /* Class to which this CSR belongs.  Used to decide whether or
+     not this CSR is legal in the current -march context.  */
+  enum riscv_csr_class csr_class;
+};
+
+/* Init two hashes, csr_extra_hash and reg_names_hash, for CSR.  */
+
+static void
+riscv_init_csr_hashes (const char *name,
+		       unsigned address,
+		       enum riscv_csr_class class)
+{
+  struct riscv_csr_extra *entry = XNEW (struct riscv_csr_extra);
+  entry->csr_class = class;
+
+  const char *hash_error =
+    hash_insert (csr_extra_hash, name, (void *) entry);
+  if (hash_error != NULL)
+    {
+      fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
+		      name, hash_error);
+      /* Probably a memory allocation problem?  Give up now.  */
+	as_fatal (_("Broken assembler.  No assembly attempted."));
+    }
+
+  hash_reg_name (RCLASS_CSR, name, address);
+}
+
+/* Check wether the CSR is valid according to the ISA.  */
+
+static bfd_boolean
+riscv_csr_class_check (enum riscv_csr_class csr_class)
+{
+  switch (csr_class)
+    {
+    case CSR_CLASS_I: return riscv_subset_supports ("i");
+    case CSR_CLASS_F: return riscv_subset_supports ("f");
+    case CSR_CLASS_V: return riscv_subset_supports ("v");
+    case CSR_CLASS_I_32:
+      return (xlen == 32 && riscv_subset_supports ("i"));
+
+    default:
+      return FALSE;
+    }
+}
+
+/* If the CSR is defined, then we call `riscv_csr_class_check` to do the
+   further checking.  Return FALSE if the CSR is not defined.  Otherwise,
+   return TRUE.  */
+
+static bfd_boolean
+reg_csr_lookup_internal (const char *s)
+{
+  struct riscv_csr_extra *r =
+    (struct riscv_csr_extra *) hash_find (csr_extra_hash, s);
+
+  if (r == NULL)
+    return FALSE;
+
+  /* We just report the warning when the CSR is invalid.  */
+  if (!riscv_csr_class_check (r->csr_class))
+    as_warn (_("Invalid CSR `%s' for the current ISA"), s);
+
+  return TRUE;
+}
+
 static unsigned int
 reg_lookup_internal (const char *s, enum reg_class class)
 {
@@ -489,6 +591,11 @@ reg_lookup_internal (const char *s, enum reg_class class)
     return -1;
 
   if (riscv_opts.rve && class == RCLASS_GPR && DECODE_REG_NUM (r) > 15)
+    return -1;
+
+  if (class == RCLASS_CSR
+      && riscv_opts.csr_check
+      && !reg_csr_lookup_internal (s))
     return -1;
 
   return DECODE_REG_NUM (r);
@@ -683,6 +790,32 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	     return FALSE;
 	  }
 	break;
+
+      case 'V': /* RVV */
+	switch (c = *p++)
+	  {
+	  case 'd':
+	  case 'f': USE_BITS (OP_MASK_VD, OP_SH_VD); break;
+	  case 'e': USE_BITS (OP_MASK_VWD, OP_SH_VWD); break;
+	  case 's': USE_BITS (OP_MASK_VS1, OP_SH_VS1); break;
+	  case 't': USE_BITS (OP_MASK_VS2, OP_SH_VS2); break;
+	  case 'u': USE_BITS (OP_MASK_VS1, OP_SH_VS1);
+		    USE_BITS (OP_MASK_VS2, OP_SH_VS2); break;
+	  case 'v': USE_BITS (OP_MASK_VD, OP_SH_VD);
+		    USE_BITS (OP_MASK_VS1, OP_SH_VS1);
+		    USE_BITS (OP_MASK_VS2, OP_SH_VS2); break;
+	  case '0': break;
+	  case 'c': used_bits |= ENCODE_RVV_VC_IMM (-1U); break;
+	  case 'i':
+	  case 'j':
+	  case 'k': USE_BITS (OP_MASK_VIMM, OP_SH_VIMM); break;
+	  case 'm': USE_BITS (OP_MASK_VMASK, OP_SH_VMASK); break;
+	  default:
+	    as_bad (_("internal: bad RISC-V opcode (unknown operand type `V%c'): %s %s"),
+		    c, opc->name, opc->args);
+	  }
+	break;
+
       default:
 	as_bad (_("internal: bad RISC-V opcode "
 		  "(unknown operand type `%c'): %s %s"),
@@ -721,7 +854,7 @@ init_opcode_hash (const struct riscv_opcode *opcodes,
       const char *hash_error =
 	hash_insert (hash, name, (void *) &opcodes[i]);
 
-      if (hash_error)
+      if (hash_error != NULL)
 	{
 	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
 		   opcodes[i].name, hash_error);
@@ -769,17 +902,20 @@ md_begin (void)
   hash_reg_names (RCLASS_GPR, riscv_gpr_names_abi, NGPR);
   hash_reg_names (RCLASS_FPR, riscv_fpr_names_numeric, NFPR);
   hash_reg_names (RCLASS_FPR, riscv_fpr_names_abi, NFPR);
-
+  hash_reg_names (RCLASS_VECR, riscv_vecr_names_numeric, NVECR);
+  hash_reg_names (RCLASS_VECM, riscv_vecm_names_numeric, NVECM);
   /* Add "fp" as an alias for "s0".  */
   hash_reg_name (RCLASS_GPR, "fp", 8);
 
-  opcode_names_hash = hash_new ();
-  init_opcode_names_hash ();
-
-#define DECLARE_CSR(name, num) hash_reg_name (RCLASS_CSR, #name, num);
-#define DECLARE_CSR_ALIAS(name, num) DECLARE_CSR(name, num);
+  /* Create and insert CSR hash tables.  */
+  csr_extra_hash = hash_new ();
+#define DECLARE_CSR(name, num, class) riscv_init_csr_hashes (#name, num, class);
+#define DECLARE_CSR_ALIAS(name, num, class) DECLARE_CSR(name, num, class);
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
+
+  opcode_names_hash = hash_new ();
+  init_opcode_names_hash ();
 
   /* Set the default alignment for the text section.  */
   record_alignment (text_section, riscv_opts.rvc ? 1 : 2);
@@ -924,6 +1060,42 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	  break;
 	case ',':
 	  continue;
+
+	case 'V': /* RVV */
+	  {
+	    switch (*fmt++)
+	      {
+	      case 'd':
+		INSERT_OPERAND (VD, insn, va_arg (args, int));
+		continue;
+
+	      case 's':
+		INSERT_OPERAND (VS1, insn, va_arg (args, int));
+		continue;
+
+	      case 't':
+		INSERT_OPERAND (VS2, insn, va_arg (args, int));
+		continue;
+
+	      case 'm':
+		{
+		  int reg = va_arg (args, int);
+		  if (reg == -1)
+		    {
+		      INSERT_OPERAND (VMASK, insn, 1);
+		      continue;
+		    }
+		  else if (reg == 0)
+		    {
+		      INSERT_OPERAND (VMASK, insn, 0);
+		      continue;
+		    }
+		}
+		/* fallthru */
+	      }
+	  }
+	  /* fallthru */
+
 	default:
 	  as_fatal (_("internal error: invalid macro"));
 	}
@@ -1088,6 +1260,96 @@ load_const (int reg, expressionS *ep)
     }
 }
 
+/* Expand RISC-V Vector macros into one of more instructions.  */
+
+static void
+vector_macro (struct riscv_cl_insn *ip)
+{
+  int vd = (ip->insn_opcode >> OP_SH_VD) & OP_MASK_VD;
+  int vs1 = (ip->insn_opcode >> OP_SH_VS1) & OP_MASK_VS1;
+  int vs2 = (ip->insn_opcode >> OP_SH_VS2) & OP_MASK_VS2;
+  int vm = (ip->insn_opcode >> OP_SH_VMASK) & OP_MASK_VMASK;
+  int vtemp = (ip->insn_opcode >> OP_SH_VFUNCT6) & OP_MASK_VFUNCT6;
+  int mask = ip->insn_mo->mask;
+
+  switch (mask)
+    {
+    case M_VMSGE:
+      if (vm)
+	{
+	  /* Unmasked.  */
+	  macro_build (NULL, "vmslt.vx", "Vd,Vt,sVm", vd, vs2, vs1, -1);
+	  macro_build (NULL, "vmnand.mm", "Vd,Vt,Vs", vd, vd, vd);
+	  break;
+	}
+      if (vtemp != 0)
+	{
+	  /* Masked.  Have vtemp to avoid overlap constraints.  */
+	  if (vd == vm)
+	    {
+	      macro_build (NULL, "vmslt.vx", "Vd,Vt,s", vtemp, vs2, vs1);
+	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vm, vtemp);
+	    }
+	  else
+	    {
+	      /* Preserve the value of vd if not updating by vm.  */
+	      macro_build (NULL, "vmslt.vx", "Vd,Vt,s", vtemp, vs2, vs1);
+	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vtemp, vm, vtemp);
+	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vd, vm);
+	      macro_build (NULL, "vmor.mm", "Vd,Vt,Vs", vd, vtemp, vd);
+	    }
+	}
+      else if (vd != vm)
+	{
+	  /* Masked.  This may cause the vd overlaps vs2, when LMUL > 1.  */
+	  macro_build (NULL, "vmslt.vx", "Vd,Vt,sVm", vd, vs2, vs1, vm);
+	  macro_build (NULL, "vmxor.mm", "Vd,Vt,Vs", vd, vd, vm);
+	}
+      else
+	as_bad (_("must provide temp if destination overlaps mask"));
+      break;
+
+    case M_VMSGEU:
+      if (vm)
+	{
+	  /* Unmasked.  */
+	  macro_build (NULL, "vmsltu.vx", "Vd,Vt,sVm", vd, vs2, vs1, -1);
+	  macro_build (NULL, "vmnand.mm", "Vd,Vt,Vs", vd, vd, vd);
+	  break;
+	}
+      if (vtemp != 0)
+	{
+	  /* Masked.  Have vtemp to avoid overlap constraints.  */
+	  if (vd == vm)
+	    {
+	      macro_build (NULL, "vmsltu.vx", "Vd,Vt,s", vtemp, vs2, vs1);
+	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vm, vtemp);
+	    }
+	  else
+	    {
+	      /* Preserve the value of vd if not updating by vm.  */
+	      macro_build (NULL, "vmsltu.vx", "Vd,Vt,s", vtemp, vs2, vs1);
+	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vtemp, vm, vtemp);
+	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vd, vm);
+	      macro_build (NULL, "vmor.mm", "Vd,Vt,Vs", vd, vtemp, vd);
+	    }
+	}
+      else if (vd != vm)
+	{
+	  /* Masked.  This may cause the vd overlaps vs2, when LMUL > 1.  */
+	  macro_build (NULL, "vmsltu.vx", "Vd,Vt,sVm", vd, vs2, vs1, vm);
+	  macro_build (NULL, "vmxor.mm", "Vd,Vt,Vs", vd, vd, vm);
+	}
+      else
+	as_bad (_("must provide temp if destination overlaps mask"));
+      break;
+
+    default:
+      as_bad (_("Macro %s not implemented"), ip->insn_mo->name);
+      break;
+    }
+}
+
 /* Expand RISC-V assembly macros into one or more instructions.  */
 static void
 macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
@@ -1207,6 +1469,11 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
 
     case M_CALL:
       riscv_call (rd, rs1, imm_expr, *imm_reloc);
+      break;
+
+    case M_VMSGE:
+    case M_VMSGEU:
+      vector_macro (ip);
       break;
 
     default:
@@ -1361,6 +1628,60 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
   return reloc_index;
 }
 
+/* Parse string STR as a vsetvli operand.  Store the expression in *EP.
+   On exit, EXPR_END points to the first character after the expression.  */
+
+static void
+my_getVsetvliExpression (expressionS *ep, char *str)
+{
+  unsigned int vsew_value = 0, vlen_value = 0, vediv_value = 0;
+  int vsew_found = FALSE, vlen_found = FALSE, vediv_found = FALSE;
+
+  if (arg_lookup (&str, riscv_vsew, ARRAY_SIZE (riscv_vsew), &vsew_value))
+    {
+      if (*str == ',')
+	++str;
+      if (vsew_found)
+	as_bad (_("multiple vsew constants"));
+      vsew_found = TRUE;
+    }
+  if (arg_lookup (&str, riscv_vlen, ARRAY_SIZE (riscv_vlen), &vlen_value))
+    {
+      if (*str == ',')
+	++str;
+      if (vlen_found)
+	as_bad (_("multiple vlen constants"));
+      vlen_found = TRUE;
+    }
+  if (arg_lookup (&str, riscv_vediv, ARRAY_SIZE (riscv_vediv), &vediv_value))
+    {
+      if (*str == ',')
+	++str;
+      if (vediv_found)
+	as_bad (_("multiple vediv constants"));
+      vediv_found = TRUE;
+    }
+
+  if (vsew_found || vlen_found || vediv_found)
+    {
+      ep->X_op = O_constant;
+      ep->X_add_number = (vediv_value << OP_SH_VEDIV)
+			 | (vsew_value << OP_SH_VSEW) | (vlen_value);
+      expr_end = str;
+    }
+  else
+    {
+      my_getExpression (ep, str);
+      str = expr_end;
+    }
+
+  /* Report warning message if the vediv field is set, but the Zvediv
+     extension isn't enabled.  */
+  if (!riscv_multi_subset_supports (INSN_CLASS_V_AND_ZVEDIV)
+      && (ep->X_add_number & (OP_MASK_VEDIV << OP_SH_VEDIV)))
+    as_warn ("vediv is set but Zvediv extension isn't enabled");
+}
+
 /* Parse opcode name, could be an mnemonics or number.  */
 static size_t
 my_getOpcodeExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
@@ -1397,6 +1718,56 @@ riscv_handle_implicit_zero_offset (expressionS *ep, const char *s)
   return FALSE;
 }
 
+/* All RISC-V CSR instructions belong to one of these classes.  */
+
+enum csr_insn_type
+{
+  INSN_NOT_CSR,
+  INSN_CSRRW,
+  INSN_CSRRS,
+  INSN_CSRRC
+};
+
+/* Return which CSR instruction is checking.  */
+
+static enum csr_insn_type
+riscv_csr_insn_type (insn_t insn)
+{
+  if (((insn ^ MATCH_CSRRW) & MASK_CSRRW) == 0
+      || ((insn ^ MATCH_CSRRWI) & MASK_CSRRWI) == 0)
+    return INSN_CSRRW;
+  else if (((insn ^ MATCH_CSRRS) & MASK_CSRRS) == 0
+	   || ((insn ^ MATCH_CSRRSI) & MASK_CSRRSI) == 0)
+    return INSN_CSRRS;
+  else if (((insn ^ MATCH_CSRRC) & MASK_CSRRC) == 0
+	   || ((insn ^ MATCH_CSRRCI) & MASK_CSRRCI) == 0)
+    return INSN_CSRRC;
+  else
+    return INSN_NOT_CSR;
+}
+
+/* CSRRW and CSRRWI always write CSR.  CSRRS, CSRRC, CSRRSI and CSRRCI write
+   CSR when RS1 isn't zero.  The CSR is read only if the [11:10] bits of
+   CSR address is 0x3.  */
+
+static bfd_boolean
+riscv_csr_read_only_check (insn_t insn)
+{
+  int csr = (insn & (OP_MASK_CSR << OP_SH_CSR)) >> OP_SH_CSR;
+  int rs1 = (insn & (OP_MASK_RS1 << OP_SH_RS1)) >> OP_SH_RS1;
+  int readonly = (((csr & (0x3 << 10)) >> 10) == 0x3);
+  enum csr_insn_type csr_insn = riscv_csr_insn_type (insn);
+
+  if (readonly
+      && (((csr_insn == INSN_CSRRS
+	    || csr_insn == INSN_CSRRC)
+	   && rs1 != 0)
+	  || csr_insn == INSN_CSRRW))
+    return FALSE;
+
+  return TRUE;
+}
+
 /* This routine assembles an instruction into its binary format.  As a
    side effect, it sets the global variable imm_reloc to the type of
    relocation to do if one of the operands is an address expression.  */
@@ -1415,6 +1786,8 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
   int argnum;
   const struct percent_op_match *p;
   const char *error = "unrecognized opcode";
+  /* Indicate we are assembling instruction with CSR.  */
+  bfd_boolean insn_with_csr = FALSE;
 
   /* Parse the name of the instruction.  Terminate the string if whitespace
      is found so that hash_find only sees the name part of the string.  */
@@ -1452,7 +1825,8 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	    case '\0': 	/* End of args.  */
 	      if (insn->pinfo != INSN_MACRO)
 		{
-		  if (!insn->match_func (insn, ip->insn_opcode))
+		  if (!insn->match_func (insn, ip->insn_opcode,
+					 riscv_opts.check_constraints))
 		    break;
 
 		  /* For .insn, insn->match and insn->mask are 0.  */
@@ -1461,11 +1835,26 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 					 : insn->match) == 2
 		      && !riscv_opts.rvc)
 		    break;
+
+		  /* Check if we write a read-only CSR by the CSR
+		     instruction.  */
+		  if (insn_with_csr
+		      && riscv_opts.csr_check
+		      && !riscv_csr_read_only_check (ip->insn_opcode))
+		    {
+		      /* Restore the character in advance, since we want to
+			 report the detailed warning message here.  */
+		      if (save_c)
+			*(argsStart - 1) = save_c;
+		      as_warn (_("Read-only CSR is written `%s'"), str);
+		      insn_with_csr = FALSE;
+		    }
 		}
 	      if (*s != '\0')
 		break;
 	      /* Successful assembly.  */
 	      error = NULL;
+	      insn_with_csr = FALSE;
 	      goto out;
 
 	    case 'C': /* RVC */
@@ -1810,6 +2199,7 @@ rvc_lui:
 	      continue;
 
 	    case 'E':		/* Control register.  */
+	      insn_with_csr = TRUE;
 	      if (reg_lookup (&s, RCLASS_CSR, &regno))
 		INSERT_OPERAND (CSR, *ip, regno);
 	      else
@@ -2123,6 +2513,154 @@ jump:
 	      imm_expr->X_op = O_absent;
 	      continue;
 
+	    case 'V': /* RVV */
+	      switch (*++args)
+		{
+		case 'd': /* VD */
+		  if (!reg_lookup (&s, RCLASS_VECR, &regno))
+		    break;
+		  INSERT_OPERAND (VD, *ip, regno);
+		  continue;
+
+		case 'e': /* AMO VD */
+		  if (reg_lookup (&s, RCLASS_GPR, &regno) && regno == 0)
+		    INSERT_OPERAND (VWD, *ip, 0);
+		  else if (reg_lookup (&s, RCLASS_VECR, &regno))
+		    {
+		      INSERT_OPERAND (VWD, *ip, 1);
+		      INSERT_OPERAND (VD, *ip, regno);
+		    }
+		  else
+		    break;
+		  continue;
+
+		case 'f': /* AMO VS3 */
+		  if (!reg_lookup (&s, RCLASS_VECR, &regno))
+		    break;
+		  if (!EXTRACT_OPERAND (VWD, ip->insn_opcode))
+		    INSERT_OPERAND (VD, *ip, regno);
+		  else
+		    {
+		      /* VS3 must match VD.  */
+		      if (EXTRACT_OPERAND (VD, ip->insn_opcode) != regno)
+			break;
+		    }
+		  continue;
+
+		case 's': /* VS1 */
+		  if (!reg_lookup (&s, RCLASS_VECR, &regno))
+		    break;
+		  INSERT_OPERAND (VS1, *ip, regno);
+		  continue;
+
+		case 't': /* VS2 */
+		  if (!reg_lookup (&s, RCLASS_VECR, &regno))
+		    break;
+		  INSERT_OPERAND (VS2, *ip, regno);
+		  continue;
+
+		case 'u': /* VS1 == VS2 */
+		  if (!reg_lookup (&s, RCLASS_VECR, &regno))
+		    break;
+		  INSERT_OPERAND (VS1, *ip, regno);
+		  INSERT_OPERAND (VS2, *ip, regno);
+		  continue;
+
+		case 'v': /* VD == VS1 == VS2 */
+		  if (!reg_lookup (&s, RCLASS_VECR, &regno))
+		    break;
+		  INSERT_OPERAND (VD, *ip, regno);
+		  INSERT_OPERAND (VS1, *ip, regno);
+		  INSERT_OPERAND (VS2, *ip, regno);
+		  continue;
+
+		case '0': /* required vector mask register without .t */
+		  if (reg_lookup (&s, RCLASS_VECR, &regno) && regno == 0)
+		    continue;
+		  break;
+
+		case 'c': /* vtypei for vsetvli */
+		  my_getVsetvliExpression (imm_expr, s);
+		  check_absolute_expr (ip, imm_expr, FALSE);
+		  if (!VALID_RVV_VC_IMM (imm_expr->X_add_number))
+		    as_bad (_("bad value for vsetvli immediate field, "
+			      "value must be 0..2047"));
+		  ip->insn_opcode
+		    |= ENCODE_RVV_VC_IMM (imm_expr->X_add_number);
+		  imm_expr->X_op = O_absent;
+		  s = expr_end;
+		  continue;
+
+		case 'i': /* vector arith signed immediate */
+		  my_getExpression (imm_expr, s);
+		  check_absolute_expr (ip, imm_expr, FALSE);
+		  if (imm_expr->X_add_number > 15
+		      || imm_expr->X_add_number < -16)
+		    as_bad (_("bad value for vector immediate field, "
+			      "value must be -16...15"));
+		  INSERT_OPERAND (VIMM, *ip, imm_expr->X_add_number);
+		  imm_expr->X_op = O_absent;
+		  s = expr_end;
+		  continue;
+
+		case 'j': /* vector arith unsigned immediate */
+		  my_getExpression (imm_expr, s);
+		  check_absolute_expr (ip, imm_expr, FALSE);
+		  if (imm_expr->X_add_number < 0
+		      || imm_expr->X_add_number >= 32)
+		    as_bad (_("bad value for vector immediate field, "
+			      "value must be 0...31"));
+		  INSERT_OPERAND (VIMM, *ip, imm_expr->X_add_number);
+		  imm_expr->X_op = O_absent;
+		  s = expr_end;
+		  continue;
+
+		case 'k': /* vector arith signed immediate, minus 1 */
+		  my_getExpression (imm_expr, s);
+		  check_absolute_expr (ip, imm_expr, FALSE);
+		  if (imm_expr->X_add_number > 16
+		      || imm_expr->X_add_number < -15)
+		    as_bad (_("bad value for vector immediate field, "
+			      "value must be -15...16"));
+		  INSERT_OPERAND (VIMM, *ip, imm_expr->X_add_number - 1);
+		  imm_expr->X_op = O_absent;
+		  s = expr_end;
+		  continue;
+
+		case 'm': /* optional vector mask */
+		  if (*s == '\0')
+		    {
+		      INSERT_OPERAND (VMASK, *ip, 1);
+		      continue;
+		    }
+		  else if (*s == ',' && s++
+			   && reg_lookup (&s, RCLASS_VECM, &regno)
+			   && regno == 0)
+		    {
+		      INSERT_OPERAND (VMASK, *ip, 0);
+		      continue;
+		    }
+		  break;
+
+		  /* The following ones are only used in macros.  */
+		case 'M': /* required vector mask */
+		  if (reg_lookup (&s, RCLASS_VECM, &regno) && regno == 0)
+		    {
+		      INSERT_OPERAND (VMASK, *ip, 0);
+		      continue;
+		    }
+		  break;
+
+		case 'T': /* vector macro temporary register */
+		  if (!reg_lookup (&s, RCLASS_VECR, &regno) || regno == 0)
+		    break;
+		  /* Store it in the FUNCT6 field as we don't have anyplace
+		     else to store it.  */
+		  INSERT_OPERAND (VFUNCT6, *ip, regno);
+		  continue;
+		}
+	      break;
+
 	    default:
 	      as_fatal (_("internal error: bad argument type %c"), *args);
 	    }
@@ -2130,6 +2668,7 @@ jump:
 	}
       s = argsStart;
       error = _("illegal operands");
+      insn_with_csr = FALSE;
     }
 
 out:
@@ -2187,6 +2726,10 @@ enum options
   OPTION_NO_RELAX,
   OPTION_ARCH_ATTR,
   OPTION_NO_ARCH_ATTR,
+  OPTION_CHECK_CONSTRAINTS,
+  OPTION_NO_CHECK_CONSTRAINTS,
+  OPTION_CSR_CHECK,
+  OPTION_NO_CSR_CHECK,
   OPTION_END_OF_ENUM
 };
 
@@ -2201,6 +2744,10 @@ struct option md_longopts[] =
   {"mno-relax", no_argument, NULL, OPTION_NO_RELAX},
   {"march-attr", no_argument, NULL, OPTION_ARCH_ATTR},
   {"mno-arch-attr", no_argument, NULL, OPTION_NO_ARCH_ATTR},
+  {"mcheck-constraints", no_argument, NULL, OPTION_CHECK_CONSTRAINTS},
+  {"mno-check-constraints", no_argument, NULL, OPTION_NO_CHECK_CONSTRAINTS},
+  {"mcsr-check", no_argument, NULL, OPTION_CSR_CHECK},
+  {"mno-csr-check", no_argument, NULL, OPTION_NO_CSR_CHECK},
 
   {NULL, no_argument, NULL, 0}
 };
@@ -2277,6 +2824,22 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_NO_ARCH_ATTR:
       riscv_opts.arch_attr = FALSE;
+      break;
+
+    case OPTION_CHECK_CONSTRAINTS:
+      riscv_opts.check_constraints = TRUE;
+      break;
+
+    case OPTION_NO_CHECK_CONSTRAINTS:
+      riscv_opts.check_constraints = FALSE;
+      break;
+
+    case OPTION_CSR_CHECK:
+      riscv_opts.csr_check = TRUE;
+      break;
+
+    case OPTION_NO_CSR_CHECK:
+      riscv_opts.csr_check = FALSE;
       break;
 
     default:
@@ -2671,6 +3234,14 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
     riscv_opts.relax = TRUE;
   else if (strcmp (name, "norelax") == 0)
     riscv_opts.relax = FALSE;
+  else if (strcmp (name, "checkconstraints") == 0)
+    riscv_opts.check_constraints = TRUE;
+  else if (strcmp (name, "nocheckconstraints") == 0)
+    riscv_opts.check_constraints = FALSE;
+  else if (strcmp (name, "csr-check") == 0)
+    riscv_opts.csr_check = TRUE;
+  else if (strcmp (name, "no-csr-check") == 0)
+    riscv_opts.csr_check = FALSE;
   else if (strcmp (name, "push") == 0)
     {
       struct riscv_option_stack *s;
