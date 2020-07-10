@@ -142,17 +142,18 @@ riscv_multi_subset_supports (enum riscv_insn_class insn_class)
       return riscv_subset_supports ("f") && riscv_subset_supports ("c");
 
     case INSN_CLASS_Q: return riscv_subset_supports ("q");
+
     case INSN_CLASS_V: return riscv_subset_supports ("v");
     case INSN_CLASS_V_AND_F:
       return riscv_subset_supports ("v") && riscv_subset_supports ("f");
-    case INSN_CLASS_V_AND_ZVAMO:
-      return (riscv_subset_supports ("v")
-	      && riscv_subset_supports ("a")
-	      && riscv_subset_supports ("zvamo"));
+    case INSN_CLASS_V_OR_ZVAMO:
+      return (riscv_subset_supports ("a")
+	      && (riscv_subset_supports ("v")
+		  || riscv_subset_supports ("zvamo")));
     case INSN_CLASS_V_AND_ZVEDIV:
       return riscv_subset_supports ("v") && riscv_subset_supports ("zvediv");
-    case INSN_CLASS_V_AND_ZVLSSEG:
-      return riscv_subset_supports ("v") && riscv_subset_supports ("zvlsseg");
+    case INSN_CLASS_V_OR_ZVLSSEG:
+      return riscv_subset_supports ("v") || riscv_subset_supports ("zvlsseg");
     case INSN_CLASS_V_AND_ZVQMAC:
       return riscv_subset_supports ("v") && riscv_subset_supports ("zvqmac");
 
@@ -553,7 +554,10 @@ riscv_csr_class_check (enum riscv_csr_class csr_class)
     {
     case CSR_CLASS_I: return riscv_subset_supports ("i");
     case CSR_CLASS_F: return riscv_subset_supports ("f");
-    case CSR_CLASS_V: return riscv_subset_supports ("v");
+    case CSR_CLASS_V:
+      return (riscv_subset_supports ("v")
+	      || riscv_subset_supports ("zvamo")
+	      || riscv_subset_supports ("zvlsseg"));
     case CSR_CLASS_I_32:
       return (xlen == 32 && riscv_subset_supports ("i"));
 
@@ -1634,8 +1638,10 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
 static void
 my_getVsetvliExpression (expressionS *ep, char *str)
 {
-  unsigned int vsew_value = 0, vlen_value = 0, vediv_value = 0;
-  int vsew_found = FALSE, vlen_found = FALSE, vediv_found = FALSE;
+  unsigned int vsew_value = 0, vlmul_value = 0, vediv_value = 0;
+  unsigned int vta_value = 0, vma_value = 0;
+  bfd_boolean vsew_found = FALSE, vlmul_found = FALSE, vediv_found = FALSE;
+  bfd_boolean vta_found = FALSE, vma_found = FALSE;
 
   if (arg_lookup (&str, riscv_vsew, ARRAY_SIZE (riscv_vsew), &vsew_value))
     {
@@ -1645,13 +1651,29 @@ my_getVsetvliExpression (expressionS *ep, char *str)
 	as_bad (_("multiple vsew constants"));
       vsew_found = TRUE;
     }
-  if (arg_lookup (&str, riscv_vlen, ARRAY_SIZE (riscv_vlen), &vlen_value))
+  if (arg_lookup (&str, riscv_vlmul, ARRAY_SIZE (riscv_vlmul), &vlmul_value))
     {
       if (*str == ',')
 	++str;
-      if (vlen_found)
-	as_bad (_("multiple vlen constants"));
-      vlen_found = TRUE;
+      if (vlmul_found)
+	as_bad (_("multiple vlmul constants"));
+      vlmul_found = TRUE;
+    }
+  if (arg_lookup (&str, riscv_vta, ARRAY_SIZE (riscv_vta), &vta_value))
+    {
+      if (*str == ',')
+	++str;
+      if (vta_found)
+	as_bad (_("multiple vta constants"));
+      vta_found = TRUE;
+    }
+  if (arg_lookup (&str, riscv_vma, ARRAY_SIZE (riscv_vma), &vma_value))
+    {
+      if (*str == ',')
+	++str;
+      if (vma_found)
+	as_bad (_("multiple vma constants"));
+      vma_found = TRUE;
     }
   if (arg_lookup (&str, riscv_vediv, ARRAY_SIZE (riscv_vediv), &vediv_value))
     {
@@ -1662,11 +1684,14 @@ my_getVsetvliExpression (expressionS *ep, char *str)
       vediv_found = TRUE;
     }
 
-  if (vsew_found || vlen_found || vediv_found)
+  if (vsew_found || vlmul_found || vediv_found || vta_found || vma_found)
     {
       ep->X_op = O_constant;
       ep->X_add_number = (vediv_value << OP_SH_VEDIV)
-			 | (vsew_value << OP_SH_VSEW) | (vlen_value);
+			 | (vsew_value << OP_SH_VSEW)
+			 | (vta_value << OP_SH_VTA)
+			 | (vma_value << OP_SH_VMA) ;
+      INSERT_VLMUL (ep->X_add_number, vlmul_value);
       expr_end = str;
     }
   else

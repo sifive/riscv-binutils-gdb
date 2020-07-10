@@ -24,7 +24,6 @@
 #include "riscv-opc.h"
 #include <stdlib.h>
 #include <stdint.h>
-#include "bfd.h"
 
 typedef uint64_t insn_t;
 
@@ -60,15 +59,25 @@ static const char * const riscv_vsew[8] =
 };
 
 /* List of vsetvli vlmul constants.  */
-static const char * const riscv_vlen[4] =
+static const char * const riscv_vlmul[8] =
 {
-  "m1", "m2", "m4", "m8"
+  "m1", "m2", "m4", "m8", 0, "mf8", "mf4", "mf2"
 };
 
 /* List of vsetvli vediv constants.  */
 static const char * const riscv_vediv[4] =
 {
   "d1", "d2", "d4", "d8"
+};
+
+static const char * const riscv_vta[2] =
+{
+  "tu", "ta"
+};
+
+static const char * const riscv_vma[2] =
+{
+  "mu", "ma"
 };
 
 #define RVC_JUMP_BITS 11
@@ -301,14 +310,18 @@ static const char * const riscv_vediv[4] =
 #define OP_MASK_VFUNCT6		0x3f
 #define OP_SH_VFUNCT6		26
 
-#define OP_MASK_VLMUL		0x3
+#define OP_MASK_VLMUL		0x23
 #define OP_SH_VLMUL		0
 #define OP_MASK_VSEW		0x7
 #define OP_SH_VSEW		2
 #define OP_MASK_VEDIV		0x3
-#define OP_SH_VEDIV		5
-#define OP_MASK_VTYPE_RES	0xf
-#define OP_SH_VTYPE_RES		7
+#define OP_SH_VEDIV		8
+#define OP_MASK_VTYPE_RES	0x1
+#define OP_SH_VTYPE_RES		10
+#define OP_MASK_VTA		0x1
+#define OP_SH_VTA		6
+#define OP_MASK_VMA		0x1
+#define OP_SH_VMA		7
 
 #define OP_MASK_VWD		0x1
 #define OP_SH_VWD		26
@@ -341,6 +354,10 @@ static const char * const riscv_vediv[4] =
   (STRUCT) = (((STRUCT) & ~((insn_t)(MASK) << (SHIFT))) \
 	      | ((insn_t)((VALUE) & (MASK)) << (SHIFT)))
 
+#define INSERT_VLMUL(STRUCT, VALUE) \
+  INSERT_BITS (STRUCT, (VALUE & 0x3), (OP_MASK_VLMUL & 0x3), 0), \
+  INSERT_BITS (STRUCT, (((VALUE & 0x4) >> 2) <<5), (OP_MASK_VLMUL & 0x20), 0)
+
 /* Extract bits MASK << SHIFT from STRUCT and shift them right
    SHIFT places.  */
 #define EXTRACT_BITS(STRUCT, MASK, SHIFT) \
@@ -349,6 +366,11 @@ static const char * const riscv_vediv[4] =
 /* Extract the operand given by FIELD from integer INSN.  */
 #define EXTRACT_OPERAND(FIELD, INSN) \
   EXTRACT_BITS ((INSN), OP_MASK_##FIELD, OP_SH_##FIELD)
+
+/* Extract the vlmul value from vsetvli instrucion.  */
+#define EXTRACT_VLMUL(INSN) \
+  (((EXTRACT_OPERAND (VLMUL, INSN) >> 5) << 2) \
+   | (EXTRACT_OPERAND (VLMUL, INSN) & 0x3))
 
 /* The maximal number of subset can be required. */
 #define MAX_SUBSET_NUM 4
@@ -370,9 +392,9 @@ enum riscv_insn_class
    INSN_CLASS_Q,
    INSN_CLASS_V,
    INSN_CLASS_V_AND_F,
-   INSN_CLASS_V_AND_ZVAMO,
+   INSN_CLASS_V_OR_ZVAMO,
    INSN_CLASS_V_AND_ZVEDIV,
-   INSN_CLASS_V_AND_ZVLSSEG,
+   INSN_CLASS_V_OR_ZVLSSEG,
    INSN_CLASS_V_AND_ZVQMAC,
   };
 
@@ -403,8 +425,8 @@ struct riscv_opcode
      Usually, this computes ((word & mask) == match).  If the constraints
      checking is disable, then most of the function should check only the
      basic encoding for the instruction.  */
-  bfd_boolean (*match_func) (const struct riscv_opcode *op, insn_t word,
-			     bfd_boolean constraints);
+  int (*match_func) (const struct riscv_opcode *op, insn_t word,
+		     int constraints);
   /* For a macro, this is INSN_MACRO.  Otherwise, it is a collection
      of bits describing the instruction, notably any relevant hazard
      information.  */

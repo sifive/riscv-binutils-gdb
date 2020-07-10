@@ -97,105 +97,107 @@ const char * const riscv_vecm_names_numeric[NVECM] =
 #define MASK_VS2 (OP_MASK_VS2 << OP_SH_VS2)
 #define MASK_VMASK (OP_MASK_VMASK << OP_SH_VMASK)
 
-static bfd_boolean
+static int
 match_opcode (const struct riscv_opcode *op,
 	      insn_t insn,
-	      bfd_boolean constraints ATTRIBUTE_UNUSED)
+	      int constraints ATTRIBUTE_UNUSED)
 {
   return ((insn ^ op->match) & op->mask) == 0;
 }
 
-static bfd_boolean
+static int
 match_never (const struct riscv_opcode *op ATTRIBUTE_UNUSED,
 	     insn_t insn ATTRIBUTE_UNUSED,
-	     bfd_boolean constraints ATTRIBUTE_UNUSED)
+	     int constraints ATTRIBUTE_UNUSED)
 {
-  return FALSE;
+  return 0;
 }
 
-static bfd_boolean
+static int
 match_rs1_eq_rs2 (const struct riscv_opcode *op,
 		  insn_t insn,
-		  bfd_boolean constraints ATTRIBUTE_UNUSED)
+		  int constraints ATTRIBUTE_UNUSED)
 {
   int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
   int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
-  return match_opcode (op, insn, FALSE) && rs1 == rs2;
+  return match_opcode (op, insn, 0) && rs1 == rs2;
 }
 
-static bfd_boolean
+static int
 match_vs1_eq_vs2 (const struct riscv_opcode *op,
 		  insn_t insn,
-		  bfd_boolean constraints ATTRIBUTE_UNUSED)
+		  int constraints ATTRIBUTE_UNUSED)
 {
   int vs1 = (insn & MASK_VS1) >> OP_SH_VS1;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
-  return match_opcode (op, insn, FALSE) && vs1 == vs2;
+
+  return match_opcode (op, insn, 0) && vs1 == vs2;
 }
 
-static bfd_boolean
+static int
 match_vd_eq_vs1_eq_vs2 (const struct riscv_opcode *op,
 			insn_t insn,
-			bfd_boolean constraints ATTRIBUTE_UNUSED)
+			int constraints ATTRIBUTE_UNUSED)
 {
   int vd =  (insn & MASK_VD) >> OP_SH_VD;
   int vs1 = (insn & MASK_VS1) >> OP_SH_VS1;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
-  return match_opcode (op, insn, FALSE) && vd == vs1 && vs1 == vs2;
+
+  return match_opcode (op, insn, 0) && vd == vs1 && vs1 == vs2;
 }
 
-static bfd_boolean
+static int
 match_rd_nonzero (const struct riscv_opcode *op,
 		  insn_t insn,
-		  bfd_boolean constraints ATTRIBUTE_UNUSED)
+		  int constraints ATTRIBUTE_UNUSED)
 {
-  return match_opcode (op, insn, FALSE) && ((insn & MASK_RD) != 0);
+  return match_opcode (op, insn, 0) && ((insn & MASK_RD) != 0);
 }
 
-static bfd_boolean
+static int
 match_c_add (const struct riscv_opcode *op,
 	     insn_t insn,
-	     bfd_boolean constraints ATTRIBUTE_UNUSED)
+	     int constraints ATTRIBUTE_UNUSED)
 {
-  return match_rd_nonzero (op, insn, FALSE) && ((insn & MASK_CRS2) != 0);
+  return match_rd_nonzero (op, insn, 0) && ((insn & MASK_CRS2) != 0);
 }
 
 /* We don't allow mv zero,X to become a c.mv hint, so we need a separate
    matching function for this.  */
 
-static bfd_boolean
+static int
 match_c_add_with_hint (const struct riscv_opcode *op,
 		       insn_t insn,
-		       bfd_boolean constraints ATTRIBUTE_UNUSED)
+		       int constraints ATTRIBUTE_UNUSED)
 {
-  return match_opcode (op, insn, FALSE) && ((insn & MASK_CRS2) != 0);
+  return match_opcode (op, insn, 0) && ((insn & MASK_CRS2) != 0);
 }
 
-static bfd_boolean
+static int
 match_c_nop (const struct riscv_opcode *op,
 	     insn_t insn,
-	     bfd_boolean constraints ATTRIBUTE_UNUSED)
+	     int constraints ATTRIBUTE_UNUSED)
 {
-  return (match_opcode (op, insn, FALSE)
+  return (match_opcode (op, insn, 0)
 	  && (((insn & MASK_RD) >> OP_SH_RD) == 0));
 }
 
-static bfd_boolean
+static int
 match_c_addi16sp (const struct riscv_opcode *op,
 		  insn_t insn,
-		  bfd_boolean constraints ATTRIBUTE_UNUSED)
+		  int constraints ATTRIBUTE_UNUSED)
 {
-  return (match_opcode (op, insn, FALSE)
+  return (match_opcode (op, insn, 0)
 	  && (((insn & MASK_RD) >> OP_SH_RD) == 2)
 	  && EXTRACT_RVC_ADDI16SP_IMM (insn) != 0);
 }
 
-static bfd_boolean
+static int
 match_c_lui (const struct riscv_opcode *op,
 	     insn_t insn,
-	     bfd_boolean constraints ATTRIBUTE_UNUSED)
+	     int constraints ATTRIBUTE_UNUSED)
 {
-  return (match_rd_nonzero (op, insn, FALSE)
+  return (match_rd_nonzero (op, insn, 0)
 	  && (((insn & MASK_RD) >> OP_SH_RD) != 2)
 	  && EXTRACT_RVC_LUI_IMM (insn) != 0);
 }
@@ -203,71 +205,71 @@ match_c_lui (const struct riscv_opcode *op,
 /* We don't allow lui zero,X to become a c.lui hint, so we need a separate
    matching function for this.  */
 
-static bfd_boolean
+static int
 match_c_lui_with_hint (const struct riscv_opcode *op,
 		       insn_t insn,
-		       bfd_boolean constraints ATTRIBUTE_UNUSED)
+		       int constraints ATTRIBUTE_UNUSED)
 {
-  return (match_opcode (op, insn, FALSE)
+  return (match_opcode (op, insn, 0)
 	  && (((insn & MASK_RD) >> OP_SH_RD) != 2)
 	  && EXTRACT_RVC_LUI_IMM (insn) != 0);
 }
 
-static bfd_boolean
+static int
 match_c_addi4spn (const struct riscv_opcode *op,
 		  insn_t insn,
-		  bfd_boolean constraints ATTRIBUTE_UNUSED)
+		  int constraints ATTRIBUTE_UNUSED)
 {
-  return match_opcode (op, insn, FALSE) && EXTRACT_RVC_ADDI4SPN_IMM (insn) != 0;
+  return match_opcode (op, insn, 0) && EXTRACT_RVC_ADDI4SPN_IMM (insn) != 0;
 }
 
 /* This requires a non-zero shift.  A zero rd is a hint, so is allowed.  */
 
-static bfd_boolean
+static int
 match_c_slli (const struct riscv_opcode *op,
 	      insn_t insn,
-	      bfd_boolean constraints ATTRIBUTE_UNUSED)
+	      int constraints ATTRIBUTE_UNUSED)
 {
-  return match_opcode (op, insn, FALSE) && EXTRACT_RVC_IMM (insn) != 0;
+  return match_opcode (op, insn, 0) && EXTRACT_RVC_IMM (insn) != 0;
 }
 
 /* This requires a non-zero rd, and a non-zero shift.  */
 
-static bfd_boolean
+static int
 match_slli_as_c_slli (const struct riscv_opcode *op,
 		      insn_t insn,
-		      bfd_boolean constraints ATTRIBUTE_UNUSED)
+		      int constraints ATTRIBUTE_UNUSED)
 {
-  return match_rd_nonzero (op, insn, FALSE) && EXTRACT_RVC_IMM (insn) != 0;
+  return match_rd_nonzero (op, insn, 0) && EXTRACT_RVC_IMM (insn) != 0;
 }
 
 /* This requires a zero shift.  A zero rd is a hint, so is allowed.  */
 
-static bfd_boolean
+static int
 match_c_slli64 (const struct riscv_opcode *op,
 		insn_t insn,
-		bfd_boolean constraints ATTRIBUTE_UNUSED)
+		int constraints ATTRIBUTE_UNUSED)
 {
-  return match_opcode (op, insn, FALSE) && EXTRACT_RVC_IMM (insn) == 0;
+  return match_opcode (op, insn, 0) && EXTRACT_RVC_IMM (insn) == 0;
 }
 
 /* This is used for both srli and srai.  This requires a non-zero shift.
    A zero rd is not possible.  */
 
-static bfd_boolean
+static int
 match_srxi_as_c_srxi (const struct riscv_opcode *op,
 		      insn_t insn,
-		      bfd_boolean constraints ATTRIBUTE_UNUSED)
+		      int constraints ATTRIBUTE_UNUSED)
 {
-  return match_opcode (op, insn, FALSE) && EXTRACT_RVC_IMM (insn) != 0;
+  return match_opcode (op, insn, 0) && EXTRACT_RVC_IMM (insn) != 0;
 }
 
 /* These are used to check the vector constraints.  */
 
-static bfd_boolean
+static int
 match_widen_vd_neq_vs1_neq_vs2_neq_vm (const struct riscv_opcode *op,
 				       insn_t insn,
-				       bfd_boolean constraints)
+				       int constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs1 = (insn & MASK_VS1) >> OP_SH_VS1;
@@ -279,15 +281,15 @@ match_widen_vd_neq_vs1_neq_vs2_neq_vm (const struct riscv_opcode *op,
 	  || (vs1 >= vd && vs1 <= (vd + 1))
 	  || (vs2 >= vd && vs2 <= (vd + 1))
 	  || (!vm && vm >= vd && vm <= (vd + 1))))
-    return FALSE;
+    return 0;
 
-  return match_opcode (op, insn, FALSE);
+  return match_opcode (op, insn, 0);
 }
 
-static bfd_boolean
+static int
 match_widen_vd_neq_vs1_neq_vm (const struct riscv_opcode *op,
 			       insn_t insn,
-			       bfd_boolean constraints)
+			       int constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs1 = (insn & MASK_VS1) >> OP_SH_VS1;
@@ -299,15 +301,15 @@ match_widen_vd_neq_vs1_neq_vm (const struct riscv_opcode *op,
 	  || (vs2 % 2) != 0
 	  || (vs1 >= vd && vs1 <= (vd + 1))
 	  || (!vm && vm >= vd && vm <= (vd + 1))))
-    return FALSE;
+    return 0;
 
-  return match_opcode (op, insn, FALSE);
+  return match_opcode (op, insn, 0);
 }
 
-static bfd_boolean
+static int
 match_widen_vd_neq_vs2_neq_vm (const struct riscv_opcode *op,
 			       insn_t insn,
-			       bfd_boolean constraints)
+			       int constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
@@ -317,15 +319,15 @@ match_widen_vd_neq_vs2_neq_vm (const struct riscv_opcode *op,
       && ((vd % 2) != 0
 	  || (vs2 >= vd && vs2 <= (vd + 1))
 	  || (!vm && vm >= vd && vm <= (vd + 1))))
-    return FALSE;
+    return 0;
 
-  return match_opcode (op, insn, FALSE);
+  return match_opcode (op, insn, 0);
 }
 
-static bfd_boolean
+static int
 match_widen_vd_neq_vm (const struct riscv_opcode *op,
 		       insn_t insn,
-		       bfd_boolean constraints)
+		       int constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
@@ -335,15 +337,15 @@ match_widen_vd_neq_vm (const struct riscv_opcode *op,
       && ((vd % 2) != 0
 	  || (vs2 % 2) != 0
 	  || (!vm && vm >= vd && vm <= (vd + 1))))
-    return FALSE;
+    return 0;
 
-  return match_opcode (op, insn, FALSE);
+  return match_opcode (op, insn, 0);
 }
 
-static bfd_boolean
+static int
 match_quad_vd_neq_vs1_neq_vs2_neq_vm (const struct riscv_opcode *op,
 				      insn_t insn,
-				      bfd_boolean constraints)
+				      int constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs1 = (insn & MASK_VS1) >> OP_SH_VS1;
@@ -355,15 +357,15 @@ match_quad_vd_neq_vs1_neq_vs2_neq_vm (const struct riscv_opcode *op,
 	  || (vs1 >= vd && vs1 <= (vd + 3))
 	  || (vs2 >= vd && vs2 <= (vd + 3))
 	  || (!vm && vm >= vd && vm <= (vd + 3))))
-    return FALSE;
+    return 0;
 
-  return match_opcode (op, insn, FALSE);
+  return match_opcode (op, insn, 0);
 }
 
-static bfd_boolean
+static int
 match_quad_vd_neq_vs2_neq_vm (const struct riscv_opcode *op,
 			      insn_t insn,
-			      bfd_boolean constraints)
+			      int constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
@@ -373,15 +375,15 @@ match_quad_vd_neq_vs2_neq_vm (const struct riscv_opcode *op,
       && ((vd % 4) != 0
 	  || (vs2 >= vd && vs2 <= (vd + 3))
 	  || (!vm && vm >= vd && vm <= (vd + 3))))
-    return FALSE;
+    return 0;
 
-  return match_opcode (op, insn, FALSE);
+  return match_opcode (op, insn, 0);
 }
 
-static bfd_boolean
+static int
 match_narrow_vd_neq_vs2 (const struct riscv_opcode *op,
 			 insn_t insn,
-			 bfd_boolean constraints)
+			 int constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
@@ -389,15 +391,15 @@ match_narrow_vd_neq_vs2 (const struct riscv_opcode *op,
   if (constraints
       && ((vs2 % 2) != 0
 	  || (vd >= vs2 && vd <= (vs2 + 1))))
-    return FALSE;
+    return 0;
 
-  return match_opcode (op, insn, FALSE);
+  return match_opcode (op, insn, 0);
 }
 
-static bfd_boolean
+static int
 match_vd_neq_vs1_neq_vs2_neq_vm (const struct riscv_opcode *op,
 				 insn_t insn,
-				 bfd_boolean constraints)
+				 int constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs1 = (insn & MASK_VS1) >> OP_SH_VS1;
@@ -408,15 +410,15 @@ match_vd_neq_vs1_neq_vs2_neq_vm (const struct riscv_opcode *op,
       && (vs1 == vd
 	  || vs2 == vd
 	  || (!vm && vm == vd)))
-    return FALSE;
+    return 0;
 
-  return match_opcode (op, insn, FALSE);
+  return match_opcode (op, insn, 0);
 }
 
-static bfd_boolean
+static int
 match_vd_neq_vs2_neq_vm (const struct riscv_opcode *op,
 			 insn_t insn,
-			 bfd_boolean constraints)
+			 int constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
@@ -425,15 +427,43 @@ match_vd_neq_vs2_neq_vm (const struct riscv_opcode *op,
    if (constraints
       && (vs2 == vd
 	  || (!vm && vm == vd)))
-    return FALSE;
+    return 0;
 
-  return match_opcode (op, insn, FALSE);
+  return match_opcode (op, insn, 0);
 }
 
-static bfd_boolean
+static int
+match_vd_neq_vs2 (const struct riscv_opcode *op,
+		  insn_t insn,
+		  int constraints)
+{
+  int vd = (insn & MASK_VD) >> OP_SH_VD;
+  int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
+
+   if (constraints && vs2 == vd)
+    return 0;
+
+  return match_opcode (op, insn, 0);
+}
+
+static int
+match_vd_neq_vm (const struct riscv_opcode *op,
+		 insn_t insn,
+		 int constraints)
+{
+  int vd = (insn & MASK_VD) >> OP_SH_VD;
+  int vm = (insn & MASK_VMASK) >> OP_SH_VMASK;
+
+  if (constraints && !vm && vm == vd)
+    return 0;
+
+  return match_opcode (op, insn, 0);
+}
+
+static int
 match_vmv_nf_rv (const struct riscv_opcode *op,
 		 insn_t insn,
-		 bfd_boolean constraints)
+		 int constraints)
 {
   int vd = (insn & MASK_VD) >> OP_SH_VD;
   int vs2 = (insn & MASK_VS2) >> OP_SH_VS2;
@@ -442,9 +472,9 @@ match_vmv_nf_rv (const struct riscv_opcode *op,
   if (constraints
       && ((vd % nf) != 0
 	  || (vs2 % nf) != 0))
-    return FALSE;
+    return 0;
 
-  return match_opcode (op, insn, FALSE);
+  return match_opcode (op, insn, 0);
 }
 
 const struct riscv_opcode riscv_opcodes[] =
@@ -1034,385 +1064,544 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vsetvl",     0, INSN_CLASS_V,  "d,s,t", MATCH_VSETVL, MASK_VSETVL, match_opcode, 0},
 {"vsetvli",    0, INSN_CLASS_V,  "d,s,Vc", MATCH_VSETVLI, MASK_VSETVLI, match_opcode, 0},
 
-{"vlb.v",      0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLBV, MASK_VLBV, match_opcode, INSN_DREF },
-{"vlh.v",      0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLHV, MASK_VLHV, match_opcode, INSN_DREF },
-{"vlw.v",      0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLWV, MASK_VLWV, match_opcode, INSN_DREF },
-{"vlbu.v",     0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLBUV, MASK_VLBUV, match_opcode, INSN_DREF },
-{"vlhu.v",     0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLHUV, MASK_VLHUV, match_opcode, INSN_DREF },
-{"vlwu.v",     0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLWUV, MASK_VLWUV, match_opcode, INSN_DREF },
-{"vle.v",      0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLEV, MASK_VLEV, match_opcode, INSN_DREF },
-{"vsb.v",      0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VSBV, MASK_VSBV, match_opcode, INSN_DREF },
-{"vsh.v",      0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VSHV, MASK_VSHV, match_opcode, INSN_DREF },
-{"vsw.v",      0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VSWV, MASK_VSWV, match_opcode, INSN_DREF },
-{"vse.v",      0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VSEV, MASK_VSEV, match_opcode, INSN_DREF },
+{"vle8.v",     0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE8V, MASK_VLE8V, match_opcode, INSN_DREF },
+{"vle16.v",    0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE16V, MASK_VLE16V, match_opcode, INSN_DREF },
+{"vle32.v",    0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE32V, MASK_VLE32V, match_opcode, INSN_DREF },
+{"vle64.v",    0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE64V, MASK_VLE64V, match_opcode, INSN_DREF },
+{"vle128.v",   0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE128V, MASK_VLE128V, match_opcode, INSN_DREF },
+{"vle256.v",   0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE256V, MASK_VLE256V, match_opcode, INSN_DREF },
+{"vle512.v",   0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE512V, MASK_VLE512V, match_opcode, INSN_DREF },
+{"vle1024.v",  0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE1024V, MASK_VLE1024V, match_opcode, INSN_DREF },
 
-{"vlsb.v",     0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSBV, MASK_VLSBV, match_opcode, INSN_DREF },
-{"vlsh.v",     0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSHV, MASK_VLSHV, match_opcode, INSN_DREF },
-{"vlsw.v",     0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSWV, MASK_VLSWV, match_opcode, INSN_DREF },
-{"vlsbu.v",    0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSBUV, MASK_VLSBUV, match_opcode, INSN_DREF },
-{"vlshu.v",    0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSHUV, MASK_VLSHUV, match_opcode, INSN_DREF },
-{"vlswu.v",    0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSWUV, MASK_VLSWUV, match_opcode, INSN_DREF },
-{"vlse.v",     0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSEV, MASK_VLSEV, match_opcode, INSN_DREF },
-{"vssb.v",     0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VSSBV, MASK_VSSBV, match_opcode, INSN_DREF },
-{"vssh.v",     0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VSSHV, MASK_VSSHV, match_opcode, INSN_DREF },
-{"vssw.v",     0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VSSWV, MASK_VSSWV, match_opcode, INSN_DREF },
-{"vsse.v",     0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VSSEV, MASK_VSSEV, match_opcode, INSN_DREF },
+{"vse8.v",     0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VSE8V, MASK_VSE8V, match_opcode, INSN_DREF },
+{"vse16.v",    0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VSE16V, MASK_VSE16V, match_opcode, INSN_DREF },
+{"vse32.v",    0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VSE32V, MASK_VSE32V, match_opcode, INSN_DREF },
+{"vse64.v",    0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VSE64V, MASK_VSE64V, match_opcode, INSN_DREF },
+{"vse128.v",   0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VSE128V, MASK_VSE128V, match_opcode, INSN_DREF },
+{"vse256.v",   0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VSE256V, MASK_VSE256V, match_opcode, INSN_DREF },
+{"vse512.v",   0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VSE512V, MASK_VSE512V, match_opcode, INSN_DREF },
+{"vse1024.v",  0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VSE1024V, MASK_VSE1024V, match_opcode, INSN_DREF },
 
-{"vlxb.v",     0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXBV, MASK_VLXBV, match_opcode, INSN_DREF },
-{"vlxh.v",     0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXHV, MASK_VLXHV, match_opcode, INSN_DREF },
-{"vlxw.v",     0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXWV, MASK_VLXWV, match_opcode, INSN_DREF },
-{"vlxbu.v",    0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXBUV, MASK_VLXBUV, match_opcode, INSN_DREF },
-{"vlxhu.v",    0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXHUV, MASK_VLXHUV, match_opcode, INSN_DREF },
-{"vlxwu.v",    0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXWUV, MASK_VLXWUV, match_opcode, INSN_DREF },
-{"vlxe.v",     0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXEV, MASK_VLXEV, match_opcode, INSN_DREF },
-{"vsxb.v",     0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSXBV, MASK_VSXBV, match_opcode, INSN_DREF },
-{"vsxh.v",     0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSXHV, MASK_VSXHV, match_opcode, INSN_DREF },
-{"vsxw.v",     0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSXWV, MASK_VSXWV, match_opcode, INSN_DREF },
-{"vsxe.v",     0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSXEV, MASK_VSXEV, match_opcode, INSN_DREF },
-{"vsuxb.v",    0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSUXBV, MASK_VSUXBV, match_opcode, INSN_DREF },
-{"vsuxh.v",    0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSUXHV, MASK_VSUXHV, match_opcode, INSN_DREF },
-{"vsuxw.v",    0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSUXWV, MASK_VSUXWV, match_opcode, INSN_DREF },
-{"vsuxe.v",    0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSUXEV, MASK_VSUXEV, match_opcode, INSN_DREF },
+{"vlse8.v",    0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSE8V, MASK_VLSE8V, match_opcode, INSN_DREF },
+{"vlse16.v",   0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSE16V, MASK_VLSE16V, match_opcode, INSN_DREF },
+{"vlse32.v",   0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSE32V, MASK_VLSE32V, match_opcode, INSN_DREF },
+{"vlse64.v",   0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSE64V, MASK_VLSE64V, match_opcode, INSN_DREF },
+{"vlse128.v",  0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSE128V, MASK_VLSE128V, match_opcode, INSN_DREF },
+{"vlse256.v",  0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSE256V, MASK_VLSE256V, match_opcode, INSN_DREF },
+{"vlse512.v",  0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSE512V, MASK_VLSE512V, match_opcode, INSN_DREF },
+{"vlse1024.v", 0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VLSE1024V, MASK_VLSE1024V, match_opcode, INSN_DREF },
 
-{"vlbff.v",    0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLBFFV, MASK_VLBFFV, match_opcode, INSN_DREF },
-{"vlhff.v",    0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLHFFV, MASK_VLHFFV, match_opcode, INSN_DREF },
-{"vlwff.v",    0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLWFFV, MASK_VLWFFV, match_opcode, INSN_DREF },
-{"vlbuff.v",   0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLBUFFV, MASK_VLBUFFV, match_opcode, INSN_DREF },
-{"vlhuff.v",   0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLHUFFV, MASK_VLHUFFV, match_opcode, INSN_DREF },
-{"vlwuff.v",   0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLWUFFV, MASK_VLWUFFV, match_opcode, INSN_DREF },
-{"vleff.v",    0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLEFFV, MASK_VLEFFV, match_opcode, INSN_DREF },
+{"vsse8.v",    0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VSSE8V, MASK_VSSE8V, match_opcode, INSN_DREF },
+{"vsse16.v",   0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VSSE16V, MASK_VSSE16V, match_opcode, INSN_DREF },
+{"vsse32.v",   0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VSSE32V, MASK_VSSE32V, match_opcode, INSN_DREF },
+{"vsse64.v",   0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VSSE64V, MASK_VSSE64V, match_opcode, INSN_DREF },
+{"vsse128.v",  0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VSSE128V, MASK_VSSE128V, match_opcode, INSN_DREF },
+{"vsse256.v",  0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VSSE256V, MASK_VSSE256V, match_opcode, INSN_DREF },
+{"vsse512.v",  0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VSSE512V, MASK_VSSE512V, match_opcode, INSN_DREF },
+{"vsse1024.v", 0, INSN_CLASS_V,  "Vd,0(s),tVm", MATCH_VSSE1024V, MASK_VSSE1024V, match_opcode, INSN_DREF },
 
-{"vlseg2b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2BV, MASK_VLSEG2BV, match_opcode, INSN_DREF },
-{"vlseg2h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2HV, MASK_VLSEG2HV, match_opcode, INSN_DREF },
-{"vlseg2w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2WV, MASK_VLSEG2WV, match_opcode, INSN_DREF },
-{"vlseg2bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2BUV, MASK_VLSEG2BUV, match_opcode, INSN_DREF },
-{"vlseg2hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2HUV, MASK_VLSEG2HUV, match_opcode, INSN_DREF },
-{"vlseg2wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2WUV, MASK_VLSEG2WUV, match_opcode, INSN_DREF },
-{"vlseg2e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2EV, MASK_VLSEG2EV, match_opcode, INSN_DREF },
-{"vsseg2b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG2BV, MASK_VSSEG2BV, match_opcode, INSN_DREF },
-{"vsseg2h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG2HV, MASK_VSSEG2HV, match_opcode, INSN_DREF },
-{"vsseg2w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG2WV, MASK_VSSEG2WV, match_opcode, INSN_DREF },
-{"vsseg2e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG2EV, MASK_VSSEG2EV, match_opcode, INSN_DREF },
+{"vlxei8.v",   0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXEI8V, MASK_VLXEI8V, match_opcode, INSN_DREF },
+{"vlxei16.v",  0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXEI16V, MASK_VLXEI16V, match_opcode, INSN_DREF },
+{"vlxei32.v",  0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXEI32V, MASK_VLXEI32V, match_opcode, INSN_DREF },
+{"vlxei64.v",  0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXEI64V, MASK_VLXEI64V, match_opcode, INSN_DREF },
+{"vlxei128.v", 0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXEI128V, MASK_VLXEI128V, match_opcode, INSN_DREF },
+{"vlxei256.v", 0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXEI256V, MASK_VLXEI256V, match_opcode, INSN_DREF },
+{"vlxei512.v", 0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXEI512V, MASK_VLXEI512V, match_opcode, INSN_DREF },
+{"vlxei1024.v",0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VLXEI1024V, MASK_VLXEI1024V, match_opcode, INSN_DREF },
 
-{"vlseg3b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3BV, MASK_VLSEG3BV, match_opcode, INSN_DREF },
-{"vlseg3h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3HV, MASK_VLSEG3HV, match_opcode, INSN_DREF },
-{"vlseg3w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3WV, MASK_VLSEG3WV, match_opcode, INSN_DREF },
-{"vlseg3bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3BUV, MASK_VLSEG3BUV, match_opcode, INSN_DREF },
-{"vlseg3hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3HUV, MASK_VLSEG3HUV, match_opcode, INSN_DREF },
-{"vlseg3wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3WUV, MASK_VLSEG3WUV, match_opcode, INSN_DREF },
-{"vlseg3e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3EV, MASK_VLSEG3EV, match_opcode, INSN_DREF },
-{"vsseg3b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG3BV, MASK_VSSEG3BV, match_opcode, INSN_DREF },
-{"vsseg3h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG3HV, MASK_VSSEG3HV, match_opcode, INSN_DREF },
-{"vsseg3w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG3WV, MASK_VSSEG3WV, match_opcode, INSN_DREF },
-{"vsseg3e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG3EV, MASK_VSSEG3EV, match_opcode, INSN_DREF },
+{"vsxei8.v",   0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSXEI8V, MASK_VSXEI8V, match_opcode, INSN_DREF },
+{"vsxei16.v",  0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSXEI16V, MASK_VSXEI16V, match_opcode, INSN_DREF },
+{"vsxei32.v",  0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSXEI32V, MASK_VSXEI32V, match_opcode, INSN_DREF },
+{"vsxei64.v",  0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSXEI64V, MASK_VSXEI64V, match_opcode, INSN_DREF },
+{"vsxei128.v", 0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSXEI128V, MASK_VSXEI128V, match_opcode, INSN_DREF },
+{"vsxei256.v", 0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSXEI256V, MASK_VSXEI256V, match_opcode, INSN_DREF },
+{"vsxei512.v", 0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSXEI512V, MASK_VSXEI512V, match_opcode, INSN_DREF },
+{"vsxei1024.v",0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSXEI1024V, MASK_VSXEI1024V, match_opcode, INSN_DREF },
 
-{"vlseg4b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4BV, MASK_VLSEG4BV, match_opcode, INSN_DREF },
-{"vlseg4h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4HV, MASK_VLSEG4HV, match_opcode, INSN_DREF },
-{"vlseg4w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4WV, MASK_VLSEG4WV, match_opcode, INSN_DREF },
-{"vlseg4bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4BUV, MASK_VLSEG4BUV, match_opcode, INSN_DREF },
-{"vlseg4hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4HUV, MASK_VLSEG4HUV, match_opcode, INSN_DREF },
-{"vlseg4wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4WUV, MASK_VLSEG4WUV, match_opcode, INSN_DREF },
-{"vlseg4e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4EV, MASK_VLSEG4EV, match_opcode, INSN_DREF },
-{"vsseg4b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG4BV, MASK_VSSEG4BV, match_opcode, INSN_DREF },
-{"vsseg4h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG4HV, MASK_VSSEG4HV, match_opcode, INSN_DREF },
-{"vsseg4w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG4WV, MASK_VSSEG4WV, match_opcode, INSN_DREF },
-{"vsseg4e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG4EV, MASK_VSSEG4EV, match_opcode, INSN_DREF },
+{"vsuxei8.v",   0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSUXEI8V, MASK_VSUXEI8V, match_opcode, INSN_DREF },
+{"vsuxei16.v",  0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSUXEI16V, MASK_VSUXEI16V, match_opcode, INSN_DREF },
+{"vsuxei32.v",  0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSUXEI32V, MASK_VSUXEI32V, match_opcode, INSN_DREF },
+{"vsuxei64.v",  0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSUXEI64V, MASK_VSUXEI64V, match_opcode, INSN_DREF },
+{"vsuxei128.v", 0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSUXEI128V, MASK_VSUXEI128V, match_opcode, INSN_DREF },
+{"vsuxei256.v", 0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSUXEI256V, MASK_VSUXEI256V, match_opcode, INSN_DREF },
+{"vsuxei512.v", 0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSUXEI512V, MASK_VSUXEI512V, match_opcode, INSN_DREF },
+{"vsuxei1024.v",0, INSN_CLASS_V,  "Vd,0(s),VtVm", MATCH_VSUXEI1024V, MASK_VSUXEI1024V, match_opcode, INSN_DREF },
 
-{"vlseg5b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5BV, MASK_VLSEG5BV, match_opcode, INSN_DREF },
-{"vlseg5h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5HV, MASK_VLSEG5HV, match_opcode, INSN_DREF },
-{"vlseg5w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5WV, MASK_VLSEG5WV, match_opcode, INSN_DREF },
-{"vlseg5bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5BUV, MASK_VLSEG5BUV, match_opcode, INSN_DREF },
-{"vlseg5hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5HUV, MASK_VLSEG5HUV, match_opcode, INSN_DREF },
-{"vlseg5wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5WUV, MASK_VLSEG5WUV, match_opcode, INSN_DREF },
-{"vlseg5e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5EV, MASK_VLSEG5EV, match_opcode, INSN_DREF },
-{"vsseg5b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG5BV, MASK_VSSEG5BV, match_opcode, INSN_DREF },
-{"vsseg5h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG5HV, MASK_VSSEG5HV, match_opcode, INSN_DREF },
-{"vsseg5w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG5WV, MASK_VSSEG5WV, match_opcode, INSN_DREF },
-{"vsseg5e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG5EV, MASK_VSSEG5EV, match_opcode, INSN_DREF },
+{"vle8ff.v",    0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE8FFV, MASK_VLE8FFV, match_opcode, INSN_DREF },
+{"vle16ff.v",   0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE16FFV, MASK_VLE16FFV, match_opcode, INSN_DREF },
+{"vle32ff.v",   0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE32FFV, MASK_VLE32FFV, match_opcode, INSN_DREF },
+{"vle64ff.v",   0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE64FFV, MASK_VLE64FFV, match_opcode, INSN_DREF },
+{"vle128ff.v",  0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE128FFV, MASK_VLE128FFV, match_opcode, INSN_DREF },
+{"vle256ff.v",  0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE256FFV, MASK_VLE256FFV, match_opcode, INSN_DREF },
+{"vle512ff.v",  0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE512FFV, MASK_VLE512FFV, match_opcode, INSN_DREF },
+{"vle1024ff.v", 0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE1024FFV, MASK_VLE1024FFV, match_opcode, INSN_DREF },
 
-{"vlseg6b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6BV, MASK_VLSEG6BV, match_opcode, INSN_DREF },
-{"vlseg6h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6HV, MASK_VLSEG6HV, match_opcode, INSN_DREF },
-{"vlseg6w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6WV, MASK_VLSEG6WV, match_opcode, INSN_DREF },
-{"vlseg6bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6BUV, MASK_VLSEG6BUV, match_opcode, INSN_DREF },
-{"vlseg6hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6HUV, MASK_VLSEG6HUV, match_opcode, INSN_DREF },
-{"vlseg6wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6WUV, MASK_VLSEG6WUV, match_opcode, INSN_DREF },
-{"vlseg6e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6EV, MASK_VLSEG6EV, match_opcode, INSN_DREF },
-{"vsseg6b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG6BV, MASK_VSSEG6BV, match_opcode, INSN_DREF },
-{"vsseg6h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG6HV, MASK_VSSEG6HV, match_opcode, INSN_DREF },
-{"vsseg6w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG6WV, MASK_VSSEG6WV, match_opcode, INSN_DREF },
-{"vsseg6e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG6EV, MASK_VSSEG6EV, match_opcode, INSN_DREF },
+{"vlseg2e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E8V, MASK_VLSEG2E8V, match_vd_neq_vm, INSN_DREF },
+{"vsseg2e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG2E8V, MASK_VSSEG2E8V, match_opcode, INSN_DREF },
+{"vlseg3e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E8V, MASK_VLSEG3E8V, match_vd_neq_vm, INSN_DREF },
+{"vsseg3e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG3E8V, MASK_VSSEG3E8V, match_opcode, INSN_DREF },
+{"vlseg4e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E8V, MASK_VLSEG4E8V, match_vd_neq_vm, INSN_DREF },
+{"vsseg4e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG4E8V, MASK_VSSEG4E8V, match_opcode, INSN_DREF },
+{"vlseg5e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E8V, MASK_VLSEG5E8V, match_vd_neq_vm, INSN_DREF },
+{"vsseg5e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG5E8V, MASK_VSSEG5E8V, match_opcode, INSN_DREF },
+{"vlseg6e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E8V, MASK_VLSEG6E8V, match_vd_neq_vm, INSN_DREF },
+{"vsseg6e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG6E8V, MASK_VSSEG6E8V, match_opcode, INSN_DREF },
+{"vlseg7e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E8V, MASK_VLSEG7E8V, match_vd_neq_vm, INSN_DREF },
+{"vsseg7e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG7E8V, MASK_VSSEG7E8V, match_opcode, INSN_DREF },
+{"vlseg8e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E8V, MASK_VLSEG8E8V, match_vd_neq_vm, INSN_DREF },
+{"vsseg8e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG8E8V, MASK_VSSEG8E8V, match_opcode, INSN_DREF },
 
-{"vlseg7b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7BV, MASK_VLSEG7BV, match_opcode, INSN_DREF },
-{"vlseg7h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7HV, MASK_VLSEG7HV, match_opcode, INSN_DREF },
-{"vlseg7w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7WV, MASK_VLSEG7WV, match_opcode, INSN_DREF },
-{"vlseg7bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7BUV, MASK_VLSEG7BUV, match_opcode, INSN_DREF },
-{"vlseg7hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7HUV, MASK_VLSEG7HUV, match_opcode, INSN_DREF },
-{"vlseg7wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7WUV, MASK_VLSEG7WUV, match_opcode, INSN_DREF },
-{"vlseg7e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7EV, MASK_VLSEG7EV, match_opcode, INSN_DREF },
-{"vsseg7b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG7BV, MASK_VSSEG7BV, match_opcode, INSN_DREF },
-{"vsseg7h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG7HV, MASK_VSSEG7HV, match_opcode, INSN_DREF },
-{"vsseg7w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG7WV, MASK_VSSEG7WV, match_opcode, INSN_DREF },
-{"vsseg7e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG7EV, MASK_VSSEG7EV, match_opcode, INSN_DREF },
+{"vlseg2e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E16V, MASK_VLSEG2E16V, match_vd_neq_vm, INSN_DREF },
+{"vsseg2e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG2E16V, MASK_VSSEG2E16V, match_opcode, INSN_DREF },
+{"vlseg3e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E16V, MASK_VLSEG3E16V, match_vd_neq_vm, INSN_DREF },
+{"vsseg3e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG3E16V, MASK_VSSEG3E16V, match_opcode, INSN_DREF },
+{"vlseg4e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E16V, MASK_VLSEG4E16V, match_vd_neq_vm, INSN_DREF },
+{"vsseg4e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG4E16V, MASK_VSSEG4E16V, match_opcode, INSN_DREF },
+{"vlseg5e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E16V, MASK_VLSEG5E16V, match_vd_neq_vm, INSN_DREF },
+{"vsseg5e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG5E16V, MASK_VSSEG5E16V, match_opcode, INSN_DREF },
+{"vlseg6e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E16V, MASK_VLSEG6E16V, match_vd_neq_vm, INSN_DREF },
+{"vsseg6e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG6E16V, MASK_VSSEG6E16V, match_opcode, INSN_DREF },
+{"vlseg7e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E16V, MASK_VLSEG7E16V, match_vd_neq_vm, INSN_DREF },
+{"vsseg7e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG7E16V, MASK_VSSEG7E16V, match_opcode, INSN_DREF },
+{"vlseg8e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E16V, MASK_VLSEG8E16V, match_vd_neq_vm, INSN_DREF },
+{"vsseg8e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG8E16V, MASK_VSSEG8E16V, match_opcode, INSN_DREF },
 
-{"vlseg8b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8BV, MASK_VLSEG8BV, match_opcode, INSN_DREF },
-{"vlseg8h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8HV, MASK_VLSEG8HV, match_opcode, INSN_DREF },
-{"vlseg8w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8WV, MASK_VLSEG8WV, match_opcode, INSN_DREF },
-{"vlseg8bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8BUV, MASK_VLSEG8BUV, match_opcode, INSN_DREF },
-{"vlseg8hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8HUV, MASK_VLSEG8HUV, match_opcode, INSN_DREF },
-{"vlseg8wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8WUV, MASK_VLSEG8WUV, match_opcode, INSN_DREF },
-{"vlseg8e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8EV, MASK_VLSEG8EV, match_opcode, INSN_DREF },
-{"vsseg8b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG8BV, MASK_VSSEG8BV, match_opcode, INSN_DREF },
-{"vsseg8h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG8HV, MASK_VSSEG8HV, match_opcode, INSN_DREF },
-{"vsseg8w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG8WV, MASK_VSSEG8WV, match_opcode, INSN_DREF },
-{"vsseg8e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG8EV, MASK_VSSEG8EV, match_opcode, INSN_DREF },
+{"vlseg2e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E32V, MASK_VLSEG2E32V, match_vd_neq_vm, INSN_DREF },
+{"vsseg2e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG2E32V, MASK_VSSEG2E32V, match_opcode, INSN_DREF },
+{"vlseg3e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E32V, MASK_VLSEG3E32V, match_vd_neq_vm, INSN_DREF },
+{"vsseg3e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG3E32V, MASK_VSSEG3E32V, match_opcode, INSN_DREF },
+{"vlseg4e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E32V, MASK_VLSEG4E32V, match_vd_neq_vm, INSN_DREF },
+{"vsseg4e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG4E32V, MASK_VSSEG4E32V, match_opcode, INSN_DREF },
+{"vlseg5e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E32V, MASK_VLSEG5E32V, match_vd_neq_vm, INSN_DREF },
+{"vsseg5e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG5E32V, MASK_VSSEG5E32V, match_opcode, INSN_DREF },
+{"vlseg6e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E32V, MASK_VLSEG6E32V, match_vd_neq_vm, INSN_DREF },
+{"vsseg6e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG6E32V, MASK_VSSEG6E32V, match_opcode, INSN_DREF },
+{"vlseg7e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E32V, MASK_VLSEG7E32V, match_vd_neq_vm, INSN_DREF },
+{"vsseg7e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG7E32V, MASK_VSSEG7E32V, match_opcode, INSN_DREF },
+{"vlseg8e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E32V, MASK_VLSEG8E32V, match_vd_neq_vm, INSN_DREF },
+{"vsseg8e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG8E32V, MASK_VSSEG8E32V, match_opcode, INSN_DREF },
 
-{"vlsseg2b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2BV, MASK_VLSSEG2BV, match_opcode, INSN_DREF },
-{"vlsseg2h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2HV, MASK_VLSSEG2HV, match_opcode, INSN_DREF },
-{"vlsseg2w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2WV, MASK_VLSSEG2WV, match_opcode, INSN_DREF },
-{"vlsseg2bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2BUV, MASK_VLSSEG2BUV, match_opcode, INSN_DREF },
-{"vlsseg2hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2HUV, MASK_VLSSEG2HUV, match_opcode, INSN_DREF },
-{"vlsseg2wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2WUV, MASK_VLSSEG2WUV, match_opcode, INSN_DREF },
-{"vlsseg2e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2EV, MASK_VLSSEG2EV, match_opcode, INSN_DREF },
-{"vssseg2b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG2BV, MASK_VSSSEG2BV, match_opcode, INSN_DREF },
-{"vssseg2h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG2HV, MASK_VSSSEG2HV, match_opcode, INSN_DREF },
-{"vssseg2w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG2WV, MASK_VSSSEG2WV, match_opcode, INSN_DREF },
-{"vssseg2e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG2EV, MASK_VSSSEG2EV, match_opcode, INSN_DREF },
+{"vlseg2e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E64V, MASK_VLSEG2E64V, match_vd_neq_vm, INSN_DREF },
+{"vsseg2e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG2E64V, MASK_VSSEG2E64V, match_opcode, INSN_DREF },
+{"vlseg3e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E64V, MASK_VLSEG3E64V, match_vd_neq_vm, INSN_DREF },
+{"vsseg3e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG3E64V, MASK_VSSEG3E64V, match_opcode, INSN_DREF },
+{"vlseg4e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E64V, MASK_VLSEG4E64V, match_vd_neq_vm, INSN_DREF },
+{"vsseg4e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG4E64V, MASK_VSSEG4E64V, match_opcode, INSN_DREF },
+{"vlseg5e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E64V, MASK_VLSEG5E64V, match_vd_neq_vm, INSN_DREF },
+{"vsseg5e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG5E64V, MASK_VSSEG5E64V, match_opcode, INSN_DREF },
+{"vlseg6e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E64V, MASK_VLSEG6E64V, match_vd_neq_vm, INSN_DREF },
+{"vsseg6e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG6E64V, MASK_VSSEG6E64V, match_opcode, INSN_DREF },
+{"vlseg7e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E64V, MASK_VLSEG7E64V, match_vd_neq_vm, INSN_DREF },
+{"vsseg7e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG7E64V, MASK_VSSEG7E64V, match_opcode, INSN_DREF },
+{"vlseg8e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E64V, MASK_VLSEG8E64V, match_vd_neq_vm, INSN_DREF },
+{"vsseg8e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG8E64V, MASK_VSSEG8E64V, match_opcode, INSN_DREF },
 
-{"vlsseg3b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3BV, MASK_VLSSEG3BV, match_opcode, INSN_DREF },
-{"vlsseg3h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3HV, MASK_VLSSEG3HV, match_opcode, INSN_DREF },
-{"vlsseg3w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3WV, MASK_VLSSEG3WV, match_opcode, INSN_DREF },
-{"vlsseg3bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3BUV, MASK_VLSSEG3BUV, match_opcode, INSN_DREF },
-{"vlsseg3hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3HUV, MASK_VLSSEG3HUV, match_opcode, INSN_DREF },
-{"vlsseg3wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3WUV, MASK_VLSSEG3WUV, match_opcode, INSN_DREF },
-{"vlsseg3e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3EV, MASK_VLSSEG3EV, match_opcode, INSN_DREF },
-{"vssseg3b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG3BV, MASK_VSSSEG3BV, match_opcode, INSN_DREF },
-{"vssseg3h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG3HV, MASK_VSSSEG3HV, match_opcode, INSN_DREF },
-{"vssseg3w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG3WV, MASK_VSSSEG3WV, match_opcode, INSN_DREF },
-{"vssseg3e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG3EV, MASK_VSSSEG3EV, match_opcode, INSN_DREF },
+{"vlseg2e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E128V, MASK_VLSEG2E128V, match_vd_neq_vm, INSN_DREF },
+{"vsseg2e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG2E128V, MASK_VSSEG2E128V, match_opcode, INSN_DREF },
+{"vlseg3e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E128V, MASK_VLSEG3E128V, match_vd_neq_vm, INSN_DREF },
+{"vsseg3e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG3E128V, MASK_VSSEG3E128V, match_opcode, INSN_DREF },
+{"vlseg4e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E128V, MASK_VLSEG4E128V, match_vd_neq_vm, INSN_DREF },
+{"vsseg4e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG4E128V, MASK_VSSEG4E128V, match_opcode, INSN_DREF },
+{"vlseg5e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E128V, MASK_VLSEG5E128V, match_vd_neq_vm, INSN_DREF },
+{"vsseg5e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG5E128V, MASK_VSSEG5E128V, match_opcode, INSN_DREF },
+{"vlseg6e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E128V, MASK_VLSEG6E128V, match_vd_neq_vm, INSN_DREF },
+{"vsseg6e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG6E128V, MASK_VSSEG6E128V, match_opcode, INSN_DREF },
+{"vlseg7e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E128V, MASK_VLSEG7E128V, match_vd_neq_vm, INSN_DREF },
+{"vsseg7e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG7E128V, MASK_VSSEG7E128V, match_opcode, INSN_DREF },
+{"vlseg8e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E128V, MASK_VLSEG8E128V, match_vd_neq_vm, INSN_DREF },
+{"vsseg8e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG8E128V, MASK_VSSEG8E128V, match_opcode, INSN_DREF },
 
-{"vlsseg4b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4BV, MASK_VLSSEG4BV, match_opcode, INSN_DREF },
-{"vlsseg4h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4HV, MASK_VLSSEG4HV, match_opcode, INSN_DREF },
-{"vlsseg4w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4WV, MASK_VLSSEG4WV, match_opcode, INSN_DREF },
-{"vlsseg4bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4BUV, MASK_VLSSEG4BUV, match_opcode, INSN_DREF },
-{"vlsseg4hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4HUV, MASK_VLSSEG4HUV, match_opcode, INSN_DREF },
-{"vlsseg4wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4WUV, MASK_VLSSEG4WUV, match_opcode, INSN_DREF },
-{"vlsseg4e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4EV, MASK_VLSSEG4EV, match_opcode, INSN_DREF },
-{"vssseg4b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG4BV, MASK_VSSSEG4BV, match_opcode, INSN_DREF },
-{"vssseg4h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG4HV, MASK_VSSSEG4HV, match_opcode, INSN_DREF },
-{"vssseg4w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG4WV, MASK_VSSSEG4WV, match_opcode, INSN_DREF },
-{"vssseg4e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG4EV, MASK_VSSSEG4EV, match_opcode, INSN_DREF },
+{"vlseg2e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E256V, MASK_VLSEG2E256V, match_vd_neq_vm, INSN_DREF },
+{"vsseg2e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG2E256V, MASK_VSSEG2E256V, match_opcode, INSN_DREF },
+{"vlseg3e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E256V, MASK_VLSEG3E256V, match_vd_neq_vm, INSN_DREF },
+{"vsseg3e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG3E256V, MASK_VSSEG3E256V, match_opcode, INSN_DREF },
+{"vlseg4e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E256V, MASK_VLSEG4E256V, match_vd_neq_vm, INSN_DREF },
+{"vsseg4e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG4E256V, MASK_VSSEG4E256V, match_opcode, INSN_DREF },
+{"vlseg5e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E256V, MASK_VLSEG5E256V, match_vd_neq_vm, INSN_DREF },
+{"vsseg5e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG5E256V, MASK_VSSEG5E256V, match_opcode, INSN_DREF },
+{"vlseg6e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E256V, MASK_VLSEG6E256V, match_vd_neq_vm, INSN_DREF },
+{"vsseg6e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG6E256V, MASK_VSSEG6E256V, match_opcode, INSN_DREF },
+{"vlseg7e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E256V, MASK_VLSEG7E256V, match_vd_neq_vm, INSN_DREF },
+{"vsseg7e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG7E256V, MASK_VSSEG7E256V, match_opcode, INSN_DREF },
+{"vlseg8e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E256V, MASK_VLSEG8E256V, match_vd_neq_vm, INSN_DREF },
+{"vsseg8e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG8E256V, MASK_VSSEG8E256V, match_opcode, INSN_DREF },
 
-{"vlsseg5b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5BV, MASK_VLSSEG5BV, match_opcode, INSN_DREF },
-{"vlsseg5h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5HV, MASK_VLSSEG5HV, match_opcode, INSN_DREF },
-{"vlsseg5w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5WV, MASK_VLSSEG5WV, match_opcode, INSN_DREF },
-{"vlsseg5bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5BUV, MASK_VLSSEG5BUV, match_opcode, INSN_DREF },
-{"vlsseg5hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5HUV, MASK_VLSSEG5HUV, match_opcode, INSN_DREF },
-{"vlsseg5wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5WUV, MASK_VLSSEG5WUV, match_opcode, INSN_DREF },
-{"vlsseg5e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5EV, MASK_VLSSEG5EV, match_opcode, INSN_DREF },
-{"vssseg5b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG5BV, MASK_VSSSEG5BV, match_opcode, INSN_DREF },
-{"vssseg5h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG5HV, MASK_VSSSEG5HV, match_opcode, INSN_DREF },
-{"vssseg5w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG5WV, MASK_VSSSEG5WV, match_opcode, INSN_DREF },
-{"vssseg5e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG5EV, MASK_VSSSEG5EV, match_opcode, INSN_DREF },
+{"vlseg2e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E512V, MASK_VLSEG2E512V, match_vd_neq_vm, INSN_DREF },
+{"vsseg2e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG2E512V, MASK_VSSEG2E512V, match_opcode, INSN_DREF },
+{"vlseg3e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E512V, MASK_VLSEG3E512V, match_vd_neq_vm, INSN_DREF },
+{"vsseg3e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG3E512V, MASK_VSSEG3E512V, match_opcode, INSN_DREF },
+{"vlseg4e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E512V, MASK_VLSEG4E512V, match_vd_neq_vm, INSN_DREF },
+{"vsseg4e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG4E512V, MASK_VSSEG4E512V, match_opcode, INSN_DREF },
+{"vlseg5e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E512V, MASK_VLSEG5E512V, match_vd_neq_vm, INSN_DREF },
+{"vsseg5e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG5E512V, MASK_VSSEG5E512V, match_opcode, INSN_DREF },
+{"vlseg6e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E512V, MASK_VLSEG6E512V, match_vd_neq_vm, INSN_DREF },
+{"vsseg6e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG6E512V, MASK_VSSEG6E512V, match_opcode, INSN_DREF },
+{"vlseg7e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E512V, MASK_VLSEG7E512V, match_vd_neq_vm, INSN_DREF },
+{"vsseg7e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG7E512V, MASK_VSSEG7E512V, match_opcode, INSN_DREF },
+{"vlseg8e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E512V, MASK_VLSEG8E512V, match_vd_neq_vm, INSN_DREF },
+{"vsseg8e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG8E512V, MASK_VSSEG8E512V, match_opcode, INSN_DREF },
 
-{"vlsseg6b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6BV, MASK_VLSSEG6BV, match_opcode, INSN_DREF },
-{"vlsseg6h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6HV, MASK_VLSSEG6HV, match_opcode, INSN_DREF },
-{"vlsseg6w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6WV, MASK_VLSSEG6WV, match_opcode, INSN_DREF },
-{"vlsseg6bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6BUV, MASK_VLSSEG6BUV, match_opcode, INSN_DREF },
-{"vlsseg6hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6HUV, MASK_VLSSEG6HUV, match_opcode, INSN_DREF },
-{"vlsseg6wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6WUV, MASK_VLSSEG6WUV, match_opcode, INSN_DREF },
-{"vlsseg6e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6EV, MASK_VLSSEG6EV, match_opcode, INSN_DREF },
-{"vssseg6b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG6BV, MASK_VSSSEG6BV, match_opcode, INSN_DREF },
-{"vssseg6h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG6HV, MASK_VSSSEG6HV, match_opcode, INSN_DREF },
-{"vssseg6w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG6WV, MASK_VSSSEG6WV, match_opcode, INSN_DREF },
-{"vssseg6e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG6EV, MASK_VSSSEG6EV, match_opcode, INSN_DREF },
+{"vlseg2e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E1024V, MASK_VLSEG2E1024V, match_vd_neq_vm, INSN_DREF },
+{"vsseg2e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG2E1024V, MASK_VSSEG2E1024V, match_opcode, INSN_DREF },
+{"vlseg3e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E1024V, MASK_VLSEG3E1024V, match_vd_neq_vm, INSN_DREF },
+{"vsseg3e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG3E1024V, MASK_VSSEG3E1024V, match_opcode, INSN_DREF },
+{"vlseg4e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E1024V, MASK_VLSEG4E1024V, match_vd_neq_vm, INSN_DREF },
+{"vsseg4e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG4E1024V, MASK_VSSEG4E1024V, match_opcode, INSN_DREF },
+{"vlseg5e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E1024V, MASK_VLSEG5E1024V, match_vd_neq_vm, INSN_DREF },
+{"vsseg5e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG5E1024V, MASK_VSSEG5E1024V, match_opcode, INSN_DREF },
+{"vlseg6e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E1024V, MASK_VLSEG6E1024V, match_vd_neq_vm, INSN_DREF },
+{"vsseg6e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG6E1024V, MASK_VSSEG6E1024V, match_opcode, INSN_DREF },
+{"vlseg7e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E1024V, MASK_VLSEG7E1024V, match_vd_neq_vm, INSN_DREF },
+{"vsseg7e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG7E1024V, MASK_VSSEG7E1024V, match_opcode, INSN_DREF },
+{"vlseg8e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E1024V, MASK_VLSEG8E1024V, match_vd_neq_vm, INSN_DREF },
+{"vsseg8e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VSSEG8E1024V, MASK_VSSEG8E1024V, match_opcode, INSN_DREF },
 
-{"vlsseg7b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7BV, MASK_VLSSEG7BV, match_opcode, INSN_DREF },
-{"vlsseg7h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7HV, MASK_VLSSEG7HV, match_opcode, INSN_DREF },
-{"vlsseg7w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7WV, MASK_VLSSEG7WV, match_opcode, INSN_DREF },
-{"vlsseg7bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7BUV, MASK_VLSSEG7BUV, match_opcode, INSN_DREF },
-{"vlsseg7hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7HUV, MASK_VLSSEG7HUV, match_opcode, INSN_DREF },
-{"vlsseg7wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7WUV, MASK_VLSSEG7WUV, match_opcode, INSN_DREF },
-{"vlsseg7e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7EV, MASK_VLSSEG7EV, match_opcode, INSN_DREF },
-{"vssseg7b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG7BV, MASK_VSSSEG7BV, match_opcode, INSN_DREF },
-{"vssseg7h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG7HV, MASK_VSSSEG7HV, match_opcode, INSN_DREF },
-{"vssseg7w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG7WV, MASK_VSSSEG7WV, match_opcode, INSN_DREF },
-{"vssseg7e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG7EV, MASK_VSSSEG7EV, match_opcode, INSN_DREF },
+{"vlsseg2e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2E8V, MASK_VLSSEG2E8V, match_vd_neq_vm, INSN_DREF },
+{"vssseg2e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG2E8V, MASK_VSSSEG2E8V, match_opcode, INSN_DREF },
+{"vlsseg3e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3E8V, MASK_VLSSEG3E8V, match_vd_neq_vm, INSN_DREF },
+{"vssseg3e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG3E8V, MASK_VSSSEG3E8V, match_opcode, INSN_DREF },
+{"vlsseg4e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4E8V, MASK_VLSSEG4E8V, match_vd_neq_vm, INSN_DREF },
+{"vssseg4e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG4E8V, MASK_VSSSEG4E8V, match_opcode, INSN_DREF },
+{"vlsseg5e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5E8V, MASK_VLSSEG5E8V, match_vd_neq_vm, INSN_DREF },
+{"vssseg5e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG5E8V, MASK_VSSSEG5E8V, match_opcode, INSN_DREF },
+{"vlsseg6e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6E8V, MASK_VLSSEG6E8V, match_vd_neq_vm, INSN_DREF },
+{"vssseg6e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG6E8V, MASK_VSSSEG6E8V, match_opcode, INSN_DREF },
+{"vlsseg7e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7E8V, MASK_VLSSEG7E8V, match_vd_neq_vm, INSN_DREF },
+{"vssseg7e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG7E8V, MASK_VSSSEG7E8V, match_opcode, INSN_DREF },
+{"vlsseg8e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8E8V, MASK_VLSSEG8E8V, match_vd_neq_vm, INSN_DREF },
+{"vssseg8e8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG8E8V, MASK_VSSSEG8E8V, match_opcode, INSN_DREF },
 
-{"vlsseg8b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8BV, MASK_VLSSEG8BV, match_opcode, INSN_DREF },
-{"vlsseg8h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8HV, MASK_VLSSEG8HV, match_opcode, INSN_DREF },
-{"vlsseg8w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8WV, MASK_VLSSEG8WV, match_opcode, INSN_DREF },
-{"vlsseg8bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8BUV, MASK_VLSSEG8BUV, match_opcode, INSN_DREF },
-{"vlsseg8hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8HUV, MASK_VLSSEG8HUV, match_opcode, INSN_DREF },
-{"vlsseg8wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8WUV, MASK_VLSSEG8WUV, match_opcode, INSN_DREF },
-{"vlsseg8e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8EV, MASK_VLSSEG8EV, match_opcode, INSN_DREF },
-{"vssseg8b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG8BV, MASK_VSSSEG8BV, match_opcode, INSN_DREF },
-{"vssseg8h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG8HV, MASK_VSSSEG8HV, match_opcode, INSN_DREF },
-{"vssseg8w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG8WV, MASK_VSSSEG8WV, match_opcode, INSN_DREF },
-{"vssseg8e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG8EV, MASK_VSSSEG8EV, match_opcode, INSN_DREF },
+{"vlsseg2e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2E16V, MASK_VLSSEG2E16V, match_vd_neq_vm, INSN_DREF },
+{"vssseg2e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG2E16V, MASK_VSSSEG2E16V, match_opcode, INSN_DREF },
+{"vlsseg3e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3E16V, MASK_VLSSEG3E16V, match_vd_neq_vm, INSN_DREF },
+{"vssseg3e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG3E16V, MASK_VSSSEG3E16V, match_opcode, INSN_DREF },
+{"vlsseg4e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4E16V, MASK_VLSSEG4E16V, match_vd_neq_vm, INSN_DREF },
+{"vssseg4e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG4E16V, MASK_VSSSEG4E16V, match_opcode, INSN_DREF },
+{"vlsseg5e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5E16V, MASK_VLSSEG5E16V, match_vd_neq_vm, INSN_DREF },
+{"vssseg5e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG5E16V, MASK_VSSSEG5E16V, match_opcode, INSN_DREF },
+{"vlsseg6e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6E16V, MASK_VLSSEG6E16V, match_vd_neq_vm, INSN_DREF },
+{"vssseg6e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG6E16V, MASK_VSSSEG6E16V, match_opcode, INSN_DREF },
+{"vlsseg7e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7E16V, MASK_VLSSEG7E16V, match_vd_neq_vm, INSN_DREF },
+{"vssseg7e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG7E16V, MASK_VSSSEG7E16V, match_opcode, INSN_DREF },
+{"vlsseg8e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8E16V, MASK_VLSSEG8E16V, match_vd_neq_vm, INSN_DREF },
+{"vssseg8e16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG8E16V, MASK_VSSSEG8E16V, match_opcode, INSN_DREF },
 
-{"vlxseg2b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2BV, MASK_VLXSEG2BV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg2h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2HV, MASK_VLXSEG2HV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg2w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2WV, MASK_VLXSEG2WV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg2bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2BUV, MASK_VLXSEG2BUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg2hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2HUV, MASK_VLXSEG2HUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg2wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2WUV, MASK_VLXSEG2WUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg2e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2EV, MASK_VLXSEG2EV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg2b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG2BV, MASK_VSXSEG2BV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg2h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG2HV, MASK_VSXSEG2HV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg2w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG2WV, MASK_VSXSEG2WV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg2e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG2EV, MASK_VSXSEG2EV, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlsseg2e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2E32V, MASK_VLSSEG2E32V, match_vd_neq_vm, INSN_DREF },
+{"vssseg2e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG2E32V, MASK_VSSSEG2E32V, match_opcode, INSN_DREF },
+{"vlsseg3e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3E32V, MASK_VLSSEG3E32V, match_vd_neq_vm, INSN_DREF },
+{"vssseg3e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG3E32V, MASK_VSSSEG3E32V, match_opcode, INSN_DREF },
+{"vlsseg4e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4E32V, MASK_VLSSEG4E32V, match_vd_neq_vm, INSN_DREF },
+{"vssseg4e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG4E32V, MASK_VSSSEG4E32V, match_opcode, INSN_DREF },
+{"vlsseg5e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5E32V, MASK_VLSSEG5E32V, match_vd_neq_vm, INSN_DREF },
+{"vssseg5e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG5E32V, MASK_VSSSEG5E32V, match_opcode, INSN_DREF },
+{"vlsseg6e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6E32V, MASK_VLSSEG6E32V, match_vd_neq_vm, INSN_DREF },
+{"vssseg6e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG6E32V, MASK_VSSSEG6E32V, match_opcode, INSN_DREF },
+{"vlsseg7e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7E32V, MASK_VLSSEG7E32V, match_vd_neq_vm, INSN_DREF },
+{"vssseg7e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG7E32V, MASK_VSSSEG7E32V, match_opcode, INSN_DREF },
+{"vlsseg8e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8E32V, MASK_VLSSEG8E32V, match_vd_neq_vm, INSN_DREF },
+{"vssseg8e32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG8E32V, MASK_VSSSEG8E32V, match_opcode, INSN_DREF },
 
-{"vlxseg3b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3BV, MASK_VLXSEG3BV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg3h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3HV, MASK_VLXSEG3HV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg3w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3WV, MASK_VLXSEG3WV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg3bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3BUV, MASK_VLXSEG3BUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg3hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3HUV, MASK_VLXSEG3HUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg3wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3WUV, MASK_VLXSEG3WUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg3e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3EV, MASK_VLXSEG3EV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg3b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG3BV, MASK_VSXSEG3BV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg3h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG3HV, MASK_VSXSEG3HV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg3w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG3WV, MASK_VSXSEG3WV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg3e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG3EV, MASK_VSXSEG3EV, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlsseg2e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2E64V, MASK_VLSSEG2E64V, match_vd_neq_vm, INSN_DREF },
+{"vssseg2e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG2E64V, MASK_VSSSEG2E64V, match_opcode, INSN_DREF },
+{"vlsseg3e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3E64V, MASK_VLSSEG3E64V, match_vd_neq_vm, INSN_DREF },
+{"vssseg3e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG3E64V, MASK_VSSSEG3E64V, match_opcode, INSN_DREF },
+{"vlsseg4e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4E64V, MASK_VLSSEG4E64V, match_vd_neq_vm, INSN_DREF },
+{"vssseg4e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG4E64V, MASK_VSSSEG4E64V, match_opcode, INSN_DREF },
+{"vlsseg5e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5E64V, MASK_VLSSEG5E64V, match_vd_neq_vm, INSN_DREF },
+{"vssseg5e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG5E64V, MASK_VSSSEG5E64V, match_opcode, INSN_DREF },
+{"vlsseg6e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6E64V, MASK_VLSSEG6E64V, match_vd_neq_vm, INSN_DREF },
+{"vssseg6e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG6E64V, MASK_VSSSEG6E64V, match_opcode, INSN_DREF },
+{"vlsseg7e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7E64V, MASK_VLSSEG7E64V, match_vd_neq_vm, INSN_DREF },
+{"vssseg7e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG7E64V, MASK_VSSSEG7E64V, match_opcode, INSN_DREF },
+{"vlsseg8e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8E64V, MASK_VLSSEG8E64V, match_vd_neq_vm, INSN_DREF },
+{"vssseg8e64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG8E64V, MASK_VSSSEG8E64V, match_opcode, INSN_DREF },
 
-{"vlxseg4b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4BV, MASK_VLXSEG4BV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg4h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4HV, MASK_VLXSEG4HV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg4w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4WV, MASK_VLXSEG4WV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg4bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4BUV, MASK_VLXSEG4BUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg4hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4HUV, MASK_VLXSEG4HUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg4wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4WUV, MASK_VLXSEG4WUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg4e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4EV, MASK_VLXSEG4EV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg4b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG4BV, MASK_VSXSEG4BV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg4h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG4HV, MASK_VSXSEG4HV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg4w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG4WV, MASK_VSXSEG4WV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg4e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG4EV, MASK_VSXSEG4EV, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlsseg2e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2E128V, MASK_VLSSEG2E128V, match_vd_neq_vm, INSN_DREF },
+{"vssseg2e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG2E128V, MASK_VSSSEG2E128V, match_opcode, INSN_DREF },
+{"vlsseg3e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3E128V, MASK_VLSSEG3E128V, match_vd_neq_vm, INSN_DREF },
+{"vssseg3e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG3E128V, MASK_VSSSEG3E128V, match_opcode, INSN_DREF },
+{"vlsseg4e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4E128V, MASK_VLSSEG4E128V, match_vd_neq_vm, INSN_DREF },
+{"vssseg4e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG4E128V, MASK_VSSSEG4E128V, match_opcode, INSN_DREF },
+{"vlsseg5e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5E128V, MASK_VLSSEG5E128V, match_vd_neq_vm, INSN_DREF },
+{"vssseg5e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG5E128V, MASK_VSSSEG5E128V, match_opcode, INSN_DREF },
+{"vlsseg6e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6E128V, MASK_VLSSEG6E128V, match_vd_neq_vm, INSN_DREF },
+{"vssseg6e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG6E128V, MASK_VSSSEG6E128V, match_opcode, INSN_DREF },
+{"vlsseg7e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7E128V, MASK_VLSSEG7E128V, match_vd_neq_vm, INSN_DREF },
+{"vssseg7e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG7E128V, MASK_VSSSEG7E128V, match_opcode, INSN_DREF },
+{"vlsseg8e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8E128V, MASK_VLSSEG8E128V, match_vd_neq_vm, INSN_DREF },
+{"vssseg8e128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG8E128V, MASK_VSSSEG8E128V, match_opcode, INSN_DREF },
 
-{"vlxseg5b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5BV, MASK_VLXSEG5BV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg5h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5HV, MASK_VLXSEG5HV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg5w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5WV, MASK_VLXSEG5WV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg5bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5BUV, MASK_VLXSEG5BUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg5hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5HUV, MASK_VLXSEG5HUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg5wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5WUV, MASK_VLXSEG5WUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg5e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5EV, MASK_VLXSEG5EV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg5b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG5BV, MASK_VSXSEG5BV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg5h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG5HV, MASK_VSXSEG5HV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg5w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG5WV, MASK_VSXSEG5WV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg5e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG5EV, MASK_VSXSEG5EV, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlsseg2e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2E256V, MASK_VLSSEG2E256V, match_vd_neq_vm, INSN_DREF },
+{"vssseg2e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG2E256V, MASK_VSSSEG2E256V, match_opcode, INSN_DREF },
+{"vlsseg3e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3E256V, MASK_VLSSEG3E256V, match_vd_neq_vm, INSN_DREF },
+{"vssseg3e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG3E256V, MASK_VSSSEG3E256V, match_opcode, INSN_DREF },
+{"vlsseg4e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4E256V, MASK_VLSSEG4E256V, match_vd_neq_vm, INSN_DREF },
+{"vssseg4e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG4E256V, MASK_VSSSEG4E256V, match_opcode, INSN_DREF },
+{"vlsseg5e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5E256V, MASK_VLSSEG5E256V, match_vd_neq_vm, INSN_DREF },
+{"vssseg5e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG5E256V, MASK_VSSSEG5E256V, match_opcode, INSN_DREF },
+{"vlsseg6e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6E256V, MASK_VLSSEG6E256V, match_vd_neq_vm, INSN_DREF },
+{"vssseg6e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG6E256V, MASK_VSSSEG6E256V, match_opcode, INSN_DREF },
+{"vlsseg7e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7E256V, MASK_VLSSEG7E256V, match_vd_neq_vm, INSN_DREF },
+{"vssseg7e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG7E256V, MASK_VSSSEG7E256V, match_opcode, INSN_DREF },
+{"vlsseg8e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8E256V, MASK_VLSSEG8E256V, match_vd_neq_vm, INSN_DREF },
+{"vssseg8e256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG8E256V, MASK_VSSSEG8E256V, match_opcode, INSN_DREF },
 
-{"vlxseg6b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6BV, MASK_VLXSEG6BV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg6h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6HV, MASK_VLXSEG6HV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg6w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6WV, MASK_VLXSEG6WV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg6bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6BUV, MASK_VLXSEG6BUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg6hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6HUV, MASK_VLXSEG6HUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg6wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6WUV, MASK_VLXSEG6WUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg6e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6EV, MASK_VLXSEG6EV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg6b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG6BV, MASK_VSXSEG6BV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg6h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG6HV, MASK_VSXSEG6HV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg6w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG6WV, MASK_VSXSEG6WV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg6e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG6EV, MASK_VSXSEG6EV, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlsseg2e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2E512V, MASK_VLSSEG2E512V, match_vd_neq_vm, INSN_DREF },
+{"vssseg2e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG2E512V, MASK_VSSSEG2E512V, match_opcode, INSN_DREF },
+{"vlsseg3e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3E512V, MASK_VLSSEG3E512V, match_vd_neq_vm, INSN_DREF },
+{"vssseg3e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG3E512V, MASK_VSSSEG3E512V, match_opcode, INSN_DREF },
+{"vlsseg4e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4E512V, MASK_VLSSEG4E512V, match_vd_neq_vm, INSN_DREF },
+{"vssseg4e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG4E512V, MASK_VSSSEG4E512V, match_opcode, INSN_DREF },
+{"vlsseg5e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5E512V, MASK_VLSSEG5E512V, match_vd_neq_vm, INSN_DREF },
+{"vssseg5e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG5E512V, MASK_VSSSEG5E512V, match_opcode, INSN_DREF },
+{"vlsseg6e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6E512V, MASK_VLSSEG6E512V, match_vd_neq_vm, INSN_DREF },
+{"vssseg6e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG6E512V, MASK_VSSSEG6E512V, match_opcode, INSN_DREF },
+{"vlsseg7e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7E512V, MASK_VLSSEG7E512V, match_vd_neq_vm, INSN_DREF },
+{"vssseg7e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG7E512V, MASK_VSSSEG7E512V, match_opcode, INSN_DREF },
+{"vlsseg8e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8E512V, MASK_VLSSEG8E512V, match_vd_neq_vm, INSN_DREF },
+{"vssseg8e512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG8E512V, MASK_VSSSEG8E512V, match_opcode, INSN_DREF },
 
-{"vlxseg7b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7BV, MASK_VLXSEG7BV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg7h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7HV, MASK_VLXSEG7HV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg7w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7WV, MASK_VLXSEG7WV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg7bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7BUV, MASK_VLXSEG7BUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg7hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7HUV, MASK_VLXSEG7HUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg7wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7WUV, MASK_VLXSEG7WUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg7e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7EV, MASK_VLXSEG7EV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg7b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG7BV, MASK_VSXSEG7BV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg7h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG7HV, MASK_VSXSEG7HV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg7w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG7WV, MASK_VSXSEG7WV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg7e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG7EV, MASK_VSXSEG7EV, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlsseg2e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG2E1024V, MASK_VLSSEG2E1024V, match_vd_neq_vm, INSN_DREF },
+{"vssseg2e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG2E1024V, MASK_VSSSEG2E1024V, match_opcode, INSN_DREF },
+{"vlsseg3e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG3E1024V, MASK_VLSSEG3E1024V, match_vd_neq_vm, INSN_DREF },
+{"vssseg3e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG3E1024V, MASK_VSSSEG3E1024V, match_opcode, INSN_DREF },
+{"vlsseg4e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG4E1024V, MASK_VLSSEG4E1024V, match_vd_neq_vm, INSN_DREF },
+{"vssseg4e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG4E1024V, MASK_VSSSEG4E1024V, match_opcode, INSN_DREF },
+{"vlsseg5e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG5E1024V, MASK_VLSSEG5E1024V, match_vd_neq_vm, INSN_DREF },
+{"vssseg5e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG5E1024V, MASK_VSSSEG5E1024V, match_opcode, INSN_DREF },
+{"vlsseg6e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG6E1024V, MASK_VLSSEG6E1024V, match_vd_neq_vm, INSN_DREF },
+{"vssseg6e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG6E1024V, MASK_VSSSEG6E1024V, match_opcode, INSN_DREF },
+{"vlsseg7e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG7E1024V, MASK_VLSSEG7E1024V, match_vd_neq_vm, INSN_DREF },
+{"vssseg7e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG7E1024V, MASK_VSSSEG7E1024V, match_opcode, INSN_DREF },
+{"vlsseg8e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VLSSEG8E1024V, MASK_VLSSEG8E1024V, match_vd_neq_vm, INSN_DREF },
+{"vssseg8e1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),tVm", MATCH_VSSSEG8E1024V, MASK_VSSSEG8E1024V, match_opcode, INSN_DREF },
 
-{"vlxseg8b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8BV, MASK_VLXSEG8BV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg8h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8HV, MASK_VLXSEG8HV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg8w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8WV, MASK_VLXSEG8WV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg8bu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8BUV, MASK_VLXSEG8BUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg8hu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8HUV, MASK_VLXSEG8HUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg8wu.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8WUV, MASK_VLXSEG8WUV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vlxseg8e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8EV, MASK_VLXSEG8EV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg8b.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG8BV, MASK_VSXSEG8BV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg8h.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG8HV, MASK_VSXSEG8HV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg8w.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG8WV, MASK_VSXSEG8WV, match_vd_neq_vs2_neq_vm, INSN_DREF },
-{"vsxseg8e.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG8EV, MASK_VSXSEG8EV, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg2ei8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2EI8V, MASK_VLXSEG2EI8V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg2ei8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG2EI8V, MASK_VSXSEG2EI8V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg3ei8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3EI8V, MASK_VLXSEG3EI8V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg3ei8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG3EI8V, MASK_VSXSEG3EI8V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg4ei8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4EI8V, MASK_VLXSEG4EI8V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg4ei8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG4EI8V, MASK_VSXSEG4EI8V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg5ei8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5EI8V, MASK_VLXSEG5EI8V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg5ei8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG5EI8V, MASK_VSXSEG5EI8V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg6ei8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6EI8V, MASK_VLXSEG6EI8V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg6ei8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG6EI8V, MASK_VSXSEG6EI8V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg7ei8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7EI8V, MASK_VLXSEG7EI8V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg7ei8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG7EI8V, MASK_VSXSEG7EI8V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg8ei8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8EI8V, MASK_VLXSEG8EI8V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg8ei8.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG8EI8V, MASK_VSXSEG8EI8V, match_vd_neq_vs2_neq_vm, INSN_DREF },
 
-{"vlseg2bff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2BFFV, MASK_VLSEG2BFFV, match_opcode, INSN_DREF },
-{"vlseg2hff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2HFFV, MASK_VLSEG2HFFV, match_opcode, INSN_DREF },
-{"vlseg2wff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2WFFV, MASK_VLSEG2WFFV, match_opcode, INSN_DREF },
-{"vlseg2buff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2BUFFV, MASK_VLSEG2BUFFV, match_opcode, INSN_DREF },
-{"vlseg2huff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2HUFFV, MASK_VLSEG2HUFFV, match_opcode, INSN_DREF },
-{"vlseg2wuff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2WUFFV, MASK_VLSEG2WUFFV, match_opcode, INSN_DREF },
-{"vlseg2eff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2EFFV, MASK_VLSEG2EFFV, match_opcode, INSN_DREF },
+{"vlxseg2ei16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2EI16V, MASK_VLXSEG2EI16V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg2ei16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG2EI16V, MASK_VSXSEG2EI16V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg3ei16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3EI16V, MASK_VLXSEG3EI16V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg3ei16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG3EI16V, MASK_VSXSEG3EI16V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg4ei16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4EI16V, MASK_VLXSEG4EI16V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg4ei16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG4EI16V, MASK_VSXSEG4EI16V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg5ei16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5EI16V, MASK_VLXSEG5EI16V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg5ei16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG5EI16V, MASK_VSXSEG5EI16V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg6ei16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6EI16V, MASK_VLXSEG6EI16V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg6ei16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG6EI16V, MASK_VSXSEG6EI16V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg7ei16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7EI16V, MASK_VLXSEG7EI16V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg7ei16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG7EI16V, MASK_VSXSEG7EI16V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg8ei16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8EI16V, MASK_VLXSEG8EI16V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg8ei16.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG8EI16V, MASK_VSXSEG8EI16V, match_vd_neq_vs2_neq_vm, INSN_DREF },
 
-{"vlseg3bff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3BFFV, MASK_VLSEG3BFFV, match_opcode, INSN_DREF },
-{"vlseg3hff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3HFFV, MASK_VLSEG3HFFV, match_opcode, INSN_DREF },
-{"vlseg3wff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3WFFV, MASK_VLSEG3WFFV, match_opcode, INSN_DREF },
-{"vlseg3buff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3BUFFV, MASK_VLSEG3BUFFV, match_opcode, INSN_DREF },
-{"vlseg3huff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3HUFFV, MASK_VLSEG3HUFFV, match_opcode, INSN_DREF },
-{"vlseg3wuff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3WUFFV, MASK_VLSEG3WUFFV, match_opcode, INSN_DREF },
-{"vlseg3eff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3EFFV, MASK_VLSEG3EFFV, match_opcode, INSN_DREF },
+{"vlxseg2ei32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2EI32V, MASK_VLXSEG2EI32V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg2ei32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG2EI32V, MASK_VSXSEG2EI32V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg3ei32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3EI32V, MASK_VLXSEG3EI32V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg3ei32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG3EI32V, MASK_VSXSEG3EI32V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg4ei32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4EI32V, MASK_VLXSEG4EI32V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg4ei32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG4EI32V, MASK_VSXSEG4EI32V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg5ei32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5EI32V, MASK_VLXSEG5EI32V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg5ei32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG5EI32V, MASK_VSXSEG5EI32V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg6ei32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6EI32V, MASK_VLXSEG6EI32V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg6ei32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG6EI32V, MASK_VSXSEG6EI32V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg7ei32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7EI32V, MASK_VLXSEG7EI32V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg7ei32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG7EI32V, MASK_VSXSEG7EI32V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg8ei32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8EI32V, MASK_VLXSEG8EI32V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg8ei32.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG8EI32V, MASK_VSXSEG8EI32V, match_vd_neq_vs2_neq_vm, INSN_DREF },
 
-{"vlseg4bff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4BFFV, MASK_VLSEG4BFFV, match_opcode, INSN_DREF },
-{"vlseg4hff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4HFFV, MASK_VLSEG4HFFV, match_opcode, INSN_DREF },
-{"vlseg4wff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4WFFV, MASK_VLSEG4WFFV, match_opcode, INSN_DREF },
-{"vlseg4buff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4BUFFV, MASK_VLSEG4BUFFV, match_opcode, INSN_DREF },
-{"vlseg4huff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4HUFFV, MASK_VLSEG4HUFFV, match_opcode, INSN_DREF },
-{"vlseg4wuff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4WUFFV, MASK_VLSEG4WUFFV, match_opcode, INSN_DREF },
-{"vlseg4eff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4EFFV, MASK_VLSEG4EFFV, match_opcode, INSN_DREF },
+{"vlxseg2ei64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2EI64V, MASK_VLXSEG2EI64V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg2ei64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG2EI64V, MASK_VSXSEG2EI64V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg3ei64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3EI64V, MASK_VLXSEG3EI64V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg3ei64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG3EI64V, MASK_VSXSEG3EI64V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg4ei64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4EI64V, MASK_VLXSEG4EI64V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg4ei64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG4EI64V, MASK_VSXSEG4EI64V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg5ei64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5EI64V, MASK_VLXSEG5EI64V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg5ei64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG5EI64V, MASK_VSXSEG5EI64V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg6ei64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6EI64V, MASK_VLXSEG6EI64V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg6ei64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG6EI64V, MASK_VSXSEG6EI64V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg7ei64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7EI64V, MASK_VLXSEG7EI64V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg7ei64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG7EI64V, MASK_VSXSEG7EI64V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg8ei64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8EI64V, MASK_VLXSEG8EI64V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg8ei64.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG8EI64V, MASK_VSXSEG8EI64V, match_vd_neq_vs2_neq_vm, INSN_DREF },
 
-{"vlseg5bff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5BFFV, MASK_VLSEG5BFFV, match_opcode, INSN_DREF },
-{"vlseg5hff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5HFFV, MASK_VLSEG5HFFV, match_opcode, INSN_DREF },
-{"vlseg5wff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5WFFV, MASK_VLSEG5WFFV, match_opcode, INSN_DREF },
-{"vlseg5buff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5BUFFV, MASK_VLSEG5BUFFV, match_opcode, INSN_DREF },
-{"vlseg5huff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5HUFFV, MASK_VLSEG5HUFFV, match_opcode, INSN_DREF },
-{"vlseg5wuff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5WUFFV, MASK_VLSEG5WUFFV, match_opcode, INSN_DREF },
-{"vlseg5eff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5EFFV, MASK_VLSEG5EFFV, match_opcode, INSN_DREF },
+{"vlxseg2ei128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2EI128V, MASK_VLXSEG2EI128V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg2ei128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG2EI128V, MASK_VSXSEG2EI128V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg3ei128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3EI128V, MASK_VLXSEG3EI128V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg3ei128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG3EI128V, MASK_VSXSEG3EI128V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg4ei128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4EI128V, MASK_VLXSEG4EI128V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg4ei128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG4EI128V, MASK_VSXSEG4EI128V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg5ei128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5EI128V, MASK_VLXSEG5EI128V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg5ei128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG5EI128V, MASK_VSXSEG5EI128V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg6ei128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6EI128V, MASK_VLXSEG6EI128V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg6ei128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG6EI128V, MASK_VSXSEG6EI128V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg7ei128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7EI128V, MASK_VLXSEG7EI128V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg7ei128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG7EI128V, MASK_VSXSEG7EI128V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg8ei128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8EI128V, MASK_VLXSEG8EI128V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg8ei128.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG8EI128V, MASK_VSXSEG8EI128V, match_vd_neq_vs2_neq_vm, INSN_DREF },
 
-{"vlseg6bff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6BFFV, MASK_VLSEG6BFFV, match_opcode, INSN_DREF },
-{"vlseg6hff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6HFFV, MASK_VLSEG6HFFV, match_opcode, INSN_DREF },
-{"vlseg6wff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6WFFV, MASK_VLSEG6WFFV, match_opcode, INSN_DREF },
-{"vlseg6buff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6BUFFV, MASK_VLSEG6BUFFV, match_opcode, INSN_DREF },
-{"vlseg6huff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6HUFFV, MASK_VLSEG6HUFFV, match_opcode, INSN_DREF },
-{"vlseg6wuff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6WUFFV, MASK_VLSEG6WUFFV, match_opcode, INSN_DREF },
-{"vlseg6eff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6EFFV, MASK_VLSEG6EFFV, match_opcode, INSN_DREF },
+{"vlxseg2ei256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2EI256V, MASK_VLXSEG2EI256V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg2ei256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG2EI256V, MASK_VSXSEG2EI256V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg3ei256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3EI256V, MASK_VLXSEG3EI256V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg3ei256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG3EI256V, MASK_VSXSEG3EI256V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg4ei256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4EI256V, MASK_VLXSEG4EI256V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg4ei256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG4EI256V, MASK_VSXSEG4EI256V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg5ei256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5EI256V, MASK_VLXSEG5EI256V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg5ei256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG5EI256V, MASK_VSXSEG5EI256V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg6ei256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6EI256V, MASK_VLXSEG6EI256V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg6ei256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG6EI256V, MASK_VSXSEG6EI256V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg7ei256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7EI256V, MASK_VLXSEG7EI256V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg7ei256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG7EI256V, MASK_VSXSEG7EI256V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg8ei256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8EI256V, MASK_VLXSEG8EI256V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg8ei256.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG8EI256V, MASK_VSXSEG8EI256V, match_vd_neq_vs2_neq_vm, INSN_DREF },
 
-{"vlseg7bff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7BFFV, MASK_VLSEG7BFFV, match_opcode, INSN_DREF },
-{"vlseg7hff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7HFFV, MASK_VLSEG7HFFV, match_opcode, INSN_DREF },
-{"vlseg7wff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7WFFV, MASK_VLSEG7WFFV, match_opcode, INSN_DREF },
-{"vlseg7buff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7BUFFV, MASK_VLSEG7BUFFV, match_opcode, INSN_DREF },
-{"vlseg7huff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7HUFFV, MASK_VLSEG7HUFFV, match_opcode, INSN_DREF },
-{"vlseg7wuff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7WUFFV, MASK_VLSEG7WUFFV, match_opcode, INSN_DREF },
-{"vlseg7eff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7EFFV, MASK_VLSEG7EFFV, match_opcode, INSN_DREF },
+{"vlxseg2ei512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2EI512V, MASK_VLXSEG2EI512V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg2ei512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG2EI512V, MASK_VSXSEG2EI512V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg3ei512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3EI512V, MASK_VLXSEG3EI512V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg3ei512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG3EI512V, MASK_VSXSEG3EI512V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg4ei512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4EI512V, MASK_VLXSEG4EI512V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg4ei512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG4EI512V, MASK_VSXSEG4EI512V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg5ei512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5EI512V, MASK_VLXSEG5EI512V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg5ei512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG5EI512V, MASK_VSXSEG5EI512V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg6ei512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6EI512V, MASK_VLXSEG6EI512V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg6ei512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG6EI512V, MASK_VSXSEG6EI512V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg7ei512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7EI512V, MASK_VLXSEG7EI512V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg7ei512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG7EI512V, MASK_VSXSEG7EI512V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg8ei512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8EI512V, MASK_VLXSEG8EI512V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg8ei512.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG8EI512V, MASK_VSXSEG8EI512V, match_vd_neq_vs2_neq_vm, INSN_DREF },
 
-{"vlseg8bff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8BFFV, MASK_VLSEG8BFFV, match_opcode, INSN_DREF },
-{"vlseg8hff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8HFFV, MASK_VLSEG8HFFV, match_opcode, INSN_DREF },
-{"vlseg8wff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8WFFV, MASK_VLSEG8WFFV, match_opcode, INSN_DREF },
-{"vlseg8buff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8BUFFV, MASK_VLSEG8BUFFV, match_opcode, INSN_DREF },
-{"vlseg8huff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8HUFFV, MASK_VLSEG8HUFFV, match_opcode, INSN_DREF },
-{"vlseg8wuff.v", 0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8WUFFV, MASK_VLSEG8WUFFV, match_opcode, INSN_DREF },
-{"vlseg8eff.v",  0, INSN_CLASS_V_AND_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8EFFV, MASK_VLSEG8EFFV, match_opcode, INSN_DREF },
+{"vlxseg2ei1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG2EI1024V, MASK_VLXSEG2EI1024V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg2ei1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG2EI1024V, MASK_VSXSEG2EI1024V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg3ei1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG3EI1024V, MASK_VLXSEG3EI1024V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg3ei1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG3EI1024V, MASK_VSXSEG3EI1024V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg4ei1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG4EI1024V, MASK_VLXSEG4EI1024V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg4ei1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG4EI1024V, MASK_VSXSEG4EI1024V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg5ei1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG5EI1024V, MASK_VLXSEG5EI1024V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg5ei1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG5EI1024V, MASK_VSXSEG5EI1024V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg6ei1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG6EI1024V, MASK_VLXSEG6EI1024V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg6ei1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG6EI1024V, MASK_VSXSEG6EI1024V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg7ei1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG7EI1024V, MASK_VLXSEG7EI1024V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg7ei1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG7EI1024V, MASK_VSXSEG7EI1024V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vlxseg8ei1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VLXSEG8EI1024V, MASK_VLXSEG8EI1024V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+{"vsxseg8ei1024.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s),VtVm", MATCH_VSXSEG8EI1024V, MASK_VSXSEG8EI1024V, match_vd_neq_vs2_neq_vm, INSN_DREF },
+
+{"vlseg2e8ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E8FFV, MASK_VLSEG2E8FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg3e8ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E8FFV, MASK_VLSEG3E8FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg4e8ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E8FFV, MASK_VLSEG4E8FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg5e8ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E8FFV, MASK_VLSEG5E8FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg6e8ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E8FFV, MASK_VLSEG6E8FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg7e8ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E8FFV, MASK_VLSEG7E8FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg8e8ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E8FFV, MASK_VLSEG8E8FFV, match_vd_neq_vm, INSN_DREF },
+
+{"vlseg2e16ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E16FFV, MASK_VLSEG2E16FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg3e16ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E16FFV, MASK_VLSEG3E16FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg4e16ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E16FFV, MASK_VLSEG4E16FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg5e16ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E16FFV, MASK_VLSEG5E16FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg6e16ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E16FFV, MASK_VLSEG6E16FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg7e16ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E16FFV, MASK_VLSEG7E16FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg8e16ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E16FFV, MASK_VLSEG8E16FFV, match_vd_neq_vm, INSN_DREF },
+
+{"vlseg2e32ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E32FFV, MASK_VLSEG2E32FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg3e32ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E32FFV, MASK_VLSEG3E32FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg4e32ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E32FFV, MASK_VLSEG4E32FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg5e32ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E32FFV, MASK_VLSEG5E32FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg6e32ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E32FFV, MASK_VLSEG6E32FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg7e32ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E32FFV, MASK_VLSEG7E32FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg8e32ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E32FFV, MASK_VLSEG8E32FFV, match_vd_neq_vm, INSN_DREF },
+
+{"vlseg2e64ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E64FFV, MASK_VLSEG2E64FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg3e64ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E64FFV, MASK_VLSEG3E64FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg4e64ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E64FFV, MASK_VLSEG4E64FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg5e64ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E64FFV, MASK_VLSEG5E64FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg6e64ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E64FFV, MASK_VLSEG6E64FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg7e64ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E64FFV, MASK_VLSEG7E64FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg8e64ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E64FFV, MASK_VLSEG8E64FFV, match_vd_neq_vm, INSN_DREF },
+
+{"vlseg2e128ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E128FFV, MASK_VLSEG2E128FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg3e128ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E128FFV, MASK_VLSEG3E128FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg4e128ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E128FFV, MASK_VLSEG4E128FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg5e128ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E128FFV, MASK_VLSEG5E128FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg6e128ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E128FFV, MASK_VLSEG6E128FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg7e128ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E128FFV, MASK_VLSEG7E128FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg8e128ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E128FFV, MASK_VLSEG8E128FFV, match_vd_neq_vm, INSN_DREF },
+
+{"vlseg2e256ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E256FFV, MASK_VLSEG2E256FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg3e256ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E256FFV, MASK_VLSEG3E256FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg4e256ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E256FFV, MASK_VLSEG4E256FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg5e256ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E256FFV, MASK_VLSEG5E256FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg6e256ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E256FFV, MASK_VLSEG6E256FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg7e256ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E256FFV, MASK_VLSEG7E256FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg8e256ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E256FFV, MASK_VLSEG8E256FFV, match_vd_neq_vm, INSN_DREF },
+
+{"vlseg2e512ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E512FFV, MASK_VLSEG2E512FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg3e512ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E512FFV, MASK_VLSEG3E512FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg4e512ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E512FFV, MASK_VLSEG4E512FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg5e512ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E512FFV, MASK_VLSEG5E512FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg6e512ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E512FFV, MASK_VLSEG6E512FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg7e512ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E512FFV, MASK_VLSEG7E512FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg8e512ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E512FFV, MASK_VLSEG8E512FFV, match_vd_neq_vm, INSN_DREF },
+
+{"vlseg2e1024ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG2E1024FFV, MASK_VLSEG2E1024FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg3e1024ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG3E1024FFV, MASK_VLSEG3E1024FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg4e1024ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG4E1024FFV, MASK_VLSEG4E1024FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg5e1024ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG5E1024FFV, MASK_VLSEG5E1024FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg6e1024ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG6E1024FFV, MASK_VLSEG6E1024FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg7e1024ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG7E1024FFV, MASK_VLSEG7E1024FFV, match_vd_neq_vm, INSN_DREF },
+{"vlseg8e1024ff.v",  0, INSN_CLASS_V_OR_ZVLSSEG,  "Vd,0(s)Vm", MATCH_VLSEG8E1024FFV, MASK_VLSEG8E1024FFV, match_vd_neq_vm, INSN_DREF },
 
 {"vl1r.v",  0, INSN_CLASS_V,  "Vd,0(s)", MATCH_VL1RV, MASK_VL1RV, match_opcode, INSN_DREF },
 {"vs1r.v",  0, INSN_CLASS_V,  "Vd,0(s)", MATCH_VS1RV, MASK_VS1RV, match_opcode, INSN_DREF },
 
-{"vamoaddw.v",   0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOADDWV, MASK_VAMOADDWV, match_opcode, INSN_DREF},
-{"vamoadde.v",   0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOADDEV, MASK_VAMOADDEV, match_opcode, INSN_DREF},
-{"vamoswapw.v",  0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOSWAPWV, MASK_VAMOSWAPWV, match_opcode, INSN_DREF},
-{"vamoswape.v",  0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOSWAPEV, MASK_VAMOSWAPEV, match_opcode, INSN_DREF},
+{"vamoaddei8.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOADDEI8V, MASK_VAMOADDEI8V, match_opcode, INSN_DREF},
+{"vamoswapei8.v",  0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOSWAPEI8V, MASK_VAMOSWAPEI8V, match_opcode, INSN_DREF},
+{"vamoxorei8.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOXOREI8V, MASK_VAMOXOREI8V, match_opcode, INSN_DREF},
+{"vamoandei8.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOANDEI8V, MASK_VAMOANDEI8V, match_opcode, INSN_DREF},
+{"vamoorei8.v",    0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOOREI8V, MASK_VAMOOREI8V, match_opcode, INSN_DREF},
+{"vamominei8.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMINEI8V, MASK_VAMOMINEI8V, match_opcode, INSN_DREF},
+{"vamomaxei8.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMAXEI8V, MASK_VAMOMAXEI8V, match_opcode, INSN_DREF},
+{"vamominuei8.v",  0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMINUEI8V, MASK_VAMOMINUEI8V, match_opcode, INSN_DREF},
+{"vamomaxuei8.v",  0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMAXUEI8V, MASK_VAMOMAXUEI8V, match_opcode, INSN_DREF},
 
-{"vamoxorw.v",   0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOXORWV, MASK_VAMOXORWV, match_opcode, INSN_DREF},
-{"vamoxore.v",   0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOXOREV, MASK_VAMOXOREV, match_opcode, INSN_DREF},
-{"vamoandw.v",   0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOANDWV, MASK_VAMOANDWV, match_opcode, INSN_DREF},
-{"vamoande.v",   0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOANDEV, MASK_VAMOANDEV, match_opcode, INSN_DREF},
-{"vamoorw.v",    0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOORWV, MASK_VAMOORWV, match_opcode, INSN_DREF},
-{"vamoore.v",    0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOOREV, MASK_VAMOOREV, match_opcode, INSN_DREF},
+{"vamoaddei16.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOADDEI16V, MASK_VAMOADDEI16V, match_opcode, INSN_DREF},
+{"vamoswapei16.v",  0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOSWAPEI16V, MASK_VAMOSWAPEI16V, match_opcode, INSN_DREF},
+{"vamoxorei16.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOXOREI16V, MASK_VAMOXOREI16V, match_opcode, INSN_DREF},
+{"vamoandei16.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOANDEI16V, MASK_VAMOANDEI16V, match_opcode, INSN_DREF},
+{"vamoorei16.v",    0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOOREI16V, MASK_VAMOOREI16V, match_opcode, INSN_DREF},
+{"vamominei16.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMINEI16V, MASK_VAMOMINEI16V, match_opcode, INSN_DREF},
+{"vamomaxei16.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMAXEI16V, MASK_VAMOMAXEI16V, match_opcode, INSN_DREF},
+{"vamominuei16.v",  0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMINUEI16V, MASK_VAMOMINUEI16V, match_opcode, INSN_DREF},
+{"vamomaxuei16.v",  0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMAXUEI16V, MASK_VAMOMAXUEI16V, match_opcode, INSN_DREF},
 
-{"vamominw.v",   0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMINWV, MASK_VAMOMINWV, match_opcode, INSN_DREF},
-{"vamomine.v",   0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMINEV, MASK_VAMOMINEV, match_opcode, INSN_DREF},
-{"vamomaxw.v",   0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMAXWV, MASK_VAMOMAXWV, match_opcode, INSN_DREF},
-{"vamomaxe.v",   0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMAXEV, MASK_VAMOMAXEV, match_opcode, INSN_DREF},
-{"vamominuw.v",  0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMINUWV, MASK_VAMOMINUWV, match_opcode, INSN_DREF},
-{"vamominue.v",  0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMINUEV, MASK_VAMOMINUEV, match_opcode, INSN_DREF},
-{"vamomaxuw.v",  0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMAXUWV, MASK_VAMOMAXUWV, match_opcode, INSN_DREF},
-{"vamomaxue.v",  0, INSN_CLASS_V_AND_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMAXUEV, MASK_VAMOMAXUEV, match_opcode, INSN_DREF},
+{"vamoaddei32.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOADDEI32V, MASK_VAMOADDEI32V, match_opcode, INSN_DREF},
+{"vamoswapei32.v",  0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOSWAPEI32V, MASK_VAMOSWAPEI32V, match_opcode, INSN_DREF},
+{"vamoxorei32.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOXOREI32V, MASK_VAMOXOREI32V, match_opcode, INSN_DREF},
+{"vamoandei32.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOANDEI32V, MASK_VAMOANDEI32V, match_opcode, INSN_DREF},
+{"vamoorei32.v",    0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOOREI32V, MASK_VAMOOREI32V, match_opcode, INSN_DREF},
+{"vamominei32.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMINEI32V, MASK_VAMOMINEI32V, match_opcode, INSN_DREF},
+{"vamomaxei32.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMAXEI32V, MASK_VAMOMAXEI32V, match_opcode, INSN_DREF},
+{"vamominuei32.v",  0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMINUEI32V, MASK_VAMOMINUEI32V, match_opcode, INSN_DREF},
+{"vamomaxuei32.v",  0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMAXUEI32V, MASK_VAMOMAXUEI32V, match_opcode, INSN_DREF},
+
+{"vamoaddei64.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOADDEI64V, MASK_VAMOADDEI64V, match_opcode, INSN_DREF},
+{"vamoswapei64.v",  0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOSWAPEI64V, MASK_VAMOSWAPEI64V, match_opcode, INSN_DREF},
+{"vamoxorei64.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOXOREI64V, MASK_VAMOXOREI64V, match_opcode, INSN_DREF},
+{"vamoandei64.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOANDEI64V, MASK_VAMOANDEI64V, match_opcode, INSN_DREF},
+{"vamoorei64.v",    0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOOREI64V, MASK_VAMOOREI64V, match_opcode, INSN_DREF},
+{"vamominei64.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMINEI64V, MASK_VAMOMINEI64V, match_opcode, INSN_DREF},
+{"vamomaxei64.v",   0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMAXEI64V, MASK_VAMOMAXEI64V, match_opcode, INSN_DREF},
+{"vamominuei64.v",  0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMINUEI64V, MASK_VAMOMINUEI64V, match_opcode, INSN_DREF},
+{"vamomaxuei64.v",  0, INSN_CLASS_V_OR_ZVAMO,  "Ve,0(s),Vt,VfVm", MATCH_VAMOMAXUEI64V, MASK_VAMOMAXUEI64V, match_opcode, INSN_DREF},
 
 {"vadd.vv",    0, INSN_CLASS_V,  "Vd,Vt,VsVm", MATCH_VADDVV, MASK_VADDVV, match_opcode, 0 },
 {"vadd.vx",    0, INSN_CLASS_V,  "Vd,Vt,sVm", MATCH_VADDVX, MASK_VADDVX, match_opcode, 0 },
@@ -1441,6 +1630,13 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vwadd.wx",   0, INSN_CLASS_V,  "Vd,Vt,sVm", MATCH_VWADDWX, MASK_VWADDWX, match_widen_vd_neq_vm, 0 },
 {"vwsub.wv",   0, INSN_CLASS_V,  "Vd,Vt,VsVm", MATCH_VWSUBWV, MASK_VWSUBWV, match_widen_vd_neq_vs1_neq_vm, 0 },
 {"vwsub.wx",   0, INSN_CLASS_V,  "Vd,Vt,sVm", MATCH_VWSUBWX, MASK_VWSUBWX, match_widen_vd_neq_vm, 0 },
+
+{"vzext.vf2",  0, INSN_CLASS_V,  "Vd,VtVm", MATCH_VZEXT_VF2, MASK_VZEXT_VF2, match_opcode, 0 },
+{"vsext.vf2",  0, INSN_CLASS_V,  "Vd,VtVm", MATCH_VSEXT_VF2, MASK_VSEXT_VF2, match_opcode, 0 },
+{"vzext.vf4",  0, INSN_CLASS_V,  "Vd,VtVm", MATCH_VZEXT_VF4, MASK_VZEXT_VF4, match_opcode, 0 },
+{"vsext.vf4",  0, INSN_CLASS_V,  "Vd,VtVm", MATCH_VSEXT_VF4, MASK_VSEXT_VF4, match_opcode, 0 },
+{"vzext.vf8",  0, INSN_CLASS_V,  "Vd,VtVm", MATCH_VZEXT_VF8, MASK_VZEXT_VF8, match_opcode, 0 },
+{"vsext.vf8",  0, INSN_CLASS_V,  "Vd,VtVm", MATCH_VSEXT_VF8, MASK_VSEXT_VF8, match_opcode, 0 },
 
 {"vadc.vvm",   0, INSN_CLASS_V,  "Vd,Vt,Vs,V0", MATCH_VADCVVM, MASK_VADCVVM, match_opcode, 0 },
 {"vadc.vxm",   0, INSN_CLASS_V,  "Vd,Vt,s,V0", MATCH_VADCVXM, MASK_VADCVXM, match_opcode, 0 },
@@ -1713,44 +1909,51 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vfmerge.vfm",0, INSN_CLASS_V_AND_F, "Vd,Vt,S,V0", MATCH_VFMERGEVFM, MASK_VFMERGEVFM, match_opcode, 0},
 {"vfmv.v.f",   0, INSN_CLASS_V_AND_F, "Vd,S", MATCH_VFMVVF, MASK_VFMVVF, match_opcode, 0 },
 
-{"vfcvt.xu.f.v",0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFCVTXUFV, MASK_VFCVTXUFV, match_opcode, 0},
-{"vfcvt.x.f.v", 0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFCVTXFV, MASK_VFCVTXFV, match_opcode, 0},
-{"vfcvt.f.xu.v",0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFCVTFXUV, MASK_VFCVTFXUV, match_opcode, 0},
-{"vfcvt.f.x.v", 0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFCVTFXV, MASK_VFCVTFXV, match_opcode, 0},
+{"vfcvt.xu.f.v",     0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFCVTXUFV, MASK_VFCVTXUFV, match_opcode, 0},
+{"vfcvt.x.f.v",      0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFCVTXFV, MASK_VFCVTXFV, match_opcode, 0},
+{"vfcvt.rtz.xu.f.v", 0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFCVTRTZXUFV, MASK_VFCVTRTZXUFV, match_opcode, 0},
+{"vfcvt.rtz.x.f.v",  0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFCVTRTZXFV, MASK_VFCVTRTZXFV, match_opcode, 0},
+{"vfcvt.f.xu.v",     0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFCVTFXUV, MASK_VFCVTFXUV, match_opcode, 0},
+{"vfcvt.f.x.v",      0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFCVTFXV, MASK_VFCVTFXV, match_opcode, 0},
 
-{"vfwcvt.xu.f.v",0,INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFWCVTXUFV, MASK_VFWCVTXUFV, match_widen_vd_neq_vs2_neq_vm, 0},
-{"vfwcvt.x.f.v",0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFWCVTXFV, MASK_VFWCVTXFV, match_widen_vd_neq_vs2_neq_vm, 0},
-{"vfwcvt.f.xu.v",0,INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFWCVTFXUV, MASK_VFWCVTFXUV, match_widen_vd_neq_vs2_neq_vm, 0},
-{"vfwcvt.f.x.v",0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFWCVTFXV, MASK_VFWCVTFXV, match_widen_vd_neq_vs2_neq_vm, 0},
-{"vfwcvt.f.f.v",0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFWCVTFFV, MASK_VFWCVTFFV, match_widen_vd_neq_vs2_neq_vm, 0},
+{"vfwcvt.xu.f.v",     0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFWCVTXUFV, MASK_VFWCVTXUFV, match_widen_vd_neq_vs2_neq_vm, 0},
+{"vfwcvt.x.f.v",      0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFWCVTXFV, MASK_VFWCVTXFV, match_widen_vd_neq_vs2_neq_vm, 0},
+{"vfwcvt.rtz.xu.f.v", 0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFWCVTRTZXUFV, MASK_VFWCVTRTZXUFV, match_widen_vd_neq_vs2_neq_vm, 0},
+{"vfwcvt.rtz.x.f.v",  0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFWCVTRTZXFV, MASK_VFWCVTRTZXFV, match_widen_vd_neq_vs2_neq_vm, 0},
+{"vfwcvt.f.xu.v",     0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFWCVTFXUV, MASK_VFWCVTFXUV, match_widen_vd_neq_vs2_neq_vm, 0},
+{"vfwcvt.f.x.v",      0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFWCVTFXV, MASK_VFWCVTFXV, match_widen_vd_neq_vs2_neq_vm, 0},
+{"vfwcvt.f.f.v",      0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFWCVTFFV, MASK_VFWCVTFFV, match_widen_vd_neq_vs2_neq_vm, 0},
 
-{"vfncvt.xu.f.w",0,INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFNCVTXUFW, MASK_VFNCVTXUFW, match_narrow_vd_neq_vs2, 0},
-{"vfncvt.x.f.w",0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFNCVTXFW, MASK_VFNCVTXFW, match_narrow_vd_neq_vs2, 0},
-{"vfncvt.f.xu.w",0,INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFNCVTFXUW, MASK_VFNCVTFXUW, match_narrow_vd_neq_vs2, 0},
-{"vfncvt.f.x.w",0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFNCVTFXW, MASK_VFNCVTFXW, match_narrow_vd_neq_vs2, 0},
-{"vfncvt.f.f.w",0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFNCVTFFW, MASK_VFNCVTFFW, match_narrow_vd_neq_vs2, 0},
-{"vfncvt.rod.f.f.w",0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFNCVTRFFW, MASK_VFNCVTRFFW, match_narrow_vd_neq_vs2, 0},
+{"vfncvt.xu.f.w",     0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFNCVTXUFW, MASK_VFNCVTXUFW, match_narrow_vd_neq_vs2, 0},
+{"vfncvt.x.f.w",      0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFNCVTXFW, MASK_VFNCVTXFW, match_narrow_vd_neq_vs2, 0},
+{"vfncvt.rtz.xu.f.w", 0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFNCVTRTZXUFW, MASK_VFNCVTRTZXUFW, match_narrow_vd_neq_vs2, 0},
+{"vfncvt.rtz.x.f.w",  0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFNCVTRTZXFW, MASK_VFNCVTRTZXFW, match_narrow_vd_neq_vs2, 0},
+{"vfncvt.f.xu.w",     0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFNCVTFXUW, MASK_VFNCVTFXUW, match_narrow_vd_neq_vs2, 0},
+{"vfncvt.f.x.w",      0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFNCVTFXW, MASK_VFNCVTFXW, match_narrow_vd_neq_vs2, 0},
+{"vfncvt.f.f.w",      0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFNCVTFFW, MASK_VFNCVTFFW, match_narrow_vd_neq_vs2, 0},
+{"vfncvt.rod.f.f.w",  0, INSN_CLASS_V_AND_F, "Vd,VtVm", MATCH_VFNCVTRODFFW, MASK_VFNCVTRODFFW, match_narrow_vd_neq_vs2, 0},
 
-{"vredsum.vs", 0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDSUMVV, MASK_VREDSUMVV, match_opcode, 0},
-{"vredmaxu.vs",0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDMAXUVV, MASK_VREDMAXUVV, match_opcode, 0},
-{"vredmax.vs", 0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDMAXVV, MASK_VREDMAXVV, match_opcode, 0},
-{"vredminu.vs",0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDMINUVV, MASK_VREDMINUVV, match_opcode, 0},
-{"vredmin.vs", 0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDMINVV, MASK_VREDMINVV, match_opcode, 0},
-{"vredand.vs", 0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDANDVV, MASK_VREDANDVV, match_opcode, 0},
-{"vredor.vs",  0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDORVV, MASK_VREDORVV, match_opcode, 0},
-{"vredxor.vs", 0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDXORVV, MASK_VREDXORVV, match_opcode, 0},
+{"vredsum.vs", 0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDSUMVS, MASK_VREDSUMVS, match_opcode, 0},
+{"vredmaxu.vs",0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDMAXUVS, MASK_VREDMAXUVS, match_opcode, 0},
+{"vredmax.vs", 0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDMAXVS, MASK_VREDMAXVS, match_opcode, 0},
+{"vredminu.vs",0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDMINUVS, MASK_VREDMINUVS, match_opcode, 0},
+{"vredmin.vs", 0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDMINVS, MASK_VREDMINVS, match_opcode, 0},
+{"vredand.vs", 0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDANDVS, MASK_VREDANDVS, match_opcode, 0},
+{"vredor.vs",  0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDORVS, MASK_VREDORVS, match_opcode, 0},
+{"vredxor.vs", 0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VREDXORVS, MASK_VREDXORVS, match_opcode, 0},
 
-{"vwredsumu.vs",0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VWREDSUMUVV, MASK_VWREDSUMUVV, match_opcode, 0},
-{"vwredsum.vs",0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VWREDSUMVV, MASK_VWREDSUMVV, match_opcode, 0},
+{"vwredsumu.vs",0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VWREDSUMUVS, MASK_VWREDSUMUVS, match_opcode, 0},
+{"vwredsum.vs",0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VWREDSUMVS, MASK_VWREDSUMVS, match_opcode, 0},
 
-{"vfredosum.vs",0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFREDOSUMV, MASK_VFREDOSUMV, match_opcode, 0},
-{"vfredsum.vs", 0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFREDSUMV, MASK_VFREDSUMV, match_opcode, 0},
-{"vfredmax.vs", 0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFREDMAXV, MASK_VFREDMAXV, match_opcode, 0},
-{"vfredmin.vs", 0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFREDMINV, MASK_VFREDMINV, match_opcode, 0},
+{"vfredosum.vs",0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFREDOSUMVS, MASK_VFREDOSUMVS, match_opcode, 0},
+{"vfredsum.vs", 0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFREDSUMVS, MASK_VFREDSUMVS, match_opcode, 0},
+{"vfredmax.vs", 0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFREDMAXVS, MASK_VFREDMAXVS, match_opcode, 0},
+{"vfredmin.vs", 0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFREDMINVS, MASK_VFREDMINVS, match_opcode, 0},
 
-{"vfwredosum.vs",0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFWREDOSUMV, MASK_VFWREDOSUMV, match_opcode, 0},
-{"vfwredsum.vs", 0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFWREDSUMV, MASK_VFWREDSUMV, match_opcode, 0},
+{"vfwredosum.vs",0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFWREDOSUMVS, MASK_VFWREDOSUMVS, match_opcode, 0},
+{"vfwredsum.vs", 0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFWREDSUMVS, MASK_VFWREDSUMVS, match_opcode, 0},
 
+{"vmmv.m",     0, INSN_CLASS_V, "Vd,Vu", MATCH_VMANDMM, MASK_VMANDMM, match_vs1_eq_vs2, INSN_ALIAS},
 {"vmcpy.m",    0, INSN_CLASS_V, "Vd,Vu", MATCH_VMANDMM, MASK_VMANDMM, match_vs1_eq_vs2, INSN_ALIAS},
 {"vmclr.m",    0, INSN_CLASS_V, "Vv", MATCH_VMXORMM, MASK_VMXORMM, match_vd_eq_vs1_eq_vs2, INSN_ALIAS},
 {"vmset.m",    0, INSN_CLASS_V, "Vv", MATCH_VMXNORMM, MASK_VMXNORMM, match_vd_eq_vs1_eq_vs2, INSN_ALIAS},
@@ -1779,19 +1982,21 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vfmv.f.s",   0, INSN_CLASS_V_AND_F, "D,Vt", MATCH_VFMVFS, MASK_VFMVFS, match_opcode, 0},
 {"vfmv.s.f",   0, INSN_CLASS_V_AND_F, "Vd,S", MATCH_VFMVSF, MASK_VFMVSF, match_opcode, 0},
 
-{"vslideup.vx",0, INSN_CLASS_V, "Vd,Vt,sVm", MATCH_VSLIDEUPVX, MASK_VSLIDEUPVX, match_vd_neq_vs2_neq_vm, 0},
-{"vslideup.vi",0, INSN_CLASS_V, "Vd,Vt,VjVm", MATCH_VSLIDEUPVI, MASK_VSLIDEUPVI, match_vd_neq_vs2_neq_vm, 0},
+{"vslideup.vx",0, INSN_CLASS_V, "Vd,Vt,sVm", MATCH_VSLIDEUPVX, MASK_VSLIDEUPVX, match_vd_neq_vs2, 0},
+{"vslideup.vi",0, INSN_CLASS_V, "Vd,Vt,VjVm", MATCH_VSLIDEUPVI, MASK_VSLIDEUPVI, match_vd_neq_vs2, 0},
 {"vslidedown.vx",0,INSN_CLASS_V, "Vd,Vt,sVm", MATCH_VSLIDEDOWNVX, MASK_VSLIDEDOWNVX, match_opcode, 0},
 {"vslidedown.vi",0,INSN_CLASS_V, "Vd,Vt,VjVm", MATCH_VSLIDEDOWNVI, MASK_VSLIDEDOWNVI, match_opcode, 0},
 
-{"vslide1up.vx",0 ,INSN_CLASS_V, "Vd,Vt,sVm", MATCH_VSLIDE1UPVX, MASK_VSLIDE1UPVX, match_vd_neq_vs2_neq_vm, 0},
-{"vslide1down.vx",0,INSN_CLASS_V, "Vd,Vt,sVm", MATCH_VSLIDE1DOWNVX, MASK_VSLIDE1DOWNVX, match_opcode, 0},
+{"vslide1up.vx",    0, INSN_CLASS_V, "Vd,Vt,sVm", MATCH_VSLIDE1UPVX, MASK_VSLIDE1UPVX, match_vd_neq_vs2, 0},
+{"vslide1down.vx",  0, INSN_CLASS_V, "Vd,Vt,sVm", MATCH_VSLIDE1DOWNVX, MASK_VSLIDE1DOWNVX, match_opcode, 0},
+{"vfslide1up.vf",   0, INSN_CLASS_V_AND_F, "Vd,Vt,SVm", MATCH_VFSLIDE1UPVF, MASK_VFSLIDE1UPVF, match_vd_neq_vs2, 0},
+{"vfslide1down.vf", 0, INSN_CLASS_V_AND_F, "Vd,Vt,SVm", MATCH_VFSLIDE1DOWNVF, MASK_VFSLIDE1DOWNVF, match_opcode, 0},
 
 {"vrgather.vv",0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VRGATHERVV, MASK_VRGATHERVV, match_vd_neq_vs1_neq_vs2_neq_vm, 0},
 {"vrgather.vx",0, INSN_CLASS_V, "Vd,Vt,sVm", MATCH_VRGATHERVX, MASK_VRGATHERVX, match_vd_neq_vs2_neq_vm, 0},
 {"vrgather.vi",0, INSN_CLASS_V, "Vd,Vt,VjVm", MATCH_VRGATHERVI, MASK_VRGATHERVI, match_vd_neq_vs2_neq_vm, 0},
 
-{"vcompress.vm",0, INSN_CLASS_V, "Vd,Vt,Vs", MATCH_VCOMPRESSV, MASK_VCOMPRESSV, match_vd_neq_vs1_neq_vs2_neq_vm, 0},
+{"vcompress.vm",0, INSN_CLASS_V, "Vd,Vt,Vs", MATCH_VCOMPRESSVM, MASK_VCOMPRESSVM, match_vd_neq_vs1_neq_vs2_neq_vm, 0},
 
 {"vmv1r.v",    0, INSN_CLASS_V, "Vd,Vt", MATCH_VMV1RV, MASK_VMV1RV, match_vmv_nf_rv, 0},
 {"vmv2r.v",    0, INSN_CLASS_V, "Vd,Vt", MATCH_VMV2RV, MASK_VMV2RV, match_vmv_nf_rv, 0},

@@ -379,17 +379,22 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	    case 'c':
 	      {
 		int imm = EXTRACT_RVV_VC_IMM (l);
-		unsigned int imm_vlmul = EXTRACT_OPERAND (VLMUL, imm);
+		unsigned int imm_vlmul = EXTRACT_VLMUL (imm);
 		unsigned int imm_vsew = EXTRACT_OPERAND (VSEW, imm);
 		unsigned int imm_vediv = EXTRACT_OPERAND (VEDIV, imm);
+		unsigned int imm_vta = EXTRACT_OPERAND (VTA, imm);
+		unsigned int imm_vma = EXTRACT_OPERAND (VMA, imm);
 		unsigned int imm_vtype_res = EXTRACT_OPERAND (VTYPE_RES, imm);
 
 		if (imm_vsew < ARRAY_SIZE (riscv_vsew)
-		    && imm_vlmul < ARRAY_SIZE (riscv_vlen)
+		    && imm_vlmul < ARRAY_SIZE (riscv_vlmul)
 		    && imm_vediv < ARRAY_SIZE (riscv_vediv)
+		    && imm_vta < ARRAY_SIZE (riscv_vta)
+		    && imm_vma < ARRAY_SIZE (riscv_vma)
 		    && ! imm_vtype_res)
-		  print (info->stream, "%s,%s,%s", riscv_vsew[imm_vsew],
-			 riscv_vlen[imm_vlmul], riscv_vediv[imm_vediv]);
+		  print (info->stream, "%s,%s,%s,%s,%s", riscv_vsew[imm_vsew],
+			 riscv_vlmul[imm_vlmul], riscv_vta[imm_vta],
+			 riscv_vma[imm_vma], riscv_vediv[imm_vediv]);
 		else
 		  print (info->stream, "%d", imm);
 	      }
@@ -507,7 +512,7 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
       for (; op->name; op++)
 	{
 	  /* Does the opcode match?  */
-	  if (! (op->match_func) (op, word, FALSE))
+	  if (! (op->match_func) (op, word, 0))
 	    continue;
 	  /* Is this a pseudo-instruction and may we print it as such?  */
 	  if (no_aliases && (op->pinfo & INSN_ALIAS))

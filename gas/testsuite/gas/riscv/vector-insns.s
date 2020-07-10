@@ -5,1165 +5,1959 @@
 	vsetvli a0, a1, e256, m8, d8
 	vsetvli a0, a1, e512, m8, d8
 	vsetvli a0, a1, e1024, m8, d8
+	vsetvli a0, a1, e1024, m1, d8
+	vsetvli a0, a1, e1024, mf2, d8
+	vsetvli a0, a1, e512, mf4, d2
+	vsetvli a0, a1, e256, mf8, d4
+	vsetvli a0, a1, e256, m2, ta, d4
+	vsetvli a0, a1, e256, m2, ma, d4
+	vsetvli a0, a1, e256, m2, tu, d4
+	vsetvli a0, a1, e256, m2, mu, d4
+	vsetvli a0, a1, e256, m2, ta,ma, d4
+	vsetvli a0, a1, e256, m2, tu,ma, d4
+	vsetvli a0, a1, e256, m2, ta,mu, d4
+	vsetvli a0, a1, e256, m2, tu,mu, d4
 
-	vlb.v v4, (a0)
-	vlb.v v4, 0(a0)
-	vlb.v v4, (a0), v0.t
-	vlh.v v4, (a0)
-	vlh.v v4, 0(a0)
-	vlh.v v4, (a0), v0.t
-	vlw.v v4, (a0)
-	vlw.v v4, 0(a0)
-	vlw.v v4, (a0), v0.t
-	vlbu.v v4, (a0)
-	vlbu.v v4, 0(a0)
-	vlbu.v v4, (a0), v0.t
-	vlhu.v v4, (a0)
-	vlhu.v v4, 0(a0)
-	vlhu.v v4, (a0), v0.t
-	vlwu.v v4, (a0)
-	vlwu.v v4, 0(a0)
-	vlwu.v v4, (a0), v0.t
-	vle.v v4, (a0)
-	vle.v v4, 0(a0)
-	vle.v v4, (a0), v0.t
-	vsb.v v4, (a0)
-	vsb.v v4, 0(a0)
-	vsb.v v4, (a0), v0.t
-	vsh.v v4, (a0)
-	vsh.v v4, 0(a0)
-	vsh.v v4, (a0), v0.t
-	vsw.v v4, (a0)
-	vsw.v v4, 0(a0)
-	vsw.v v4, (a0), v0.t
-	vse.v v4, (a0)
-	vse.v v4, 0(a0)
-	vse.v v4, (a0), v0.t
+	vle8.v v4, (a0)
+	vle8.v v4, 0(a0)
+	vle8.v v4, (a0), v0.t
+	vse8.v v4, (a0)
+	vse8.v v4, 0(a0)
+	vse8.v v4, (a0), v0.t
 
-	vlsb.v v4, (a0), a1
-	vlsb.v v4, 0(a0), a1
-	vlsb.v v4, (a0), a1, v0.t
-	vlsh.v v4, (a0), a1
-	vlsh.v v4, 0(a0), a1
-	vlsh.v v4, (a0), a1, v0.t
-	vlsw.v v4, (a0), a1
-	vlsw.v v4, 0(a0), a1
-	vlsw.v v4, (a0), a1, v0.t
-	vlsbu.v v4, (a0), a1
-	vlsbu.v v4, 0(a0), a1
-	vlsbu.v v4, (a0), a1, v0.t
-	vlshu.v v4, (a0), a1
-	vlshu.v v4, 0(a0), a1
-	vlshu.v v4, (a0), a1, v0.t
-	vlswu.v v4, (a0), a1
-	vlswu.v v4, 0(a0), a1
-	vlswu.v v4, (a0), a1, v0.t
-	vlse.v v4, (a0), a1
-	vlse.v v4, 0(a0), a1
-	vlse.v v4, (a0), a1, v0.t
-	vssb.v v4, (a0), a1
-	vssb.v v4, 0(a0), a1
-	vssb.v v4, (a0), a1, v0.t
-	vssh.v v4, (a0), a1
-	vssh.v v4, 0(a0), a1
-	vssh.v v4, (a0), a1, v0.t
-	vssw.v v4, (a0), a1
-	vssw.v v4, 0(a0), a1
-	vssw.v v4, (a0), a1, v0.t
-	vsse.v v4, (a0), a1
-	vsse.v v4, 0(a0), a1
-	vsse.v v4, (a0), a1, v0.t
+	vle16.v v4, (a0)
+	vle16.v v4, 0(a0)
+	vle16.v v4, (a0), v0.t
+	vse16.v v4, (a0)
+	vse16.v v4, 0(a0)
+	vse16.v v4, (a0), v0.t
 
-	vlxb.v v4, (a0), v12
-	vlxb.v v4, 0(a0), v12
-	vlxb.v v4, (a0), v12, v0.t
-	vlxh.v v4, (a0), v12
-	vlxh.v v4, 0(a0), v12
-	vlxh.v v4, (a0), v12, v0.t
-	vlxw.v v4, (a0), v12
-	vlxw.v v4, 0(a0), v12
-	vlxw.v v4, (a0), v12, v0.t
-	vlxbu.v v4, (a0), v12
-	vlxbu.v v4, 0(a0), v12
-	vlxbu.v v4, (a0), v12, v0.t
-	vlxhu.v v4, (a0), v12
-	vlxhu.v v4, 0(a0), v12
-	vlxhu.v v4, (a0), v12, v0.t
-	vlxwu.v v4, (a0), v12
-	vlxwu.v v4, 0(a0), v12
-	vlxwu.v v4, (a0), v12, v0.t
-	vlxe.v v4, (a0), v12
-	vlxe.v v4, 0(a0), v12
-	vlxe.v v4, (a0), v12, v0.t
-	vsxb.v v4, (a0), v12
-	vsxb.v v4, 0(a0), v12
-	vsxb.v v4, (a0), v12, v0.t
-	vsxh.v v4, (a0), v12
-	vsxh.v v4, 0(a0), v12
-	vsxh.v v4, (a0), v12, v0.t
-	vsxw.v v4, (a0), v12
-	vsxw.v v4, 0(a0), v12
-	vsxw.v v4, (a0), v12, v0.t
-	vsxe.v v4, (a0), v12
-	vsxe.v v4, 0(a0), v12
-	vsxe.v v4, (a0), v12, v0.t
-	vsuxb.v v4, (a0), v12
-	vsuxb.v v4, 0(a0), v12
-	vsuxb.v v4, (a0), v12, v0.t
-	vsuxh.v v4, (a0), v12
-	vsuxh.v v4, 0(a0), v12
-	vsuxh.v v4, (a0), v12, v0.t
-	vsuxw.v v4, (a0), v12
-	vsuxw.v v4, 0(a0), v12
-	vsuxw.v v4, (a0), v12, v0.t
-	vsuxe.v v4, (a0), v12
-	vsuxe.v v4, 0(a0), v12
-	vsuxe.v v4, (a0), v12, v0.t
+	vle32.v v4, (a0)
+	vle32.v v4, 0(a0)
+	vle32.v v4, (a0), v0.t
+	vse32.v v4, (a0)
+	vse32.v v4, 0(a0)
+	vse32.v v4, (a0), v0.t
 
-	vlbff.v v4, (a0)
-	vlbff.v v4, 0(a0)
-	vlbff.v v4, (a0), v0.t
-	vlhff.v v4, (a0)
-	vlhff.v v4, 0(a0)
-	vlhff.v v4, (a0), v0.t
-	vlwff.v v4, (a0)
-	vlwff.v v4, 0(a0)
-	vlwff.v v4, (a0), v0.t
-	vlbuff.v v4, (a0)
-	vlbuff.v v4, 0(a0)
-	vlbuff.v v4, (a0), v0.t
-	vlhuff.v v4, (a0)
-	vlhuff.v v4, 0(a0)
-	vlhuff.v v4, (a0), v0.t
-	vlwuff.v v4, (a0)
-	vlwuff.v v4, 0(a0)
-	vlwuff.v v4, (a0), v0.t
-	vleff.v v4, (a0)
-	vleff.v v4, 0(a0)
-	vleff.v v4, (a0), v0.t
+	vle64.v v4, (a0)
+	vle64.v v4, 0(a0)
+	vle64.v v4, (a0), v0.t
+	vse64.v v4, (a0)
+	vse64.v v4, 0(a0)
+	vse64.v v4, (a0), v0.t
 
-	vlseg2b.v v4, (a0)
-	vlseg2b.v v4, 0(a0)
-	vlseg2b.v v4, (a0), v0.t
-	vlseg2h.v v4, (a0)
-	vlseg2h.v v4, 0(a0)
-	vlseg2h.v v4, (a0), v0.t
-	vlseg2w.v v4, (a0)
-	vlseg2w.v v4, 0(a0)
-	vlseg2w.v v4, (a0), v0.t
-	vlseg2bu.v v4, (a0)
-	vlseg2bu.v v4, 0(a0)
-	vlseg2bu.v v4, (a0), v0.t
-	vlseg2hu.v v4, (a0)
-	vlseg2hu.v v4, 0(a0)
-	vlseg2hu.v v4, (a0), v0.t
-	vlseg2wu.v v4, (a0)
-	vlseg2wu.v v4, 0(a0)
-	vlseg2wu.v v4, (a0), v0.t
-	vlseg2e.v v4, (a0)
-	vlseg2e.v v4, 0(a0)
-	vlseg2e.v v4, (a0), v0.t
-	vsseg2b.v v4, (a0)
-	vsseg2b.v v4, 0(a0)
-	vsseg2b.v v4, (a0), v0.t
-	vsseg2h.v v4, (a0)
-	vsseg2h.v v4, 0(a0)
-	vsseg2h.v v4, (a0), v0.t
-	vsseg2w.v v4, (a0)
-	vsseg2w.v v4, 0(a0)
-	vsseg2w.v v4, (a0), v0.t
-	vsseg2e.v v4, (a0)
-	vsseg2e.v v4, 0(a0)
-	vsseg2e.v v4, (a0), v0.t
+	vle128.v v4, (a0)
+	vle128.v v4, 0(a0)
+	vle128.v v4, (a0), v0.t
+	vse128.v v4, (a0)
+	vse128.v v4, 0(a0)
+	vse128.v v4, (a0), v0.t
 
-	vlseg3b.v v4, (a0)
-	vlseg3b.v v4, 0(a0)
-	vlseg3b.v v4, (a0), v0.t
-	vlseg3h.v v4, (a0)
-	vlseg3h.v v4, 0(a0)
-	vlseg3h.v v4, (a0), v0.t
-	vlseg3w.v v4, (a0)
-	vlseg3w.v v4, 0(a0)
-	vlseg3w.v v4, (a0), v0.t
-	vlseg3bu.v v4, (a0)
-	vlseg3bu.v v4, 0(a0)
-	vlseg3bu.v v4, (a0), v0.t
-	vlseg3hu.v v4, (a0)
-	vlseg3hu.v v4, 0(a0)
-	vlseg3hu.v v4, (a0), v0.t
-	vlseg3wu.v v4, (a0)
-	vlseg3wu.v v4, 0(a0)
-	vlseg3wu.v v4, (a0), v0.t
-	vlseg3e.v v4, (a0)
-	vlseg3e.v v4, 0(a0)
-	vlseg3e.v v4, (a0), v0.t
-	vsseg3b.v v4, (a0)
-	vsseg3b.v v4, 0(a0)
-	vsseg3b.v v4, (a0), v0.t
-	vsseg3h.v v4, (a0)
-	vsseg3h.v v4, 0(a0)
-	vsseg3h.v v4, (a0), v0.t
-	vsseg3w.v v4, (a0)
-	vsseg3w.v v4, 0(a0)
-	vsseg3w.v v4, (a0), v0.t
-	vsseg3e.v v4, (a0)
-	vsseg3e.v v4, 0(a0)
-	vsseg3e.v v4, (a0), v0.t
+	vle256.v v4, (a0)
+	vle256.v v4, 0(a0)
+	vle256.v v4, (a0), v0.t
+	vse256.v v4, (a0)
+	vse256.v v4, 0(a0)
+	vse256.v v4, (a0), v0.t
 
-	vlseg4b.v v4, (a0)
-	vlseg4b.v v4, 0(a0)
-	vlseg4b.v v4, (a0), v0.t
-	vlseg4h.v v4, (a0)
-	vlseg4h.v v4, 0(a0)
-	vlseg4h.v v4, (a0), v0.t
-	vlseg4w.v v4, (a0)
-	vlseg4w.v v4, 0(a0)
-	vlseg4w.v v4, (a0), v0.t
-	vlseg4bu.v v4, (a0)
-	vlseg4bu.v v4, 0(a0)
-	vlseg4bu.v v4, (a0), v0.t
-	vlseg4hu.v v4, (a0)
-	vlseg4hu.v v4, 0(a0)
-	vlseg4hu.v v4, (a0), v0.t
-	vlseg4wu.v v4, (a0)
-	vlseg4wu.v v4, 0(a0)
-	vlseg4wu.v v4, (a0), v0.t
-	vlseg4e.v v4, (a0)
-	vlseg4e.v v4, 0(a0)
-	vlseg4e.v v4, (a0), v0.t
-	vsseg4b.v v4, (a0)
-	vsseg4b.v v4, 0(a0)
-	vsseg4b.v v4, (a0), v0.t
-	vsseg4h.v v4, (a0)
-	vsseg4h.v v4, 0(a0)
-	vsseg4h.v v4, (a0), v0.t
-	vsseg4w.v v4, (a0)
-	vsseg4w.v v4, 0(a0)
-	vsseg4w.v v4, (a0), v0.t
-	vsseg4e.v v4, (a0)
-	vsseg4e.v v4, 0(a0)
-	vsseg4e.v v4, (a0), v0.t
+	vle512.v v4, (a0)
+	vle512.v v4, 0(a0)
+	vle512.v v4, (a0), v0.t
+	vse512.v v4, (a0)
+	vse512.v v4, 0(a0)
+	vse512.v v4, (a0), v0.t
 
-	vlseg5b.v v4, (a0)
-	vlseg5b.v v4, 0(a0)
-	vlseg5b.v v4, (a0), v0.t
-	vlseg5h.v v4, (a0)
-	vlseg5h.v v4, 0(a0)
-	vlseg5h.v v4, (a0), v0.t
-	vlseg5w.v v4, (a0)
-	vlseg5w.v v4, 0(a0)
-	vlseg5w.v v4, (a0), v0.t
-	vlseg5bu.v v4, (a0)
-	vlseg5bu.v v4, 0(a0)
-	vlseg5bu.v v4, (a0), v0.t
-	vlseg5hu.v v4, (a0)
-	vlseg5hu.v v4, 0(a0)
-	vlseg5hu.v v4, (a0), v0.t
-	vlseg5wu.v v4, (a0)
-	vlseg5wu.v v4, 0(a0)
-	vlseg5wu.v v4, (a0), v0.t
-	vlseg5e.v v4, (a0)
-	vlseg5e.v v4, 0(a0)
-	vlseg5e.v v4, (a0), v0.t
-	vsseg5b.v v4, (a0)
-	vsseg5b.v v4, 0(a0)
-	vsseg5b.v v4, (a0), v0.t
-	vsseg5h.v v4, (a0)
-	vsseg5h.v v4, 0(a0)
-	vsseg5h.v v4, (a0), v0.t
-	vsseg5w.v v4, (a0)
-	vsseg5w.v v4, 0(a0)
-	vsseg5w.v v4, (a0), v0.t
-	vsseg5e.v v4, (a0)
-	vsseg5e.v v4, 0(a0)
-	vsseg5e.v v4, (a0), v0.t
+	vle1024.v v4, (a0)
+	vle1024.v v4, 0(a0)
+	vle1024.v v4, (a0), v0.t
+	vse1024.v v4, (a0)
+	vse1024.v v4, 0(a0)
+	vse1024.v v4, (a0), v0.t
 
-	vlseg6b.v v4, (a0)
-	vlseg6b.v v4, 0(a0)
-	vlseg6b.v v4, (a0), v0.t
-	vlseg6h.v v4, (a0)
-	vlseg6h.v v4, 0(a0)
-	vlseg6h.v v4, (a0), v0.t
-	vlseg6w.v v4, (a0)
-	vlseg6w.v v4, 0(a0)
-	vlseg6w.v v4, (a0), v0.t
-	vlseg6bu.v v4, (a0)
-	vlseg6bu.v v4, 0(a0)
-	vlseg6bu.v v4, (a0), v0.t
-	vlseg6hu.v v4, (a0)
-	vlseg6hu.v v4, 0(a0)
-	vlseg6hu.v v4, (a0), v0.t
-	vlseg6wu.v v4, (a0)
-	vlseg6wu.v v4, 0(a0)
-	vlseg6wu.v v4, (a0), v0.t
-	vlseg6e.v v4, (a0)
-	vlseg6e.v v4, 0(a0)
-	vlseg6e.v v4, (a0), v0.t
-	vsseg6b.v v4, (a0)
-	vsseg6b.v v4, 0(a0)
-	vsseg6b.v v4, (a0), v0.t
-	vsseg6h.v v4, (a0)
-	vsseg6h.v v4, 0(a0)
-	vsseg6h.v v4, (a0), v0.t
-	vsseg6w.v v4, (a0)
-	vsseg6w.v v4, 0(a0)
-	vsseg6w.v v4, (a0), v0.t
-	vsseg6e.v v4, (a0)
-	vsseg6e.v v4, 0(a0)
-	vsseg6e.v v4, (a0), v0.t
+	vlse8.v v4, (a0), a1
+	vlse8.v v4, 0(a0), a1
+	vlse8.v v4, (a0), a1, v0.t
+	vsse8.v v4, (a0), a1
+	vsse8.v v4, 0(a0), a1
+	vsse8.v v4, (a0), a1, v0.t
 
-	vlseg7b.v v4, (a0)
-	vlseg7b.v v4, 0(a0)
-	vlseg7b.v v4, (a0), v0.t
-	vlseg7h.v v4, (a0)
-	vlseg7h.v v4, 0(a0)
-	vlseg7h.v v4, (a0), v0.t
-	vlseg7w.v v4, (a0)
-	vlseg7w.v v4, 0(a0)
-	vlseg7w.v v4, (a0), v0.t
-	vlseg7bu.v v4, (a0)
-	vlseg7bu.v v4, 0(a0)
-	vlseg7bu.v v4, (a0), v0.t
-	vlseg7hu.v v4, (a0)
-	vlseg7hu.v v4, 0(a0)
-	vlseg7hu.v v4, (a0), v0.t
-	vlseg7wu.v v4, (a0)
-	vlseg7wu.v v4, 0(a0)
-	vlseg7wu.v v4, (a0), v0.t
-	vlseg7e.v v4, (a0)
-	vlseg7e.v v4, 0(a0)
-	vlseg7e.v v4, (a0), v0.t
-	vsseg7b.v v4, (a0)
-	vsseg7b.v v4, 0(a0)
-	vsseg7b.v v4, (a0), v0.t
-	vsseg7h.v v4, (a0)
-	vsseg7h.v v4, 0(a0)
-	vsseg7h.v v4, (a0), v0.t
-	vsseg7w.v v4, (a0)
-	vsseg7w.v v4, 0(a0)
-	vsseg7w.v v4, (a0), v0.t
-	vsseg7e.v v4, (a0)
-	vsseg7e.v v4, 0(a0)
-	vsseg7e.v v4, (a0), v0.t
+	vlse16.v v4, (a0), a1
+	vlse16.v v4, 0(a0), a1
+	vlse16.v v4, (a0), a1, v0.t
+	vsse16.v v4, (a0), a1
+	vsse16.v v4, 0(a0), a1
+	vsse16.v v4, (a0), a1, v0.t
 
-	vlseg8b.v v4, (a0)
-	vlseg8b.v v4, 0(a0)
-	vlseg8b.v v4, (a0), v0.t
-	vlseg8h.v v4, (a0)
-	vlseg8h.v v4, 0(a0)
-	vlseg8h.v v4, (a0), v0.t
-	vlseg8w.v v4, (a0)
-	vlseg8w.v v4, 0(a0)
-	vlseg8w.v v4, (a0), v0.t
-	vlseg8bu.v v4, (a0)
-	vlseg8bu.v v4, 0(a0)
-	vlseg8bu.v v4, (a0), v0.t
-	vlseg8hu.v v4, (a0)
-	vlseg8hu.v v4, 0(a0)
-	vlseg8hu.v v4, (a0), v0.t
-	vlseg8wu.v v4, (a0)
-	vlseg8wu.v v4, 0(a0)
-	vlseg8wu.v v4, (a0), v0.t
-	vlseg8e.v v4, (a0)
-	vlseg8e.v v4, 0(a0)
-	vlseg8e.v v4, (a0), v0.t
-	vsseg8b.v v4, (a0)
-	vsseg8b.v v4, 0(a0)
-	vsseg8b.v v4, (a0), v0.t
-	vsseg8h.v v4, (a0)
-	vsseg8h.v v4, 0(a0)
-	vsseg8h.v v4, (a0), v0.t
-	vsseg8w.v v4, (a0)
-	vsseg8w.v v4, 0(a0)
-	vsseg8w.v v4, (a0), v0.t
-	vsseg8e.v v4, (a0)
-	vsseg8e.v v4, 0(a0)
-	vsseg8e.v v4, (a0), v0.t
+	vlse32.v v4, (a0), a1
+	vlse32.v v4, 0(a0), a1
+	vlse32.v v4, (a0), a1, v0.t
+	vsse32.v v4, (a0), a1
+	vsse32.v v4, 0(a0), a1
+	vsse32.v v4, (a0), a1, v0.t
 
-	vlsseg2b.v v4, (a0), a1
-	vlsseg2b.v v4, 0(a0), a1
-	vlsseg2b.v v4, (a0), a1, v0.t
-	vlsseg2h.v v4, (a0), a1
-	vlsseg2h.v v4, 0(a0), a1
-	vlsseg2h.v v4, (a0), a1, v0.t
-	vlsseg2w.v v4, (a0), a1
-	vlsseg2w.v v4, 0(a0), a1
-	vlsseg2w.v v4, (a0), a1, v0.t
-	vlsseg2bu.v v4, (a0), a1
-	vlsseg2bu.v v4, 0(a0), a1
-	vlsseg2bu.v v4, (a0), a1, v0.t
-	vlsseg2hu.v v4, (a0), a1
-	vlsseg2hu.v v4, 0(a0), a1
-	vlsseg2hu.v v4, (a0), a1, v0.t
-	vlsseg2wu.v v4, (a0), a1
-	vlsseg2wu.v v4, 0(a0), a1
-	vlsseg2wu.v v4, (a0), a1, v0.t
-	vlsseg2e.v v4, (a0), a1
-	vlsseg2e.v v4, 0(a0), a1
-	vlsseg2e.v v4, (a0), a1, v0.t
-	vssseg2b.v v4, (a0), a1
-	vssseg2b.v v4, 0(a0), a1
-	vssseg2b.v v4, (a0), a1, v0.t
-	vssseg2h.v v4, (a0), a1
-	vssseg2h.v v4, 0(a0), a1
-	vssseg2h.v v4, (a0), a1, v0.t
-	vssseg2w.v v4, (a0), a1
-	vssseg2w.v v4, 0(a0), a1
-	vssseg2w.v v4, (a0), a1, v0.t
-	vssseg2e.v v4, (a0), a1
-	vssseg2e.v v4, 0(a0), a1
-	vssseg2e.v v4, (a0), a1, v0.t
+	vlse64.v v4, (a0), a1
+	vlse64.v v4, 0(a0), a1
+	vlse64.v v4, (a0), a1, v0.t
+	vsse64.v v4, (a0), a1
+	vsse64.v v4, 0(a0), a1
+	vsse64.v v4, (a0), a1, v0.t
 
-	vlsseg3b.v v4, (a0), a1
-	vlsseg3b.v v4, 0(a0), a1
-	vlsseg3b.v v4, (a0), a1, v0.t
-	vlsseg3h.v v4, (a0), a1
-	vlsseg3h.v v4, 0(a0), a1
-	vlsseg3h.v v4, (a0), a1, v0.t
-	vlsseg3w.v v4, (a0), a1
-	vlsseg3w.v v4, 0(a0), a1
-	vlsseg3w.v v4, (a0), a1, v0.t
-	vlsseg3bu.v v4, (a0), a1
-	vlsseg3bu.v v4, 0(a0), a1
-	vlsseg3bu.v v4, (a0), a1, v0.t
-	vlsseg3hu.v v4, (a0), a1
-	vlsseg3hu.v v4, 0(a0), a1
-	vlsseg3hu.v v4, (a0), a1, v0.t
-	vlsseg3wu.v v4, (a0), a1
-	vlsseg3wu.v v4, 0(a0), a1
-	vlsseg3wu.v v4, (a0), a1, v0.t
-	vlsseg3e.v v4, (a0), a1
-	vlsseg3e.v v4, 0(a0), a1
-	vlsseg3e.v v4, (a0), a1, v0.t
-	vssseg3b.v v4, (a0), a1
-	vssseg3b.v v4, 0(a0), a1
-	vssseg3b.v v4, (a0), a1, v0.t
-	vssseg3h.v v4, (a0), a1
-	vssseg3h.v v4, 0(a0), a1
-	vssseg3h.v v4, (a0), a1, v0.t
-	vssseg3w.v v4, (a0), a1
-	vssseg3w.v v4, 0(a0), a1
-	vssseg3w.v v4, (a0), a1, v0.t
-	vssseg3e.v v4, (a0), a1
-	vssseg3e.v v4, 0(a0), a1
-	vssseg3e.v v4, (a0), a1, v0.t
+	vlse128.v v4, (a0), a1
+	vlse128.v v4, 0(a0), a1
+	vlse128.v v4, (a0), a1, v0.t
+	vsse128.v v4, (a0), a1
+	vsse128.v v4, 0(a0), a1
+	vsse128.v v4, (a0), a1, v0.t
 
-	vlsseg4b.v v4, (a0), a1
-	vlsseg4b.v v4, 0(a0), a1
-	vlsseg4b.v v4, (a0), a1, v0.t
-	vlsseg4h.v v4, (a0), a1
-	vlsseg4h.v v4, 0(a0), a1
-	vlsseg4h.v v4, (a0), a1, v0.t
-	vlsseg4w.v v4, (a0), a1
-	vlsseg4w.v v4, 0(a0), a1
-	vlsseg4w.v v4, (a0), a1, v0.t
-	vlsseg4bu.v v4, (a0), a1
-	vlsseg4bu.v v4, 0(a0), a1
-	vlsseg4bu.v v4, (a0), a1, v0.t
-	vlsseg4hu.v v4, (a0), a1
-	vlsseg4hu.v v4, 0(a0), a1
-	vlsseg4hu.v v4, (a0), a1, v0.t
-	vlsseg4wu.v v4, (a0), a1
-	vlsseg4wu.v v4, 0(a0), a1
-	vlsseg4wu.v v4, (a0), a1, v0.t
-	vlsseg4e.v v4, (a0), a1
-	vlsseg4e.v v4, 0(a0), a1
-	vlsseg4e.v v4, (a0), a1, v0.t
-	vssseg4b.v v4, (a0), a1
-	vssseg4b.v v4, 0(a0), a1
-	vssseg4b.v v4, (a0), a1, v0.t
-	vssseg4h.v v4, (a0), a1
-	vssseg4h.v v4, 0(a0), a1
-	vssseg4h.v v4, (a0), a1, v0.t
-	vssseg4w.v v4, (a0), a1
-	vssseg4w.v v4, 0(a0), a1
-	vssseg4w.v v4, (a0), a1, v0.t
-	vssseg4e.v v4, (a0), a1
-	vssseg4e.v v4, 0(a0), a1
-	vssseg4e.v v4, (a0), a1, v0.t
+	vlse256.v v4, (a0), a1
+	vlse256.v v4, 0(a0), a1
+	vlse256.v v4, (a0), a1, v0.t
+	vsse256.v v4, (a0), a1
+	vsse256.v v4, 0(a0), a1
+	vsse256.v v4, (a0), a1, v0.t
 
-	vlsseg5b.v v4, (a0), a1
-	vlsseg5b.v v4, 0(a0), a1
-	vlsseg5b.v v4, (a0), a1, v0.t
-	vlsseg5h.v v4, (a0), a1
-	vlsseg5h.v v4, 0(a0), a1
-	vlsseg5h.v v4, (a0), a1, v0.t
-	vlsseg5w.v v4, (a0), a1
-	vlsseg5w.v v4, 0(a0), a1
-	vlsseg5w.v v4, (a0), a1, v0.t
-	vlsseg5bu.v v4, (a0), a1
-	vlsseg5bu.v v4, 0(a0), a1
-	vlsseg5bu.v v4, (a0), a1, v0.t
-	vlsseg5hu.v v4, (a0), a1
-	vlsseg5hu.v v4, 0(a0), a1
-	vlsseg5hu.v v4, (a0), a1, v0.t
-	vlsseg5wu.v v4, (a0), a1
-	vlsseg5wu.v v4, 0(a0), a1
-	vlsseg5wu.v v4, (a0), a1, v0.t
-	vlsseg5e.v v4, (a0), a1
-	vlsseg5e.v v4, 0(a0), a1
-	vlsseg5e.v v4, (a0), a1, v0.t
-	vssseg5b.v v4, (a0), a1
-	vssseg5b.v v4, 0(a0), a1
-	vssseg5b.v v4, (a0), a1, v0.t
-	vssseg5h.v v4, (a0), a1
-	vssseg5h.v v4, 0(a0), a1
-	vssseg5h.v v4, (a0), a1, v0.t
-	vssseg5w.v v4, (a0), a1
-	vssseg5w.v v4, 0(a0), a1
-	vssseg5w.v v4, (a0), a1, v0.t
-	vssseg5e.v v4, (a0), a1
-	vssseg5e.v v4, 0(a0), a1
-	vssseg5e.v v4, (a0), a1, v0.t
+	vlse512.v v4, (a0), a1
+	vlse512.v v4, 0(a0), a1
+	vlse512.v v4, (a0), a1, v0.t
+	vsse512.v v4, (a0), a1
+	vsse512.v v4, 0(a0), a1
+	vsse512.v v4, (a0), a1, v0.t
 
-	vlsseg6b.v v4, (a0), a1
-	vlsseg6b.v v4, 0(a0), a1
-	vlsseg6b.v v4, (a0), a1, v0.t
-	vlsseg6h.v v4, (a0), a1
-	vlsseg6h.v v4, 0(a0), a1
-	vlsseg6h.v v4, (a0), a1, v0.t
-	vlsseg6w.v v4, (a0), a1
-	vlsseg6w.v v4, 0(a0), a1
-	vlsseg6w.v v4, (a0), a1, v0.t
-	vlsseg6bu.v v4, (a0), a1
-	vlsseg6bu.v v4, 0(a0), a1
-	vlsseg6bu.v v4, (a0), a1, v0.t
-	vlsseg6hu.v v4, (a0), a1
-	vlsseg6hu.v v4, 0(a0), a1
-	vlsseg6hu.v v4, (a0), a1, v0.t
-	vlsseg6wu.v v4, (a0), a1
-	vlsseg6wu.v v4, 0(a0), a1
-	vlsseg6wu.v v4, (a0), a1, v0.t
-	vlsseg6e.v v4, (a0), a1
-	vlsseg6e.v v4, 0(a0), a1
-	vlsseg6e.v v4, (a0), a1, v0.t
-	vssseg6b.v v4, (a0), a1
-	vssseg6b.v v4, 0(a0), a1
-	vssseg6b.v v4, (a0), a1, v0.t
-	vssseg6h.v v4, (a0), a1
-	vssseg6h.v v4, 0(a0), a1
-	vssseg6h.v v4, (a0), a1, v0.t
-	vssseg6w.v v4, (a0), a1
-	vssseg6w.v v4, 0(a0), a1
-	vssseg6w.v v4, (a0), a1, v0.t
-	vssseg6e.v v4, (a0), a1
-	vssseg6e.v v4, 0(a0), a1
-	vssseg6e.v v4, (a0), a1, v0.t
+	vlse1024.v v4, (a0), a1
+	vlse1024.v v4, 0(a0), a1
+	vlse1024.v v4, (a0), a1, v0.t
+	vsse1024.v v4, (a0), a1
+	vsse1024.v v4, 0(a0), a1
+	vsse1024.v v4, (a0), a1, v0.t
 
-	vlsseg7b.v v4, (a0), a1
-	vlsseg7b.v v4, 0(a0), a1
-	vlsseg7b.v v4, (a0), a1, v0.t
-	vlsseg7h.v v4, (a0), a1
-	vlsseg7h.v v4, 0(a0), a1
-	vlsseg7h.v v4, (a0), a1, v0.t
-	vlsseg7w.v v4, (a0), a1
-	vlsseg7w.v v4, 0(a0), a1
-	vlsseg7w.v v4, (a0), a1, v0.t
-	vlsseg7bu.v v4, (a0), a1
-	vlsseg7bu.v v4, 0(a0), a1
-	vlsseg7bu.v v4, (a0), a1, v0.t
-	vlsseg7hu.v v4, (a0), a1
-	vlsseg7hu.v v4, 0(a0), a1
-	vlsseg7hu.v v4, (a0), a1, v0.t
-	vlsseg7wu.v v4, (a0), a1
-	vlsseg7wu.v v4, 0(a0), a1
-	vlsseg7wu.v v4, (a0), a1, v0.t
-	vlsseg7e.v v4, (a0), a1
-	vlsseg7e.v v4, 0(a0), a1
-	vlsseg7e.v v4, (a0), a1, v0.t
-	vssseg7b.v v4, (a0), a1
-	vssseg7b.v v4, 0(a0), a1
-	vssseg7b.v v4, (a0), a1, v0.t
-	vssseg7h.v v4, (a0), a1
-	vssseg7h.v v4, 0(a0), a1
-	vssseg7h.v v4, (a0), a1, v0.t
-	vssseg7w.v v4, (a0), a1
-	vssseg7w.v v4, 0(a0), a1
-	vssseg7w.v v4, (a0), a1, v0.t
-	vssseg7e.v v4, (a0), a1
-	vssseg7e.v v4, 0(a0), a1
-	vssseg7e.v v4, (a0), a1, v0.t
+	vlxei8.v v4, (a0), v12
+	vlxei8.v v4, 0(a0), v12
+	vlxei8.v v4, (a0), v12, v0.t
+	vsxei8.v v4, (a0), v12
+	vsxei8.v v4, 0(a0), v12
+	vsxei8.v v4, (a0), v12, v0.t
+	vsuxei8.v v4, (a0), v12
+	vsuxei8.v v4, 0(a0), v12
+	vsuxei8.v v4, (a0), v12, v0.t
 
-	vlsseg8b.v v4, (a0), a1
-	vlsseg8b.v v4, 0(a0), a1
-	vlsseg8b.v v4, (a0), a1, v0.t
-	vlsseg8h.v v4, (a0), a1
-	vlsseg8h.v v4, 0(a0), a1
-	vlsseg8h.v v4, (a0), a1, v0.t
-	vlsseg8w.v v4, (a0), a1
-	vlsseg8w.v v4, 0(a0), a1
-	vlsseg8w.v v4, (a0), a1, v0.t
-	vlsseg8bu.v v4, (a0), a1
-	vlsseg8bu.v v4, 0(a0), a1
-	vlsseg8bu.v v4, (a0), a1, v0.t
-	vlsseg8hu.v v4, (a0), a1
-	vlsseg8hu.v v4, 0(a0), a1
-	vlsseg8hu.v v4, (a0), a1, v0.t
-	vlsseg8wu.v v4, (a0), a1
-	vlsseg8wu.v v4, 0(a0), a1
-	vlsseg8wu.v v4, (a0), a1, v0.t
-	vlsseg8e.v v4, (a0), a1
-	vlsseg8e.v v4, 0(a0), a1
-	vlsseg8e.v v4, (a0), a1, v0.t
-	vssseg8b.v v4, (a0), a1
-	vssseg8b.v v4, 0(a0), a1
-	vssseg8b.v v4, (a0), a1, v0.t
-	vssseg8h.v v4, (a0), a1
-	vssseg8h.v v4, 0(a0), a1
-	vssseg8h.v v4, (a0), a1, v0.t
-	vssseg8w.v v4, (a0), a1
-	vssseg8w.v v4, 0(a0), a1
-	vssseg8w.v v4, (a0), a1, v0.t
-	vssseg8e.v v4, (a0), a1
-	vssseg8e.v v4, 0(a0), a1
-	vssseg8e.v v4, (a0), a1, v0.t
+	vlxei16.v v4, (a0), v12
+	vlxei16.v v4, 0(a0), v12
+	vlxei16.v v4, (a0), v12, v0.t
+	vsxei16.v v4, (a0), v12
+	vsxei16.v v4, 0(a0), v12
+	vsxei16.v v4, (a0), v12, v0.t
+	vsuxei16.v v4, (a0), v12
+	vsuxei16.v v4, 0(a0), v12
+	vsuxei16.v v4, (a0), v12, v0.t
 
-	vlxseg2b.v v4, (a0), v12
-	vlxseg2b.v v4, 0(a0), v12
-	vlxseg2b.v v4, (a0), v12, v0.t
-	vlxseg2h.v v4, (a0), v12
-	vlxseg2h.v v4, 0(a0), v12
-	vlxseg2h.v v4, (a0), v12, v0.t
-	vlxseg2w.v v4, (a0), v12
-	vlxseg2w.v v4, 0(a0), v12
-	vlxseg2w.v v4, (a0), v12, v0.t
-	vlxseg2bu.v v4, (a0), v12
-	vlxseg2bu.v v4, 0(a0), v12
-	vlxseg2bu.v v4, (a0), v12, v0.t
-	vlxseg2hu.v v4, (a0), v12
-	vlxseg2hu.v v4, 0(a0), v12
-	vlxseg2hu.v v4, (a0), v12, v0.t
-	vlxseg2wu.v v4, (a0), v12
-	vlxseg2wu.v v4, 0(a0), v12
-	vlxseg2wu.v v4, (a0), v12, v0.t
-	vlxseg2e.v v4, (a0), v12
-	vlxseg2e.v v4, 0(a0), v12
-	vlxseg2e.v v4, (a0), v12, v0.t
-	vsxseg2b.v v4, (a0), v12
-	vsxseg2b.v v4, 0(a0), v12
-	vsxseg2b.v v4, (a0), v12, v0.t
-	vsxseg2h.v v4, (a0), v12
-	vsxseg2h.v v4, 0(a0), v12
-	vsxseg2h.v v4, (a0), v12, v0.t
-	vsxseg2w.v v4, (a0), v12
-	vsxseg2w.v v4, 0(a0), v12
-	vsxseg2w.v v4, (a0), v12, v0.t
-	vsxseg2e.v v4, (a0), v12
-	vsxseg2e.v v4, 0(a0), v12
-	vsxseg2e.v v4, (a0), v12, v0.t
+	vlxei32.v v4, (a0), v12
+	vlxei32.v v4, 0(a0), v12
+	vlxei32.v v4, (a0), v12, v0.t
+	vsxei32.v v4, (a0), v12
+	vsxei32.v v4, 0(a0), v12
+	vsxei32.v v4, (a0), v12, v0.t
+	vsuxei32.v v4, (a0), v12
+	vsuxei32.v v4, 0(a0), v12
+	vsuxei32.v v4, (a0), v12, v0.t
 
-	vlxseg3b.v v4, (a0), v12
-	vlxseg3b.v v4, 0(a0), v12
-	vlxseg3b.v v4, (a0), v12, v0.t
-	vlxseg3h.v v4, (a0), v12
-	vlxseg3h.v v4, 0(a0), v12
-	vlxseg3h.v v4, (a0), v12, v0.t
-	vlxseg3w.v v4, (a0), v12
-	vlxseg3w.v v4, 0(a0), v12
-	vlxseg3w.v v4, (a0), v12, v0.t
-	vlxseg3bu.v v4, (a0), v12
-	vlxseg3bu.v v4, 0(a0), v12
-	vlxseg3bu.v v4, (a0), v12, v0.t
-	vlxseg3hu.v v4, (a0), v12
-	vlxseg3hu.v v4, 0(a0), v12
-	vlxseg3hu.v v4, (a0), v12, v0.t
-	vlxseg3wu.v v4, (a0), v12
-	vlxseg3wu.v v4, 0(a0), v12
-	vlxseg3wu.v v4, (a0), v12, v0.t
-	vlxseg3e.v v4, (a0), v12
-	vlxseg3e.v v4, 0(a0), v12
-	vlxseg3e.v v4, (a0), v12, v0.t
-	vsxseg3b.v v4, (a0), v12
-	vsxseg3b.v v4, 0(a0), v12
-	vsxseg3b.v v4, (a0), v12, v0.t
-	vsxseg3h.v v4, (a0), v12
-	vsxseg3h.v v4, 0(a0), v12
-	vsxseg3h.v v4, (a0), v12, v0.t
-	vsxseg3w.v v4, (a0), v12
-	vsxseg3w.v v4, 0(a0), v12
-	vsxseg3w.v v4, (a0), v12, v0.t
-	vsxseg3e.v v4, (a0), v12
-	vsxseg3e.v v4, 0(a0), v12
-	vsxseg3e.v v4, (a0), v12, v0.t
+	vlxei64.v v4, (a0), v12
+	vlxei64.v v4, 0(a0), v12
+	vlxei64.v v4, (a0), v12, v0.t
+	vsxei64.v v4, (a0), v12
+	vsxei64.v v4, 0(a0), v12
+	vsxei64.v v4, (a0), v12, v0.t
+	vsuxei64.v v4, (a0), v12
+	vsuxei64.v v4, 0(a0), v12
+	vsuxei64.v v4, (a0), v12, v0.t
 
-	vlxseg4b.v v4, (a0), v12
-	vlxseg4b.v v4, 0(a0), v12
-	vlxseg4b.v v4, (a0), v12, v0.t
-	vlxseg4h.v v4, (a0), v12
-	vlxseg4h.v v4, 0(a0), v12
-	vlxseg4h.v v4, (a0), v12, v0.t
-	vlxseg4w.v v4, (a0), v12
-	vlxseg4w.v v4, 0(a0), v12
-	vlxseg4w.v v4, (a0), v12, v0.t
-	vlxseg4bu.v v4, (a0), v12
-	vlxseg4bu.v v4, 0(a0), v12
-	vlxseg4bu.v v4, (a0), v12, v0.t
-	vlxseg4hu.v v4, (a0), v12
-	vlxseg4hu.v v4, 0(a0), v12
-	vlxseg4hu.v v4, (a0), v12, v0.t
-	vlxseg4wu.v v4, (a0), v12
-	vlxseg4wu.v v4, 0(a0), v12
-	vlxseg4wu.v v4, (a0), v12, v0.t
-	vlxseg4e.v v4, (a0), v12
-	vlxseg4e.v v4, 0(a0), v12
-	vlxseg4e.v v4, (a0), v12, v0.t
-	vsxseg4b.v v4, (a0), v12
-	vsxseg4b.v v4, 0(a0), v12
-	vsxseg4b.v v4, (a0), v12, v0.t
-	vsxseg4h.v v4, (a0), v12
-	vsxseg4h.v v4, 0(a0), v12
-	vsxseg4h.v v4, (a0), v12, v0.t
-	vsxseg4w.v v4, (a0), v12
-	vsxseg4w.v v4, 0(a0), v12
-	vsxseg4w.v v4, (a0), v12, v0.t
-	vsxseg4e.v v4, (a0), v12
-	vsxseg4e.v v4, 0(a0), v12
-	vsxseg4e.v v4, (a0), v12, v0.t
+	vlxei128.v v4, (a0), v12
+	vlxei128.v v4, 0(a0), v12
+	vlxei128.v v4, (a0), v12, v0.t
+	vsxei128.v v4, (a0), v12
+	vsxei128.v v4, 0(a0), v12
+	vsxei128.v v4, (a0), v12, v0.t
+	vsuxei128.v v4, (a0), v12
+	vsuxei128.v v4, 0(a0), v12
+	vsuxei128.v v4, (a0), v12, v0.t
 
-	vlxseg5b.v v4, (a0), v12
-	vlxseg5b.v v4, 0(a0), v12
-	vlxseg5b.v v4, (a0), v12, v0.t
-	vlxseg5h.v v4, (a0), v12
-	vlxseg5h.v v4, 0(a0), v12
-	vlxseg5h.v v4, (a0), v12, v0.t
-	vlxseg5w.v v4, (a0), v12
-	vlxseg5w.v v4, 0(a0), v12
-	vlxseg5w.v v4, (a0), v12, v0.t
-	vlxseg5bu.v v4, (a0), v12
-	vlxseg5bu.v v4, 0(a0), v12
-	vlxseg5bu.v v4, (a0), v12, v0.t
-	vlxseg5hu.v v4, (a0), v12
-	vlxseg5hu.v v4, 0(a0), v12
-	vlxseg5hu.v v4, (a0), v12, v0.t
-	vlxseg5wu.v v4, (a0), v12
-	vlxseg5wu.v v4, 0(a0), v12
-	vlxseg5wu.v v4, (a0), v12, v0.t
-	vlxseg5e.v v4, (a0), v12
-	vlxseg5e.v v4, 0(a0), v12
-	vlxseg5e.v v4, (a0), v12, v0.t
-	vsxseg5b.v v4, (a0), v12
-	vsxseg5b.v v4, 0(a0), v12
-	vsxseg5b.v v4, (a0), v12, v0.t
-	vsxseg5h.v v4, (a0), v12
-	vsxseg5h.v v4, 0(a0), v12
-	vsxseg5h.v v4, (a0), v12, v0.t
-	vsxseg5w.v v4, (a0), v12
-	vsxseg5w.v v4, 0(a0), v12
-	vsxseg5w.v v4, (a0), v12, v0.t
-	vsxseg5e.v v4, (a0), v12
-	vsxseg5e.v v4, 0(a0), v12
-	vsxseg5e.v v4, (a0), v12, v0.t
+	vlxei256.v v4, (a0), v12
+	vlxei256.v v4, 0(a0), v12
+	vlxei256.v v4, (a0), v12, v0.t
+	vsxei256.v v4, (a0), v12
+	vsxei256.v v4, 0(a0), v12
+	vsxei256.v v4, (a0), v12, v0.t
+	vsuxei256.v v4, (a0), v12
+	vsuxei256.v v4, 0(a0), v12
+	vsuxei256.v v4, (a0), v12, v0.t
 
-	vlxseg6b.v v4, (a0), v12
-	vlxseg6b.v v4, 0(a0), v12
-	vlxseg6b.v v4, (a0), v12, v0.t
-	vlxseg6h.v v4, (a0), v12
-	vlxseg6h.v v4, 0(a0), v12
-	vlxseg6h.v v4, (a0), v12, v0.t
-	vlxseg6w.v v4, (a0), v12
-	vlxseg6w.v v4, 0(a0), v12
-	vlxseg6w.v v4, (a0), v12, v0.t
-	vlxseg6bu.v v4, (a0), v12
-	vlxseg6bu.v v4, 0(a0), v12
-	vlxseg6bu.v v4, (a0), v12, v0.t
-	vlxseg6hu.v v4, (a0), v12
-	vlxseg6hu.v v4, 0(a0), v12
-	vlxseg6hu.v v4, (a0), v12, v0.t
-	vlxseg6wu.v v4, (a0), v12
-	vlxseg6wu.v v4, 0(a0), v12
-	vlxseg6wu.v v4, (a0), v12, v0.t
-	vlxseg6e.v v4, (a0), v12
-	vlxseg6e.v v4, 0(a0), v12
-	vlxseg6e.v v4, (a0), v12, v0.t
-	vsxseg6b.v v4, (a0), v12
-	vsxseg6b.v v4, 0(a0), v12
-	vsxseg6b.v v4, (a0), v12, v0.t
-	vsxseg6h.v v4, (a0), v12
-	vsxseg6h.v v4, 0(a0), v12
-	vsxseg6h.v v4, (a0), v12, v0.t
-	vsxseg6w.v v4, (a0), v12
-	vsxseg6w.v v4, 0(a0), v12
-	vsxseg6w.v v4, (a0), v12, v0.t
-	vsxseg6e.v v4, (a0), v12
-	vsxseg6e.v v4, 0(a0), v12
-	vsxseg6e.v v4, (a0), v12, v0.t
+	vlxei512.v v4, (a0), v12
+	vlxei512.v v4, 0(a0), v12
+	vlxei512.v v4, (a0), v12, v0.t
+	vsxei512.v v4, (a0), v12
+	vsxei512.v v4, 0(a0), v12
+	vsxei512.v v4, (a0), v12, v0.t
+	vsuxei512.v v4, (a0), v12
+	vsuxei512.v v4, 0(a0), v12
+	vsuxei512.v v4, (a0), v12, v0.t
 
-	vlxseg7b.v v4, (a0), v12
-	vlxseg7b.v v4, 0(a0), v12
-	vlxseg7b.v v4, (a0), v12, v0.t
-	vlxseg7h.v v4, (a0), v12
-	vlxseg7h.v v4, 0(a0), v12
-	vlxseg7h.v v4, (a0), v12, v0.t
-	vlxseg7w.v v4, (a0), v12
-	vlxseg7w.v v4, 0(a0), v12
-	vlxseg7w.v v4, (a0), v12, v0.t
-	vlxseg7bu.v v4, (a0), v12
-	vlxseg7bu.v v4, 0(a0), v12
-	vlxseg7bu.v v4, (a0), v12, v0.t
-	vlxseg7hu.v v4, (a0), v12
-	vlxseg7hu.v v4, 0(a0), v12
-	vlxseg7hu.v v4, (a0), v12, v0.t
-	vlxseg7wu.v v4, (a0), v12
-	vlxseg7wu.v v4, 0(a0), v12
-	vlxseg7wu.v v4, (a0), v12, v0.t
-	vlxseg7e.v v4, (a0), v12
-	vlxseg7e.v v4, 0(a0), v12
-	vlxseg7e.v v4, (a0), v12, v0.t
-	vsxseg7b.v v4, (a0), v12
-	vsxseg7b.v v4, 0(a0), v12
-	vsxseg7b.v v4, (a0), v12, v0.t
-	vsxseg7h.v v4, (a0), v12
-	vsxseg7h.v v4, 0(a0), v12
-	vsxseg7h.v v4, (a0), v12, v0.t
-	vsxseg7w.v v4, (a0), v12
-	vsxseg7w.v v4, 0(a0), v12
-	vsxseg7w.v v4, (a0), v12, v0.t
-	vsxseg7e.v v4, (a0), v12
-	vsxseg7e.v v4, 0(a0), v12
-	vsxseg7e.v v4, (a0), v12, v0.t
+	vlxei1024.v v4, (a0), v12
+	vlxei1024.v v4, 0(a0), v12
+	vlxei1024.v v4, (a0), v12, v0.t
+	vsxei1024.v v4, (a0), v12
+	vsxei1024.v v4, 0(a0), v12
+	vsxei1024.v v4, (a0), v12, v0.t
+	vsuxei1024.v v4, (a0), v12
+	vsuxei1024.v v4, 0(a0), v12
+	vsuxei1024.v v4, (a0), v12, v0.t
 
-	vlxseg8b.v v4, (a0), v12
-	vlxseg8b.v v4, 0(a0), v12
-	vlxseg8b.v v4, (a0), v12, v0.t
-	vlxseg8h.v v4, (a0), v12
-	vlxseg8h.v v4, 0(a0), v12
-	vlxseg8h.v v4, (a0), v12, v0.t
-	vlxseg8w.v v4, (a0), v12
-	vlxseg8w.v v4, 0(a0), v12
-	vlxseg8w.v v4, (a0), v12, v0.t
-	vlxseg8bu.v v4, (a0), v12
-	vlxseg8bu.v v4, 0(a0), v12
-	vlxseg8bu.v v4, (a0), v12, v0.t
-	vlxseg8hu.v v4, (a0), v12
-	vlxseg8hu.v v4, 0(a0), v12
-	vlxseg8hu.v v4, (a0), v12, v0.t
-	vlxseg8wu.v v4, (a0), v12
-	vlxseg8wu.v v4, 0(a0), v12
-	vlxseg8wu.v v4, (a0), v12, v0.t
-	vlxseg8e.v v4, (a0), v12
-	vlxseg8e.v v4, 0(a0), v12
-	vlxseg8e.v v4, (a0), v12, v0.t
-	vsxseg8b.v v4, (a0), v12
-	vsxseg8b.v v4, 0(a0), v12
-	vsxseg8b.v v4, (a0), v12, v0.t
-	vsxseg8h.v v4, (a0), v12
-	vsxseg8h.v v4, 0(a0), v12
-	vsxseg8h.v v4, (a0), v12, v0.t
-	vsxseg8w.v v4, (a0), v12
-	vsxseg8w.v v4, 0(a0), v12
-	vsxseg8w.v v4, (a0), v12, v0.t
-	vsxseg8e.v v4, (a0), v12
-	vsxseg8e.v v4, 0(a0), v12
-	vsxseg8e.v v4, (a0), v12, v0.t
+	vle8ff.v v4, (a0)
+	vle8ff.v v4, 0(a0)
+	vle8ff.v v4, (a0), v0.t
 
-	vlseg2bff.v v4, (a0)
-	vlseg2bff.v v4, 0(a0)
-	vlseg2bff.v v4, (a0), v0.t
-	vlseg2hff.v v4, (a0)
-	vlseg2hff.v v4, 0(a0)
-	vlseg2hff.v v4, (a0), v0.t
-	vlseg2wff.v v4, (a0)
-	vlseg2wff.v v4, 0(a0)
-	vlseg2wff.v v4, (a0), v0.t
-	vlseg2buff.v v4, (a0)
-	vlseg2buff.v v4, 0(a0)
-	vlseg2buff.v v4, (a0), v0.t
-	vlseg2huff.v v4, (a0)
-	vlseg2huff.v v4, 0(a0)
-	vlseg2huff.v v4, (a0), v0.t
-	vlseg2wuff.v v4, (a0)
-	vlseg2wuff.v v4, 0(a0)
-	vlseg2wuff.v v4, (a0), v0.t
-	vlseg2eff.v v4, (a0)
-	vlseg2eff.v v4, 0(a0)
-	vlseg2eff.v v4, (a0), v0.t
+	vle16ff.v v4, (a0)
+	vle16ff.v v4, 0(a0)
+	vle16ff.v v4, (a0), v0.t
 
-	vlseg3bff.v v4, (a0)
-	vlseg3bff.v v4, 0(a0)
-	vlseg3bff.v v4, (a0), v0.t
-	vlseg3hff.v v4, (a0)
-	vlseg3hff.v v4, 0(a0)
-	vlseg3hff.v v4, (a0), v0.t
-	vlseg3wff.v v4, (a0)
-	vlseg3wff.v v4, 0(a0)
-	vlseg3wff.v v4, (a0), v0.t
-	vlseg3buff.v v4, (a0)
-	vlseg3buff.v v4, 0(a0)
-	vlseg3buff.v v4, (a0), v0.t
-	vlseg3huff.v v4, (a0)
-	vlseg3huff.v v4, 0(a0)
-	vlseg3huff.v v4, (a0), v0.t
-	vlseg3wuff.v v4, (a0)
-	vlseg3wuff.v v4, 0(a0)
-	vlseg3wuff.v v4, (a0), v0.t
-	vlseg3eff.v v4, (a0)
-	vlseg3eff.v v4, 0(a0)
-	vlseg3eff.v v4, (a0), v0.t
+	vle32ff.v v4, (a0)
+	vle32ff.v v4, 0(a0)
+	vle32ff.v v4, (a0), v0.t
 
-	vlseg4bff.v v4, (a0)
-	vlseg4bff.v v4, 0(a0)
-	vlseg4bff.v v4, (a0), v0.t
-	vlseg4hff.v v4, (a0)
-	vlseg4hff.v v4, 0(a0)
-	vlseg4hff.v v4, (a0), v0.t
-	vlseg4wff.v v4, (a0)
-	vlseg4wff.v v4, 0(a0)
-	vlseg4wff.v v4, (a0), v0.t
-	vlseg4buff.v v4, (a0)
-	vlseg4buff.v v4, 0(a0)
-	vlseg4buff.v v4, (a0), v0.t
-	vlseg4huff.v v4, (a0)
-	vlseg4huff.v v4, 0(a0)
-	vlseg4huff.v v4, (a0), v0.t
-	vlseg4wuff.v v4, (a0)
-	vlseg4wuff.v v4, 0(a0)
-	vlseg4wuff.v v4, (a0), v0.t
-	vlseg4eff.v v4, (a0)
-	vlseg4eff.v v4, 0(a0)
-	vlseg4eff.v v4, (a0), v0.t
+	vle64ff.v v4, (a0)
+	vle64ff.v v4, 0(a0)
+	vle64ff.v v4, (a0), v0.t
 
-	vlseg5bff.v v4, (a0)
-	vlseg5bff.v v4, 0(a0)
-	vlseg5bff.v v4, (a0), v0.t
-	vlseg5hff.v v4, (a0)
-	vlseg5hff.v v4, 0(a0)
-	vlseg5hff.v v4, (a0), v0.t
-	vlseg5wff.v v4, (a0)
-	vlseg5wff.v v4, 0(a0)
-	vlseg5wff.v v4, (a0), v0.t
-	vlseg5buff.v v4, (a0)
-	vlseg5buff.v v4, 0(a0)
-	vlseg5buff.v v4, (a0), v0.t
-	vlseg5huff.v v4, (a0)
-	vlseg5huff.v v4, 0(a0)
-	vlseg5huff.v v4, (a0), v0.t
-	vlseg5wuff.v v4, (a0)
-	vlseg5wuff.v v4, 0(a0)
-	vlseg5wuff.v v4, (a0), v0.t
-	vlseg5eff.v v4, (a0)
-	vlseg5eff.v v4, 0(a0)
-	vlseg5eff.v v4, (a0), v0.t
+	vle128ff.v v4, (a0)
+	vle128ff.v v4, 0(a0)
+	vle128ff.v v4, (a0), v0.t
 
-	vlseg6bff.v v4, (a0)
-	vlseg6bff.v v4, 0(a0)
-	vlseg6bff.v v4, (a0), v0.t
-	vlseg6hff.v v4, (a0)
-	vlseg6hff.v v4, 0(a0)
-	vlseg6hff.v v4, (a0), v0.t
-	vlseg6wff.v v4, (a0)
-	vlseg6wff.v v4, 0(a0)
-	vlseg6wff.v v4, (a0), v0.t
-	vlseg6buff.v v4, (a0)
-	vlseg6buff.v v4, 0(a0)
-	vlseg6buff.v v4, (a0), v0.t
-	vlseg6huff.v v4, (a0)
-	vlseg6huff.v v4, 0(a0)
-	vlseg6huff.v v4, (a0), v0.t
-	vlseg6wuff.v v4, (a0)
-	vlseg6wuff.v v4, 0(a0)
-	vlseg6wuff.v v4, (a0), v0.t
-	vlseg6eff.v v4, (a0)
-	vlseg6eff.v v4, 0(a0)
-	vlseg6eff.v v4, (a0), v0.t
+	vle256ff.v v4, (a0)
+	vle256ff.v v4, 0(a0)
+	vle256ff.v v4, (a0), v0.t
 
-	vlseg7bff.v v4, (a0)
-	vlseg7bff.v v4, 0(a0)
-	vlseg7bff.v v4, (a0), v0.t
-	vlseg7hff.v v4, (a0)
-	vlseg7hff.v v4, 0(a0)
-	vlseg7hff.v v4, (a0), v0.t
-	vlseg7wff.v v4, (a0)
-	vlseg7wff.v v4, 0(a0)
-	vlseg7wff.v v4, (a0), v0.t
-	vlseg7buff.v v4, (a0)
-	vlseg7buff.v v4, 0(a0)
-	vlseg7buff.v v4, (a0), v0.t
-	vlseg7huff.v v4, (a0)
-	vlseg7huff.v v4, 0(a0)
-	vlseg7huff.v v4, (a0), v0.t
-	vlseg7wuff.v v4, (a0)
-	vlseg7wuff.v v4, 0(a0)
-	vlseg7wuff.v v4, (a0), v0.t
-	vlseg7eff.v v4, (a0)
-	vlseg7eff.v v4, 0(a0)
-	vlseg7eff.v v4, (a0), v0.t
+	vle512ff.v v4, (a0)
+	vle512ff.v v4, 0(a0)
+	vle512ff.v v4, (a0), v0.t
 
-	vlseg8bff.v v4, (a0)
-	vlseg8bff.v v4, 0(a0)
-	vlseg8bff.v v4, (a0), v0.t
-	vlseg8hff.v v4, (a0)
-	vlseg8hff.v v4, 0(a0)
-	vlseg8hff.v v4, (a0), v0.t
-	vlseg8wff.v v4, (a0)
-	vlseg8wff.v v4, 0(a0)
-	vlseg8wff.v v4, (a0), v0.t
-	vlseg8buff.v v4, (a0)
-	vlseg8buff.v v4, 0(a0)
-	vlseg8buff.v v4, (a0), v0.t
-	vlseg8huff.v v4, (a0)
-	vlseg8huff.v v4, 0(a0)
-	vlseg8huff.v v4, (a0), v0.t
-	vlseg8wuff.v v4, (a0)
-	vlseg8wuff.v v4, 0(a0)
-	vlseg8wuff.v v4, (a0), v0.t
-	vlseg8eff.v v4, (a0)
-	vlseg8eff.v v4, 0(a0)
-	vlseg8eff.v v4, (a0), v0.t
+	vle1024ff.v v4, (a0)
+	vle1024ff.v v4, 0(a0)
+	vle1024ff.v v4, (a0), v0.t
+
+	vlseg2e8.v v4, (a0)
+	vlseg2e8.v v4, 0(a0)
+	vlseg2e8.v v4, (a0), v0.t
+	vsseg2e8.v v4, (a0)
+	vsseg2e8.v v4, 0(a0)
+	vsseg2e8.v v4, (a0), v0.t
+
+	vlseg3e8.v v4, (a0)
+	vlseg3e8.v v4, 0(a0)
+	vlseg3e8.v v4, (a0), v0.t
+	vsseg3e8.v v4, (a0)
+	vsseg3e8.v v4, 0(a0)
+	vsseg3e8.v v4, (a0), v0.t
+
+	vlseg4e8.v v4, (a0)
+	vlseg4e8.v v4, 0(a0)
+	vlseg4e8.v v4, (a0), v0.t
+	vsseg4e8.v v4, (a0)
+	vsseg4e8.v v4, 0(a0)
+	vsseg4e8.v v4, (a0), v0.t
+
+	vlseg5e8.v v4, (a0)
+	vlseg5e8.v v4, 0(a0)
+	vlseg5e8.v v4, (a0), v0.t
+	vsseg5e8.v v4, (a0)
+	vsseg5e8.v v4, 0(a0)
+	vsseg5e8.v v4, (a0), v0.t
+
+	vlseg6e8.v v4, (a0)
+	vlseg6e8.v v4, 0(a0)
+	vlseg6e8.v v4, (a0), v0.t
+	vsseg6e8.v v4, (a0)
+	vsseg6e8.v v4, 0(a0)
+	vsseg6e8.v v4, (a0), v0.t
+
+	vlseg7e8.v v4, (a0)
+	vlseg7e8.v v4, 0(a0)
+	vlseg7e8.v v4, (a0), v0.t
+	vsseg7e8.v v4, (a0)
+	vsseg7e8.v v4, 0(a0)
+	vsseg7e8.v v4, (a0), v0.t
+
+	vlseg8e8.v v4, (a0)
+	vlseg8e8.v v4, 0(a0)
+	vlseg8e8.v v4, (a0), v0.t
+	vsseg8e8.v v4, (a0)
+	vsseg8e8.v v4, 0(a0)
+	vsseg8e8.v v4, (a0), v0.t
+
+	vlseg2e16.v v4, (a0)
+	vlseg2e16.v v4, 0(a0)
+	vlseg2e16.v v4, (a0), v0.t
+	vsseg2e16.v v4, (a0)
+	vsseg2e16.v v4, 0(a0)
+	vsseg2e16.v v4, (a0), v0.t
+
+	vlseg3e16.v v4, (a0)
+	vlseg3e16.v v4, 0(a0)
+	vlseg3e16.v v4, (a0), v0.t
+	vsseg3e16.v v4, (a0)
+	vsseg3e16.v v4, 0(a0)
+	vsseg3e16.v v4, (a0), v0.t
+
+	vlseg4e16.v v4, (a0)
+	vlseg4e16.v v4, 0(a0)
+	vlseg4e16.v v4, (a0), v0.t
+	vsseg4e16.v v4, (a0)
+	vsseg4e16.v v4, 0(a0)
+	vsseg4e16.v v4, (a0), v0.t
+
+	vlseg5e16.v v4, (a0)
+	vlseg5e16.v v4, 0(a0)
+	vlseg5e16.v v4, (a0), v0.t
+	vsseg5e16.v v4, (a0)
+	vsseg5e16.v v4, 0(a0)
+	vsseg5e16.v v4, (a0), v0.t
+
+	vlseg6e16.v v4, (a0)
+	vlseg6e16.v v4, 0(a0)
+	vlseg6e16.v v4, (a0), v0.t
+	vsseg6e16.v v4, (a0)
+	vsseg6e16.v v4, 0(a0)
+	vsseg6e16.v v4, (a0), v0.t
+
+	vlseg7e16.v v4, (a0)
+	vlseg7e16.v v4, 0(a0)
+	vlseg7e16.v v4, (a0), v0.t
+	vsseg7e16.v v4, (a0)
+	vsseg7e16.v v4, 0(a0)
+	vsseg7e16.v v4, (a0), v0.t
+
+	vlseg8e16.v v4, (a0)
+	vlseg8e16.v v4, 0(a0)
+	vlseg8e16.v v4, (a0), v0.t
+	vsseg8e16.v v4, (a0)
+	vsseg8e16.v v4, 0(a0)
+	vsseg8e16.v v4, (a0), v0.t
+
+	vlseg2e32.v v4, (a0)
+	vlseg2e32.v v4, 0(a0)
+	vlseg2e32.v v4, (a0), v0.t
+	vsseg2e32.v v4, (a0)
+	vsseg2e32.v v4, 0(a0)
+	vsseg2e32.v v4, (a0), v0.t
+
+	vlseg3e32.v v4, (a0)
+	vlseg3e32.v v4, 0(a0)
+	vlseg3e32.v v4, (a0), v0.t
+	vsseg3e32.v v4, (a0)
+	vsseg3e32.v v4, 0(a0)
+	vsseg3e32.v v4, (a0), v0.t
+
+	vlseg4e32.v v4, (a0)
+	vlseg4e32.v v4, 0(a0)
+	vlseg4e32.v v4, (a0), v0.t
+	vsseg4e32.v v4, (a0)
+	vsseg4e32.v v4, 0(a0)
+	vsseg4e32.v v4, (a0), v0.t
+
+	vlseg5e32.v v4, (a0)
+	vlseg5e32.v v4, 0(a0)
+	vlseg5e32.v v4, (a0), v0.t
+	vsseg5e32.v v4, (a0)
+	vsseg5e32.v v4, 0(a0)
+	vsseg5e32.v v4, (a0), v0.t
+
+	vlseg6e32.v v4, (a0)
+	vlseg6e32.v v4, 0(a0)
+	vlseg6e32.v v4, (a0), v0.t
+	vsseg6e32.v v4, (a0)
+	vsseg6e32.v v4, 0(a0)
+	vsseg6e32.v v4, (a0), v0.t
+
+	vlseg7e32.v v4, (a0)
+	vlseg7e32.v v4, 0(a0)
+	vlseg7e32.v v4, (a0), v0.t
+	vsseg7e32.v v4, (a0)
+	vsseg7e32.v v4, 0(a0)
+	vsseg7e32.v v4, (a0), v0.t
+
+	vlseg8e32.v v4, (a0)
+	vlseg8e32.v v4, 0(a0)
+	vlseg8e32.v v4, (a0), v0.t
+	vsseg8e32.v v4, (a0)
+	vsseg8e32.v v4, 0(a0)
+	vsseg8e32.v v4, (a0), v0.t
+
+	vlseg2e64.v v4, (a0)
+	vlseg2e64.v v4, 0(a0)
+	vlseg2e64.v v4, (a0), v0.t
+	vsseg2e64.v v4, (a0)
+	vsseg2e64.v v4, 0(a0)
+	vsseg2e64.v v4, (a0), v0.t
+
+	vlseg3e64.v v4, (a0)
+	vlseg3e64.v v4, 0(a0)
+	vlseg3e64.v v4, (a0), v0.t
+	vsseg3e64.v v4, (a0)
+	vsseg3e64.v v4, 0(a0)
+	vsseg3e64.v v4, (a0), v0.t
+
+	vlseg4e64.v v4, (a0)
+	vlseg4e64.v v4, 0(a0)
+	vlseg4e64.v v4, (a0), v0.t
+	vsseg4e64.v v4, (a0)
+	vsseg4e64.v v4, 0(a0)
+	vsseg4e64.v v4, (a0), v0.t
+
+	vlseg5e64.v v4, (a0)
+	vlseg5e64.v v4, 0(a0)
+	vlseg5e64.v v4, (a0), v0.t
+	vsseg5e64.v v4, (a0)
+	vsseg5e64.v v4, 0(a0)
+	vsseg5e64.v v4, (a0), v0.t
+
+	vlseg6e64.v v4, (a0)
+	vlseg6e64.v v4, 0(a0)
+	vlseg6e64.v v4, (a0), v0.t
+	vsseg6e64.v v4, (a0)
+	vsseg6e64.v v4, 0(a0)
+	vsseg6e64.v v4, (a0), v0.t
+
+	vlseg7e64.v v4, (a0)
+	vlseg7e64.v v4, 0(a0)
+	vlseg7e64.v v4, (a0), v0.t
+	vsseg7e64.v v4, (a0)
+	vsseg7e64.v v4, 0(a0)
+	vsseg7e64.v v4, (a0), v0.t
+
+	vlseg8e64.v v4, (a0)
+	vlseg8e64.v v4, 0(a0)
+	vlseg8e64.v v4, (a0), v0.t
+	vsseg8e64.v v4, (a0)
+	vsseg8e64.v v4, 0(a0)
+	vsseg8e64.v v4, (a0), v0.t
+
+	vlseg2e128.v v4, (a0)
+	vlseg2e128.v v4, 0(a0)
+	vlseg2e128.v v4, (a0), v0.t
+	vsseg2e128.v v4, (a0)
+	vsseg2e128.v v4, 0(a0)
+	vsseg2e128.v v4, (a0), v0.t
+
+	vlseg3e128.v v4, (a0)
+	vlseg3e128.v v4, 0(a0)
+	vlseg3e128.v v4, (a0), v0.t
+	vsseg3e128.v v4, (a0)
+	vsseg3e128.v v4, 0(a0)
+	vsseg3e128.v v4, (a0), v0.t
+
+	vlseg4e128.v v4, (a0)
+	vlseg4e128.v v4, 0(a0)
+	vlseg4e128.v v4, (a0), v0.t
+	vsseg4e128.v v4, (a0)
+	vsseg4e128.v v4, 0(a0)
+	vsseg4e128.v v4, (a0), v0.t
+
+	vlseg5e128.v v4, (a0)
+	vlseg5e128.v v4, 0(a0)
+	vlseg5e128.v v4, (a0), v0.t
+	vsseg5e128.v v4, (a0)
+	vsseg5e128.v v4, 0(a0)
+	vsseg5e128.v v4, (a0), v0.t
+
+	vlseg6e128.v v4, (a0)
+	vlseg6e128.v v4, 0(a0)
+	vlseg6e128.v v4, (a0), v0.t
+	vsseg6e128.v v4, (a0)
+	vsseg6e128.v v4, 0(a0)
+	vsseg6e128.v v4, (a0), v0.t
+
+	vlseg7e128.v v4, (a0)
+	vlseg7e128.v v4, 0(a0)
+	vlseg7e128.v v4, (a0), v0.t
+	vsseg7e128.v v4, (a0)
+	vsseg7e128.v v4, 0(a0)
+	vsseg7e128.v v4, (a0), v0.t
+
+	vlseg8e128.v v4, (a0)
+	vlseg8e128.v v4, 0(a0)
+	vlseg8e128.v v4, (a0), v0.t
+	vsseg8e128.v v4, (a0)
+	vsseg8e128.v v4, 0(a0)
+	vsseg8e128.v v4, (a0), v0.t
+
+	vlseg2e256.v v4, (a0)
+	vlseg2e256.v v4, 0(a0)
+	vlseg2e256.v v4, (a0), v0.t
+	vsseg2e256.v v4, (a0)
+	vsseg2e256.v v4, 0(a0)
+	vsseg2e256.v v4, (a0), v0.t
+
+	vlseg3e256.v v4, (a0)
+	vlseg3e256.v v4, 0(a0)
+	vlseg3e256.v v4, (a0), v0.t
+	vsseg3e256.v v4, (a0)
+	vsseg3e256.v v4, 0(a0)
+	vsseg3e256.v v4, (a0), v0.t
+
+	vlseg4e256.v v4, (a0)
+	vlseg4e256.v v4, 0(a0)
+	vlseg4e256.v v4, (a0), v0.t
+	vsseg4e256.v v4, (a0)
+	vsseg4e256.v v4, 0(a0)
+	vsseg4e256.v v4, (a0), v0.t
+
+	vlseg5e256.v v4, (a0)
+	vlseg5e256.v v4, 0(a0)
+	vlseg5e256.v v4, (a0), v0.t
+	vsseg5e256.v v4, (a0)
+	vsseg5e256.v v4, 0(a0)
+	vsseg5e256.v v4, (a0), v0.t
+
+	vlseg6e256.v v4, (a0)
+	vlseg6e256.v v4, 0(a0)
+	vlseg6e256.v v4, (a0), v0.t
+	vsseg6e256.v v4, (a0)
+	vsseg6e256.v v4, 0(a0)
+	vsseg6e256.v v4, (a0), v0.t
+
+	vlseg7e256.v v4, (a0)
+	vlseg7e256.v v4, 0(a0)
+	vlseg7e256.v v4, (a0), v0.t
+	vsseg7e256.v v4, (a0)
+	vsseg7e256.v v4, 0(a0)
+	vsseg7e256.v v4, (a0), v0.t
+
+	vlseg8e256.v v4, (a0)
+	vlseg8e256.v v4, 0(a0)
+	vlseg8e256.v v4, (a0), v0.t
+	vsseg8e256.v v4, (a0)
+	vsseg8e256.v v4, 0(a0)
+	vsseg8e256.v v4, (a0), v0.t
+
+	vlseg2e512.v v4, (a0)
+	vlseg2e512.v v4, 0(a0)
+	vlseg2e512.v v4, (a0), v0.t
+	vsseg2e512.v v4, (a0)
+	vsseg2e512.v v4, 0(a0)
+	vsseg2e512.v v4, (a0), v0.t
+
+	vlseg3e512.v v4, (a0)
+	vlseg3e512.v v4, 0(a0)
+	vlseg3e512.v v4, (a0), v0.t
+	vsseg3e512.v v4, (a0)
+	vsseg3e512.v v4, 0(a0)
+	vsseg3e512.v v4, (a0), v0.t
+
+	vlseg4e512.v v4, (a0)
+	vlseg4e512.v v4, 0(a0)
+	vlseg4e512.v v4, (a0), v0.t
+	vsseg4e512.v v4, (a0)
+	vsseg4e512.v v4, 0(a0)
+	vsseg4e512.v v4, (a0), v0.t
+
+	vlseg5e512.v v4, (a0)
+	vlseg5e512.v v4, 0(a0)
+	vlseg5e512.v v4, (a0), v0.t
+	vsseg5e512.v v4, (a0)
+	vsseg5e512.v v4, 0(a0)
+	vsseg5e512.v v4, (a0), v0.t
+
+	vlseg6e512.v v4, (a0)
+	vlseg6e512.v v4, 0(a0)
+	vlseg6e512.v v4, (a0), v0.t
+	vsseg6e512.v v4, (a0)
+	vsseg6e512.v v4, 0(a0)
+	vsseg6e512.v v4, (a0), v0.t
+
+	vlseg7e512.v v4, (a0)
+	vlseg7e512.v v4, 0(a0)
+	vlseg7e512.v v4, (a0), v0.t
+	vsseg7e512.v v4, (a0)
+	vsseg7e512.v v4, 0(a0)
+	vsseg7e512.v v4, (a0), v0.t
+
+	vlseg8e512.v v4, (a0)
+	vlseg8e512.v v4, 0(a0)
+	vlseg8e512.v v4, (a0), v0.t
+	vsseg8e512.v v4, (a0)
+	vsseg8e512.v v4, 0(a0)
+	vsseg8e512.v v4, (a0), v0.t
+
+	vlseg2e1024.v v4, (a0)
+	vlseg2e1024.v v4, 0(a0)
+	vlseg2e1024.v v4, (a0), v0.t
+	vsseg2e1024.v v4, (a0)
+	vsseg2e1024.v v4, 0(a0)
+	vsseg2e1024.v v4, (a0), v0.t
+
+	vlseg3e1024.v v4, (a0)
+	vlseg3e1024.v v4, 0(a0)
+	vlseg3e1024.v v4, (a0), v0.t
+	vsseg3e1024.v v4, (a0)
+	vsseg3e1024.v v4, 0(a0)
+	vsseg3e1024.v v4, (a0), v0.t
+
+	vlseg4e1024.v v4, (a0)
+	vlseg4e1024.v v4, 0(a0)
+	vlseg4e1024.v v4, (a0), v0.t
+	vsseg4e1024.v v4, (a0)
+	vsseg4e1024.v v4, 0(a0)
+	vsseg4e1024.v v4, (a0), v0.t
+
+	vlseg5e1024.v v4, (a0)
+	vlseg5e1024.v v4, 0(a0)
+	vlseg5e1024.v v4, (a0), v0.t
+	vsseg5e1024.v v4, (a0)
+	vsseg5e1024.v v4, 0(a0)
+	vsseg5e1024.v v4, (a0), v0.t
+
+	vlseg6e1024.v v4, (a0)
+	vlseg6e1024.v v4, 0(a0)
+	vlseg6e1024.v v4, (a0), v0.t
+	vsseg6e1024.v v4, (a0)
+	vsseg6e1024.v v4, 0(a0)
+	vsseg6e1024.v v4, (a0), v0.t
+
+	vlseg7e1024.v v4, (a0)
+	vlseg7e1024.v v4, 0(a0)
+	vlseg7e1024.v v4, (a0), v0.t
+	vsseg7e1024.v v4, (a0)
+	vsseg7e1024.v v4, 0(a0)
+	vsseg7e1024.v v4, (a0), v0.t
+
+	vlseg8e1024.v v4, (a0)
+	vlseg8e1024.v v4, 0(a0)
+	vlseg8e1024.v v4, (a0), v0.t
+	vsseg8e1024.v v4, (a0)
+	vsseg8e1024.v v4, 0(a0)
+	vsseg8e1024.v v4, (a0), v0.t
+
+	vlsseg2e8.v v4, (a0), a1
+	vlsseg2e8.v v4, 0(a0), a1
+	vlsseg2e8.v v4, (a0), a1, v0.t
+	vssseg2e8.v v4, (a0), a1
+	vssseg2e8.v v4, 0(a0), a1
+	vssseg2e8.v v4, (a0), a1, v0.t
+
+	vlsseg3e8.v v4, (a0), a1
+	vlsseg3e8.v v4, 0(a0), a1
+	vlsseg3e8.v v4, (a0), a1, v0.t
+	vssseg3e8.v v4, (a0), a1
+	vssseg3e8.v v4, 0(a0), a1
+	vssseg3e8.v v4, (a0), a1, v0.t
+
+	vlsseg4e8.v v4, (a0), a1
+	vlsseg4e8.v v4, 0(a0), a1
+	vlsseg4e8.v v4, (a0), a1, v0.t
+	vssseg4e8.v v4, (a0), a1
+	vssseg4e8.v v4, 0(a0), a1
+	vssseg4e8.v v4, (a0), a1, v0.t
+
+	vlsseg5e8.v v4, (a0), a1
+	vlsseg5e8.v v4, 0(a0), a1
+	vlsseg5e8.v v4, (a0), a1, v0.t
+	vssseg5e8.v v4, (a0), a1
+	vssseg5e8.v v4, 0(a0), a1
+	vssseg5e8.v v4, (a0), a1, v0.t
+
+	vlsseg6e8.v v4, (a0), a1
+	vlsseg6e8.v v4, 0(a0), a1
+	vlsseg6e8.v v4, (a0), a1, v0.t
+	vssseg6e8.v v4, (a0), a1
+	vssseg6e8.v v4, 0(a0), a1
+	vssseg6e8.v v4, (a0), a1, v0.t
+
+	vlsseg7e8.v v4, (a0), a1
+	vlsseg7e8.v v4, 0(a0), a1
+	vlsseg7e8.v v4, (a0), a1, v0.t
+	vssseg7e8.v v4, (a0), a1
+	vssseg7e8.v v4, 0(a0), a1
+	vssseg7e8.v v4, (a0), a1, v0.t
+
+	vlsseg8e8.v v4, (a0), a1
+	vlsseg8e8.v v4, 0(a0), a1
+	vlsseg8e8.v v4, (a0), a1, v0.t
+	vssseg8e8.v v4, (a0), a1
+	vssseg8e8.v v4, 0(a0), a1
+	vssseg8e8.v v4, (a0), a1, v0.t
+
+	vlsseg2e16.v v4, (a0), a1
+	vlsseg2e16.v v4, 0(a0), a1
+	vlsseg2e16.v v4, (a0), a1, v0.t
+	vssseg2e16.v v4, (a0), a1
+	vssseg2e16.v v4, 0(a0), a1
+	vssseg2e16.v v4, (a0), a1, v0.t
+
+	vlsseg3e16.v v4, (a0), a1
+	vlsseg3e16.v v4, 0(a0), a1
+	vlsseg3e16.v v4, (a0), a1, v0.t
+	vssseg3e16.v v4, (a0), a1
+	vssseg3e16.v v4, 0(a0), a1
+	vssseg3e16.v v4, (a0), a1, v0.t
+
+	vlsseg4e16.v v4, (a0), a1
+	vlsseg4e16.v v4, 0(a0), a1
+	vlsseg4e16.v v4, (a0), a1, v0.t
+	vssseg4e16.v v4, (a0), a1
+	vssseg4e16.v v4, 0(a0), a1
+	vssseg4e16.v v4, (a0), a1, v0.t
+
+	vlsseg5e16.v v4, (a0), a1
+	vlsseg5e16.v v4, 0(a0), a1
+	vlsseg5e16.v v4, (a0), a1, v0.t
+	vssseg5e16.v v4, (a0), a1
+	vssseg5e16.v v4, 0(a0), a1
+	vssseg5e16.v v4, (a0), a1, v0.t
+
+	vlsseg6e16.v v4, (a0), a1
+	vlsseg6e16.v v4, 0(a0), a1
+	vlsseg6e16.v v4, (a0), a1, v0.t
+	vssseg6e16.v v4, (a0), a1
+	vssseg6e16.v v4, 0(a0), a1
+	vssseg6e16.v v4, (a0), a1, v0.t
+
+	vlsseg7e16.v v4, (a0), a1
+	vlsseg7e16.v v4, 0(a0), a1
+	vlsseg7e16.v v4, (a0), a1, v0.t
+	vssseg7e16.v v4, (a0), a1
+	vssseg7e16.v v4, 0(a0), a1
+	vssseg7e16.v v4, (a0), a1, v0.t
+
+	vlsseg8e16.v v4, (a0), a1
+	vlsseg8e16.v v4, 0(a0), a1
+	vlsseg8e16.v v4, (a0), a1, v0.t
+	vssseg8e16.v v4, (a0), a1
+	vssseg8e16.v v4, 0(a0), a1
+	vssseg8e16.v v4, (a0), a1, v0.t
+
+	vlsseg2e32.v v4, (a0), a1
+	vlsseg2e32.v v4, 0(a0), a1
+	vlsseg2e32.v v4, (a0), a1, v0.t
+	vssseg2e32.v v4, (a0), a1
+	vssseg2e32.v v4, 0(a0), a1
+	vssseg2e32.v v4, (a0), a1, v0.t
+
+	vlsseg3e32.v v4, (a0), a1
+	vlsseg3e32.v v4, 0(a0), a1
+	vlsseg3e32.v v4, (a0), a1, v0.t
+	vssseg3e32.v v4, (a0), a1
+	vssseg3e32.v v4, 0(a0), a1
+	vssseg3e32.v v4, (a0), a1, v0.t
+
+	vlsseg4e32.v v4, (a0), a1
+	vlsseg4e32.v v4, 0(a0), a1
+	vlsseg4e32.v v4, (a0), a1, v0.t
+	vssseg4e32.v v4, (a0), a1
+	vssseg4e32.v v4, 0(a0), a1
+	vssseg4e32.v v4, (a0), a1, v0.t
+
+	vlsseg5e32.v v4, (a0), a1
+	vlsseg5e32.v v4, 0(a0), a1
+	vlsseg5e32.v v4, (a0), a1, v0.t
+	vssseg5e32.v v4, (a0), a1
+	vssseg5e32.v v4, 0(a0), a1
+	vssseg5e32.v v4, (a0), a1, v0.t
+
+	vlsseg6e32.v v4, (a0), a1
+	vlsseg6e32.v v4, 0(a0), a1
+	vlsseg6e32.v v4, (a0), a1, v0.t
+	vssseg6e32.v v4, (a0), a1
+	vssseg6e32.v v4, 0(a0), a1
+	vssseg6e32.v v4, (a0), a1, v0.t
+
+	vlsseg7e32.v v4, (a0), a1
+	vlsseg7e32.v v4, 0(a0), a1
+	vlsseg7e32.v v4, (a0), a1, v0.t
+	vssseg7e32.v v4, (a0), a1
+	vssseg7e32.v v4, 0(a0), a1
+	vssseg7e32.v v4, (a0), a1, v0.t
+
+	vlsseg8e32.v v4, (a0), a1
+	vlsseg8e32.v v4, 0(a0), a1
+	vlsseg8e32.v v4, (a0), a1, v0.t
+	vssseg8e32.v v4, (a0), a1
+	vssseg8e32.v v4, 0(a0), a1
+	vssseg8e32.v v4, (a0), a1, v0.t
+
+	vlsseg2e64.v v4, (a0), a1
+	vlsseg2e64.v v4, 0(a0), a1
+	vlsseg2e64.v v4, (a0), a1, v0.t
+	vssseg2e64.v v4, (a0), a1
+	vssseg2e64.v v4, 0(a0), a1
+	vssseg2e64.v v4, (a0), a1, v0.t
+
+	vlsseg3e64.v v4, (a0), a1
+	vlsseg3e64.v v4, 0(a0), a1
+	vlsseg3e64.v v4, (a0), a1, v0.t
+	vssseg3e64.v v4, (a0), a1
+	vssseg3e64.v v4, 0(a0), a1
+	vssseg3e64.v v4, (a0), a1, v0.t
+
+	vlsseg4e64.v v4, (a0), a1
+	vlsseg4e64.v v4, 0(a0), a1
+	vlsseg4e64.v v4, (a0), a1, v0.t
+	vssseg4e64.v v4, (a0), a1
+	vssseg4e64.v v4, 0(a0), a1
+	vssseg4e64.v v4, (a0), a1, v0.t
+
+	vlsseg5e64.v v4, (a0), a1
+	vlsseg5e64.v v4, 0(a0), a1
+	vlsseg5e64.v v4, (a0), a1, v0.t
+	vssseg5e64.v v4, (a0), a1
+	vssseg5e64.v v4, 0(a0), a1
+	vssseg5e64.v v4, (a0), a1, v0.t
+
+	vlsseg6e64.v v4, (a0), a1
+	vlsseg6e64.v v4, 0(a0), a1
+	vlsseg6e64.v v4, (a0), a1, v0.t
+	vssseg6e64.v v4, (a0), a1
+	vssseg6e64.v v4, 0(a0), a1
+	vssseg6e64.v v4, (a0), a1, v0.t
+
+	vlsseg7e64.v v4, (a0), a1
+	vlsseg7e64.v v4, 0(a0), a1
+	vlsseg7e64.v v4, (a0), a1, v0.t
+	vssseg7e64.v v4, (a0), a1
+	vssseg7e64.v v4, 0(a0), a1
+	vssseg7e64.v v4, (a0), a1, v0.t
+
+	vlsseg8e64.v v4, (a0), a1
+	vlsseg8e64.v v4, 0(a0), a1
+	vlsseg8e64.v v4, (a0), a1, v0.t
+	vssseg8e64.v v4, (a0), a1
+	vssseg8e64.v v4, 0(a0), a1
+	vssseg8e64.v v4, (a0), a1, v0.t
+
+	vlsseg2e128.v v4, (a0), a1
+	vlsseg2e128.v v4, 0(a0), a1
+	vlsseg2e128.v v4, (a0), a1, v0.t
+	vssseg2e128.v v4, (a0), a1
+	vssseg2e128.v v4, 0(a0), a1
+	vssseg2e128.v v4, (a0), a1, v0.t
+
+	vlsseg3e128.v v4, (a0), a1
+	vlsseg3e128.v v4, 0(a0), a1
+	vlsseg3e128.v v4, (a0), a1, v0.t
+	vssseg3e128.v v4, (a0), a1
+	vssseg3e128.v v4, 0(a0), a1
+	vssseg3e128.v v4, (a0), a1, v0.t
+
+	vlsseg4e128.v v4, (a0), a1
+	vlsseg4e128.v v4, 0(a0), a1
+	vlsseg4e128.v v4, (a0), a1, v0.t
+	vssseg4e128.v v4, (a0), a1
+	vssseg4e128.v v4, 0(a0), a1
+	vssseg4e128.v v4, (a0), a1, v0.t
+
+	vlsseg5e128.v v4, (a0), a1
+	vlsseg5e128.v v4, 0(a0), a1
+	vlsseg5e128.v v4, (a0), a1, v0.t
+	vssseg5e128.v v4, (a0), a1
+	vssseg5e128.v v4, 0(a0), a1
+	vssseg5e128.v v4, (a0), a1, v0.t
+
+	vlsseg6e128.v v4, (a0), a1
+	vlsseg6e128.v v4, 0(a0), a1
+	vlsseg6e128.v v4, (a0), a1, v0.t
+	vssseg6e128.v v4, (a0), a1
+	vssseg6e128.v v4, 0(a0), a1
+	vssseg6e128.v v4, (a0), a1, v0.t
+
+	vlsseg7e128.v v4, (a0), a1
+	vlsseg7e128.v v4, 0(a0), a1
+	vlsseg7e128.v v4, (a0), a1, v0.t
+	vssseg7e128.v v4, (a0), a1
+	vssseg7e128.v v4, 0(a0), a1
+	vssseg7e128.v v4, (a0), a1, v0.t
+
+	vlsseg8e128.v v4, (a0), a1
+	vlsseg8e128.v v4, 0(a0), a1
+	vlsseg8e128.v v4, (a0), a1, v0.t
+	vssseg8e128.v v4, (a0), a1
+	vssseg8e128.v v4, 0(a0), a1
+	vssseg8e128.v v4, (a0), a1, v0.t
+
+	vlsseg2e256.v v4, (a0), a1
+	vlsseg2e256.v v4, 0(a0), a1
+	vlsseg2e256.v v4, (a0), a1, v0.t
+	vssseg2e256.v v4, (a0), a1
+	vssseg2e256.v v4, 0(a0), a1
+	vssseg2e256.v v4, (a0), a1, v0.t
+
+	vlsseg3e256.v v4, (a0), a1
+	vlsseg3e256.v v4, 0(a0), a1
+	vlsseg3e256.v v4, (a0), a1, v0.t
+	vssseg3e256.v v4, (a0), a1
+	vssseg3e256.v v4, 0(a0), a1
+	vssseg3e256.v v4, (a0), a1, v0.t
+
+	vlsseg4e256.v v4, (a0), a1
+	vlsseg4e256.v v4, 0(a0), a1
+	vlsseg4e256.v v4, (a0), a1, v0.t
+	vssseg4e256.v v4, (a0), a1
+	vssseg4e256.v v4, 0(a0), a1
+	vssseg4e256.v v4, (a0), a1, v0.t
+
+	vlsseg5e256.v v4, (a0), a1
+	vlsseg5e256.v v4, 0(a0), a1
+	vlsseg5e256.v v4, (a0), a1, v0.t
+	vssseg5e256.v v4, (a0), a1
+	vssseg5e256.v v4, 0(a0), a1
+	vssseg5e256.v v4, (a0), a1, v0.t
+
+	vlsseg6e256.v v4, (a0), a1
+	vlsseg6e256.v v4, 0(a0), a1
+	vlsseg6e256.v v4, (a0), a1, v0.t
+	vssseg6e256.v v4, (a0), a1
+	vssseg6e256.v v4, 0(a0), a1
+	vssseg6e256.v v4, (a0), a1, v0.t
+
+	vlsseg7e256.v v4, (a0), a1
+	vlsseg7e256.v v4, 0(a0), a1
+	vlsseg7e256.v v4, (a0), a1, v0.t
+	vssseg7e256.v v4, (a0), a1
+	vssseg7e256.v v4, 0(a0), a1
+	vssseg7e256.v v4, (a0), a1, v0.t
+
+	vlsseg8e256.v v4, (a0), a1
+	vlsseg8e256.v v4, 0(a0), a1
+	vlsseg8e256.v v4, (a0), a1, v0.t
+	vssseg8e256.v v4, (a0), a1
+	vssseg8e256.v v4, 0(a0), a1
+	vssseg8e256.v v4, (a0), a1, v0.t
+
+	vlsseg2e512.v v4, (a0), a1
+	vlsseg2e512.v v4, 0(a0), a1
+	vlsseg2e512.v v4, (a0), a1, v0.t
+	vssseg2e512.v v4, (a0), a1
+	vssseg2e512.v v4, 0(a0), a1
+	vssseg2e512.v v4, (a0), a1, v0.t
+
+	vlsseg3e512.v v4, (a0), a1
+	vlsseg3e512.v v4, 0(a0), a1
+	vlsseg3e512.v v4, (a0), a1, v0.t
+	vssseg3e512.v v4, (a0), a1
+	vssseg3e512.v v4, 0(a0), a1
+	vssseg3e512.v v4, (a0), a1, v0.t
+
+	vlsseg4e512.v v4, (a0), a1
+	vlsseg4e512.v v4, 0(a0), a1
+	vlsseg4e512.v v4, (a0), a1, v0.t
+	vssseg4e512.v v4, (a0), a1
+	vssseg4e512.v v4, 0(a0), a1
+	vssseg4e512.v v4, (a0), a1, v0.t
+
+	vlsseg5e512.v v4, (a0), a1
+	vlsseg5e512.v v4, 0(a0), a1
+	vlsseg5e512.v v4, (a0), a1, v0.t
+	vssseg5e512.v v4, (a0), a1
+	vssseg5e512.v v4, 0(a0), a1
+	vssseg5e512.v v4, (a0), a1, v0.t
+
+	vlsseg6e512.v v4, (a0), a1
+	vlsseg6e512.v v4, 0(a0), a1
+	vlsseg6e512.v v4, (a0), a1, v0.t
+	vssseg6e512.v v4, (a0), a1
+	vssseg6e512.v v4, 0(a0), a1
+	vssseg6e512.v v4, (a0), a1, v0.t
+
+	vlsseg7e512.v v4, (a0), a1
+	vlsseg7e512.v v4, 0(a0), a1
+	vlsseg7e512.v v4, (a0), a1, v0.t
+	vssseg7e512.v v4, (a0), a1
+	vssseg7e512.v v4, 0(a0), a1
+	vssseg7e512.v v4, (a0), a1, v0.t
+
+	vlsseg8e512.v v4, (a0), a1
+	vlsseg8e512.v v4, 0(a0), a1
+	vlsseg8e512.v v4, (a0), a1, v0.t
+	vssseg8e512.v v4, (a0), a1
+	vssseg8e512.v v4, 0(a0), a1
+	vssseg8e512.v v4, (a0), a1, v0.t
+
+	vlsseg2e1024.v v4, (a0), a1
+	vlsseg2e1024.v v4, 0(a0), a1
+	vlsseg2e1024.v v4, (a0), a1, v0.t
+	vssseg2e1024.v v4, (a0), a1
+	vssseg2e1024.v v4, 0(a0), a1
+	vssseg2e1024.v v4, (a0), a1, v0.t
+
+	vlsseg3e1024.v v4, (a0), a1
+	vlsseg3e1024.v v4, 0(a0), a1
+	vlsseg3e1024.v v4, (a0), a1, v0.t
+	vssseg3e1024.v v4, (a0), a1
+	vssseg3e1024.v v4, 0(a0), a1
+	vssseg3e1024.v v4, (a0), a1, v0.t
+
+	vlsseg4e1024.v v4, (a0), a1
+	vlsseg4e1024.v v4, 0(a0), a1
+	vlsseg4e1024.v v4, (a0), a1, v0.t
+	vssseg4e1024.v v4, (a0), a1
+	vssseg4e1024.v v4, 0(a0), a1
+	vssseg4e1024.v v4, (a0), a1, v0.t
+
+	vlsseg5e1024.v v4, (a0), a1
+	vlsseg5e1024.v v4, 0(a0), a1
+	vlsseg5e1024.v v4, (a0), a1, v0.t
+	vssseg5e1024.v v4, (a0), a1
+	vssseg5e1024.v v4, 0(a0), a1
+	vssseg5e1024.v v4, (a0), a1, v0.t
+
+	vlsseg6e1024.v v4, (a0), a1
+	vlsseg6e1024.v v4, 0(a0), a1
+	vlsseg6e1024.v v4, (a0), a1, v0.t
+	vssseg6e1024.v v4, (a0), a1
+	vssseg6e1024.v v4, 0(a0), a1
+	vssseg6e1024.v v4, (a0), a1, v0.t
+
+	vlsseg7e1024.v v4, (a0), a1
+	vlsseg7e1024.v v4, 0(a0), a1
+	vlsseg7e1024.v v4, (a0), a1, v0.t
+	vssseg7e1024.v v4, (a0), a1
+	vssseg7e1024.v v4, 0(a0), a1
+	vssseg7e1024.v v4, (a0), a1, v0.t
+
+	vlsseg8e1024.v v4, (a0), a1
+	vlsseg8e1024.v v4, 0(a0), a1
+	vlsseg8e1024.v v4, (a0), a1, v0.t
+	vssseg8e1024.v v4, (a0), a1
+	vssseg8e1024.v v4, 0(a0), a1
+	vssseg8e1024.v v4, (a0), a1, v0.t
+
+	vlxseg2ei8.v v4, (a0), v12
+	vlxseg2ei8.v v4, 0(a0), v12
+	vlxseg2ei8.v v4, (a0), v12, v0.t
+	vsxseg2ei8.v v4, (a0), v12
+	vsxseg2ei8.v v4, 0(a0), v12
+	vsxseg2ei8.v v4, (a0), v12, v0.t
+
+	vlxseg3ei8.v v4, (a0), v12
+	vlxseg3ei8.v v4, 0(a0), v12
+	vlxseg3ei8.v v4, (a0), v12, v0.t
+	vsxseg3ei8.v v4, (a0), v12
+	vsxseg3ei8.v v4, 0(a0), v12
+	vsxseg3ei8.v v4, (a0), v12, v0.t
+
+	vlxseg4ei8.v v4, (a0), v12
+	vlxseg4ei8.v v4, 0(a0), v12
+	vlxseg4ei8.v v4, (a0), v12, v0.t
+	vsxseg4ei8.v v4, (a0), v12
+	vsxseg4ei8.v v4, 0(a0), v12
+	vsxseg4ei8.v v4, (a0), v12, v0.t
+
+	vlxseg5ei8.v v4, (a0), v12
+	vlxseg5ei8.v v4, 0(a0), v12
+	vlxseg5ei8.v v4, (a0), v12, v0.t
+	vsxseg5ei8.v v4, (a0), v12
+	vsxseg5ei8.v v4, 0(a0), v12
+	vsxseg5ei8.v v4, (a0), v12, v0.t
+
+	vlxseg6ei8.v v4, (a0), v12
+	vlxseg6ei8.v v4, 0(a0), v12
+	vlxseg6ei8.v v4, (a0), v12, v0.t
+	vsxseg6ei8.v v4, (a0), v12
+	vsxseg6ei8.v v4, 0(a0), v12
+	vsxseg6ei8.v v4, (a0), v12, v0.t
+
+	vlxseg7ei8.v v4, (a0), v12
+	vlxseg7ei8.v v4, 0(a0), v12
+	vlxseg7ei8.v v4, (a0), v12, v0.t
+	vsxseg7ei8.v v4, (a0), v12
+	vsxseg7ei8.v v4, 0(a0), v12
+	vsxseg7ei8.v v4, (a0), v12, v0.t
+
+	vlxseg8ei8.v v4, (a0), v12
+	vlxseg8ei8.v v4, 0(a0), v12
+	vlxseg8ei8.v v4, (a0), v12, v0.t
+	vsxseg8ei8.v v4, (a0), v12
+	vsxseg8ei8.v v4, 0(a0), v12
+	vsxseg8ei8.v v4, (a0), v12, v0.t
+
+	vlxseg2ei16.v v4, (a0), v12
+	vlxseg2ei16.v v4, 0(a0), v12
+	vlxseg2ei16.v v4, (a0), v12, v0.t
+	vsxseg2ei16.v v4, (a0), v12
+	vsxseg2ei16.v v4, 0(a0), v12
+	vsxseg2ei16.v v4, (a0), v12, v0.t
+
+	vlxseg3ei16.v v4, (a0), v12
+	vlxseg3ei16.v v4, 0(a0), v12
+	vlxseg3ei16.v v4, (a0), v12, v0.t
+	vsxseg3ei16.v v4, (a0), v12
+	vsxseg3ei16.v v4, 0(a0), v12
+	vsxseg3ei16.v v4, (a0), v12, v0.t
+
+	vlxseg4ei16.v v4, (a0), v12
+	vlxseg4ei16.v v4, 0(a0), v12
+	vlxseg4ei16.v v4, (a0), v12, v0.t
+	vsxseg4ei16.v v4, (a0), v12
+	vsxseg4ei16.v v4, 0(a0), v12
+	vsxseg4ei16.v v4, (a0), v12, v0.t
+
+	vlxseg5ei16.v v4, (a0), v12
+	vlxseg5ei16.v v4, 0(a0), v12
+	vlxseg5ei16.v v4, (a0), v12, v0.t
+	vsxseg5ei16.v v4, (a0), v12
+	vsxseg5ei16.v v4, 0(a0), v12
+	vsxseg5ei16.v v4, (a0), v12, v0.t
+
+	vlxseg6ei16.v v4, (a0), v12
+	vlxseg6ei16.v v4, 0(a0), v12
+	vlxseg6ei16.v v4, (a0), v12, v0.t
+	vsxseg6ei16.v v4, (a0), v12
+	vsxseg6ei16.v v4, 0(a0), v12
+	vsxseg6ei16.v v4, (a0), v12, v0.t
+
+	vlxseg7ei16.v v4, (a0), v12
+	vlxseg7ei16.v v4, 0(a0), v12
+	vlxseg7ei16.v v4, (a0), v12, v0.t
+	vsxseg7ei16.v v4, (a0), v12
+	vsxseg7ei16.v v4, 0(a0), v12
+	vsxseg7ei16.v v4, (a0), v12, v0.t
+
+	vlxseg8ei16.v v4, (a0), v12
+	vlxseg8ei16.v v4, 0(a0), v12
+	vlxseg8ei16.v v4, (a0), v12, v0.t
+	vsxseg8ei16.v v4, (a0), v12
+	vsxseg8ei16.v v4, 0(a0), v12
+	vsxseg8ei16.v v4, (a0), v12, v0.t
+
+	vlxseg2ei32.v v4, (a0), v12
+	vlxseg2ei32.v v4, 0(a0), v12
+	vlxseg2ei32.v v4, (a0), v12, v0.t
+	vsxseg2ei32.v v4, (a0), v12
+	vsxseg2ei32.v v4, 0(a0), v12
+	vsxseg2ei32.v v4, (a0), v12, v0.t
+
+	vlxseg3ei32.v v4, (a0), v12
+	vlxseg3ei32.v v4, 0(a0), v12
+	vlxseg3ei32.v v4, (a0), v12, v0.t
+	vsxseg3ei32.v v4, (a0), v12
+	vsxseg3ei32.v v4, 0(a0), v12
+	vsxseg3ei32.v v4, (a0), v12, v0.t
+
+	vlxseg4ei32.v v4, (a0), v12
+	vlxseg4ei32.v v4, 0(a0), v12
+	vlxseg4ei32.v v4, (a0), v12, v0.t
+	vsxseg4ei32.v v4, (a0), v12
+	vsxseg4ei32.v v4, 0(a0), v12
+	vsxseg4ei32.v v4, (a0), v12, v0.t
+
+	vlxseg5ei32.v v4, (a0), v12
+	vlxseg5ei32.v v4, 0(a0), v12
+	vlxseg5ei32.v v4, (a0), v12, v0.t
+	vsxseg5ei32.v v4, (a0), v12
+	vsxseg5ei32.v v4, 0(a0), v12
+	vsxseg5ei32.v v4, (a0), v12, v0.t
+
+	vlxseg6ei32.v v4, (a0), v12
+	vlxseg6ei32.v v4, 0(a0), v12
+	vlxseg6ei32.v v4, (a0), v12, v0.t
+	vsxseg6ei32.v v4, (a0), v12
+	vsxseg6ei32.v v4, 0(a0), v12
+	vsxseg6ei32.v v4, (a0), v12, v0.t
+
+	vlxseg7ei32.v v4, (a0), v12
+	vlxseg7ei32.v v4, 0(a0), v12
+	vlxseg7ei32.v v4, (a0), v12, v0.t
+	vsxseg7ei32.v v4, (a0), v12
+	vsxseg7ei32.v v4, 0(a0), v12
+	vsxseg7ei32.v v4, (a0), v12, v0.t
+
+	vlxseg8ei32.v v4, (a0), v12
+	vlxseg8ei32.v v4, 0(a0), v12
+	vlxseg8ei32.v v4, (a0), v12, v0.t
+	vsxseg8ei32.v v4, (a0), v12
+	vsxseg8ei32.v v4, 0(a0), v12
+	vsxseg8ei32.v v4, (a0), v12, v0.t
+
+	vlxseg2ei64.v v4, (a0), v12
+	vlxseg2ei64.v v4, 0(a0), v12
+	vlxseg2ei64.v v4, (a0), v12, v0.t
+	vsxseg2ei64.v v4, (a0), v12
+	vsxseg2ei64.v v4, 0(a0), v12
+	vsxseg2ei64.v v4, (a0), v12, v0.t
+
+	vlxseg3ei64.v v4, (a0), v12
+	vlxseg3ei64.v v4, 0(a0), v12
+	vlxseg3ei64.v v4, (a0), v12, v0.t
+	vsxseg3ei64.v v4, (a0), v12
+	vsxseg3ei64.v v4, 0(a0), v12
+	vsxseg3ei64.v v4, (a0), v12, v0.t
+
+	vlxseg4ei64.v v4, (a0), v12
+	vlxseg4ei64.v v4, 0(a0), v12
+	vlxseg4ei64.v v4, (a0), v12, v0.t
+	vsxseg4ei64.v v4, (a0), v12
+	vsxseg4ei64.v v4, 0(a0), v12
+	vsxseg4ei64.v v4, (a0), v12, v0.t
+
+	vlxseg5ei64.v v4, (a0), v12
+	vlxseg5ei64.v v4, 0(a0), v12
+	vlxseg5ei64.v v4, (a0), v12, v0.t
+	vsxseg5ei64.v v4, (a0), v12
+	vsxseg5ei64.v v4, 0(a0), v12
+	vsxseg5ei64.v v4, (a0), v12, v0.t
+
+	vlxseg6ei64.v v4, (a0), v12
+	vlxseg6ei64.v v4, 0(a0), v12
+	vlxseg6ei64.v v4, (a0), v12, v0.t
+	vsxseg6ei64.v v4, (a0), v12
+	vsxseg6ei64.v v4, 0(a0), v12
+	vsxseg6ei64.v v4, (a0), v12, v0.t
+
+	vlxseg7ei64.v v4, (a0), v12
+	vlxseg7ei64.v v4, 0(a0), v12
+	vlxseg7ei64.v v4, (a0), v12, v0.t
+	vsxseg7ei64.v v4, (a0), v12
+	vsxseg7ei64.v v4, 0(a0), v12
+	vsxseg7ei64.v v4, (a0), v12, v0.t
+
+	vlxseg8ei64.v v4, (a0), v12
+	vlxseg8ei64.v v4, 0(a0), v12
+	vlxseg8ei64.v v4, (a0), v12, v0.t
+	vsxseg8ei64.v v4, (a0), v12
+	vsxseg8ei64.v v4, 0(a0), v12
+	vsxseg8ei64.v v4, (a0), v12, v0.t
+
+	vlxseg2ei128.v v4, (a0), v12
+	vlxseg2ei128.v v4, 0(a0), v12
+	vlxseg2ei128.v v4, (a0), v12, v0.t
+	vsxseg2ei128.v v4, (a0), v12
+	vsxseg2ei128.v v4, 0(a0), v12
+	vsxseg2ei128.v v4, (a0), v12, v0.t
+
+	vlxseg3ei128.v v4, (a0), v12
+	vlxseg3ei128.v v4, 0(a0), v12
+	vlxseg3ei128.v v4, (a0), v12, v0.t
+	vsxseg3ei128.v v4, (a0), v12
+	vsxseg3ei128.v v4, 0(a0), v12
+	vsxseg3ei128.v v4, (a0), v12, v0.t
+
+	vlxseg4ei128.v v4, (a0), v12
+	vlxseg4ei128.v v4, 0(a0), v12
+	vlxseg4ei128.v v4, (a0), v12, v0.t
+	vsxseg4ei128.v v4, (a0), v12
+	vsxseg4ei128.v v4, 0(a0), v12
+	vsxseg4ei128.v v4, (a0), v12, v0.t
+
+	vlxseg5ei128.v v4, (a0), v12
+	vlxseg5ei128.v v4, 0(a0), v12
+	vlxseg5ei128.v v4, (a0), v12, v0.t
+	vsxseg5ei128.v v4, (a0), v12
+	vsxseg5ei128.v v4, 0(a0), v12
+	vsxseg5ei128.v v4, (a0), v12, v0.t
+
+	vlxseg6ei128.v v4, (a0), v12
+	vlxseg6ei128.v v4, 0(a0), v12
+	vlxseg6ei128.v v4, (a0), v12, v0.t
+	vsxseg6ei128.v v4, (a0), v12
+	vsxseg6ei128.v v4, 0(a0), v12
+	vsxseg6ei128.v v4, (a0), v12, v0.t
+
+	vlxseg7ei128.v v4, (a0), v12
+	vlxseg7ei128.v v4, 0(a0), v12
+	vlxseg7ei128.v v4, (a0), v12, v0.t
+	vsxseg7ei128.v v4, (a0), v12
+	vsxseg7ei128.v v4, 0(a0), v12
+	vsxseg7ei128.v v4, (a0), v12, v0.t
+
+	vlxseg8ei128.v v4, (a0), v12
+	vlxseg8ei128.v v4, 0(a0), v12
+	vlxseg8ei128.v v4, (a0), v12, v0.t
+	vsxseg8ei128.v v4, (a0), v12
+	vsxseg8ei128.v v4, 0(a0), v12
+	vsxseg8ei128.v v4, (a0), v12, v0.t
+
+	vlxseg2ei256.v v4, (a0), v12
+	vlxseg2ei256.v v4, 0(a0), v12
+	vlxseg2ei256.v v4, (a0), v12, v0.t
+	vsxseg2ei256.v v4, (a0), v12
+	vsxseg2ei256.v v4, 0(a0), v12
+	vsxseg2ei256.v v4, (a0), v12, v0.t
+
+	vlxseg3ei256.v v4, (a0), v12
+	vlxseg3ei256.v v4, 0(a0), v12
+	vlxseg3ei256.v v4, (a0), v12, v0.t
+	vsxseg3ei256.v v4, (a0), v12
+	vsxseg3ei256.v v4, 0(a0), v12
+	vsxseg3ei256.v v4, (a0), v12, v0.t
+
+	vlxseg4ei256.v v4, (a0), v12
+	vlxseg4ei256.v v4, 0(a0), v12
+	vlxseg4ei256.v v4, (a0), v12, v0.t
+	vsxseg4ei256.v v4, (a0), v12
+	vsxseg4ei256.v v4, 0(a0), v12
+	vsxseg4ei256.v v4, (a0), v12, v0.t
+
+	vlxseg5ei256.v v4, (a0), v12
+	vlxseg5ei256.v v4, 0(a0), v12
+	vlxseg5ei256.v v4, (a0), v12, v0.t
+	vsxseg5ei256.v v4, (a0), v12
+	vsxseg5ei256.v v4, 0(a0), v12
+	vsxseg5ei256.v v4, (a0), v12, v0.t
+
+	vlxseg6ei256.v v4, (a0), v12
+	vlxseg6ei256.v v4, 0(a0), v12
+	vlxseg6ei256.v v4, (a0), v12, v0.t
+	vsxseg6ei256.v v4, (a0), v12
+	vsxseg6ei256.v v4, 0(a0), v12
+	vsxseg6ei256.v v4, (a0), v12, v0.t
+
+	vlxseg7ei256.v v4, (a0), v12
+	vlxseg7ei256.v v4, 0(a0), v12
+	vlxseg7ei256.v v4, (a0), v12, v0.t
+	vsxseg7ei256.v v4, (a0), v12
+	vsxseg7ei256.v v4, 0(a0), v12
+	vsxseg7ei256.v v4, (a0), v12, v0.t
+
+	vlxseg8ei256.v v4, (a0), v12
+	vlxseg8ei256.v v4, 0(a0), v12
+	vlxseg8ei256.v v4, (a0), v12, v0.t
+	vsxseg8ei256.v v4, (a0), v12
+	vsxseg8ei256.v v4, 0(a0), v12
+	vsxseg8ei256.v v4, (a0), v12, v0.t
+
+	vlxseg2ei512.v v4, (a0), v12
+	vlxseg2ei512.v v4, 0(a0), v12
+	vlxseg2ei512.v v4, (a0), v12, v0.t
+	vsxseg2ei512.v v4, (a0), v12
+	vsxseg2ei512.v v4, 0(a0), v12
+	vsxseg2ei512.v v4, (a0), v12, v0.t
+
+	vlxseg3ei512.v v4, (a0), v12
+	vlxseg3ei512.v v4, 0(a0), v12
+	vlxseg3ei512.v v4, (a0), v12, v0.t
+	vsxseg3ei512.v v4, (a0), v12
+	vsxseg3ei512.v v4, 0(a0), v12
+	vsxseg3ei512.v v4, (a0), v12, v0.t
+
+	vlxseg4ei512.v v4, (a0), v12
+	vlxseg4ei512.v v4, 0(a0), v12
+	vlxseg4ei512.v v4, (a0), v12, v0.t
+	vsxseg4ei512.v v4, (a0), v12
+	vsxseg4ei512.v v4, 0(a0), v12
+	vsxseg4ei512.v v4, (a0), v12, v0.t
+
+	vlxseg5ei512.v v4, (a0), v12
+	vlxseg5ei512.v v4, 0(a0), v12
+	vlxseg5ei512.v v4, (a0), v12, v0.t
+	vsxseg5ei512.v v4, (a0), v12
+	vsxseg5ei512.v v4, 0(a0), v12
+	vsxseg5ei512.v v4, (a0), v12, v0.t
+
+	vlxseg6ei512.v v4, (a0), v12
+	vlxseg6ei512.v v4, 0(a0), v12
+	vlxseg6ei512.v v4, (a0), v12, v0.t
+	vsxseg6ei512.v v4, (a0), v12
+	vsxseg6ei512.v v4, 0(a0), v12
+	vsxseg6ei512.v v4, (a0), v12, v0.t
+
+	vlxseg7ei512.v v4, (a0), v12
+	vlxseg7ei512.v v4, 0(a0), v12
+	vlxseg7ei512.v v4, (a0), v12, v0.t
+	vsxseg7ei512.v v4, (a0), v12
+	vsxseg7ei512.v v4, 0(a0), v12
+	vsxseg7ei512.v v4, (a0), v12, v0.t
+
+	vlxseg8ei512.v v4, (a0), v12
+	vlxseg8ei512.v v4, 0(a0), v12
+	vlxseg8ei512.v v4, (a0), v12, v0.t
+	vsxseg8ei512.v v4, (a0), v12
+	vsxseg8ei512.v v4, 0(a0), v12
+	vsxseg8ei512.v v4, (a0), v12, v0.t
+
+	vlxseg2ei1024.v v4, (a0), v12
+	vlxseg2ei1024.v v4, 0(a0), v12
+	vlxseg2ei1024.v v4, (a0), v12, v0.t
+	vsxseg2ei1024.v v4, (a0), v12
+	vsxseg2ei1024.v v4, 0(a0), v12
+	vsxseg2ei1024.v v4, (a0), v12, v0.t
+
+	vlxseg3ei1024.v v4, (a0), v12
+	vlxseg3ei1024.v v4, 0(a0), v12
+	vlxseg3ei1024.v v4, (a0), v12, v0.t
+	vsxseg3ei1024.v v4, (a0), v12
+	vsxseg3ei1024.v v4, 0(a0), v12
+	vsxseg3ei1024.v v4, (a0), v12, v0.t
+
+	vlxseg4ei1024.v v4, (a0), v12
+	vlxseg4ei1024.v v4, 0(a0), v12
+	vlxseg4ei1024.v v4, (a0), v12, v0.t
+	vsxseg4ei1024.v v4, (a0), v12
+	vsxseg4ei1024.v v4, 0(a0), v12
+	vsxseg4ei1024.v v4, (a0), v12, v0.t
+
+	vlxseg5ei1024.v v4, (a0), v12
+	vlxseg5ei1024.v v4, 0(a0), v12
+	vlxseg5ei1024.v v4, (a0), v12, v0.t
+	vsxseg5ei1024.v v4, (a0), v12
+	vsxseg5ei1024.v v4, 0(a0), v12
+	vsxseg5ei1024.v v4, (a0), v12, v0.t
+
+	vlxseg6ei1024.v v4, (a0), v12
+	vlxseg6ei1024.v v4, 0(a0), v12
+	vlxseg6ei1024.v v4, (a0), v12, v0.t
+	vsxseg6ei1024.v v4, (a0), v12
+	vsxseg6ei1024.v v4, 0(a0), v12
+	vsxseg6ei1024.v v4, (a0), v12, v0.t
+
+	vlxseg7ei1024.v v4, (a0), v12
+	vlxseg7ei1024.v v4, 0(a0), v12
+	vlxseg7ei1024.v v4, (a0), v12, v0.t
+	vsxseg7ei1024.v v4, (a0), v12
+	vsxseg7ei1024.v v4, 0(a0), v12
+	vsxseg7ei1024.v v4, (a0), v12, v0.t
+
+	vlxseg8ei1024.v v4, (a0), v12
+	vlxseg8ei1024.v v4, 0(a0), v12
+	vlxseg8ei1024.v v4, (a0), v12, v0.t
+	vsxseg8ei1024.v v4, (a0), v12
+	vsxseg8ei1024.v v4, 0(a0), v12
+	vsxseg8ei1024.v v4, (a0), v12, v0.t
+
+	vlseg2e8ff.v v4, (a0)
+	vlseg2e8ff.v v4, 0(a0)
+	vlseg2e8ff.v v4, (a0), v0.t
+
+	vlseg3e8ff.v v4, (a0)
+	vlseg3e8ff.v v4, 0(a0)
+	vlseg3e8ff.v v4, (a0), v0.t
+
+	vlseg4e8ff.v v4, (a0)
+	vlseg4e8ff.v v4, 0(a0)
+	vlseg4e8ff.v v4, (a0), v0.t
+
+	vlseg5e8ff.v v4, (a0)
+	vlseg5e8ff.v v4, 0(a0)
+	vlseg5e8ff.v v4, (a0), v0.t
+
+	vlseg6e8ff.v v4, (a0)
+	vlseg6e8ff.v v4, 0(a0)
+	vlseg6e8ff.v v4, (a0), v0.t
+
+	vlseg7e8ff.v v4, (a0)
+	vlseg7e8ff.v v4, 0(a0)
+	vlseg7e8ff.v v4, (a0), v0.t
+
+	vlseg8e8ff.v v4, (a0)
+	vlseg8e8ff.v v4, 0(a0)
+	vlseg8e8ff.v v4, (a0), v0.t
+
+	vlseg2e16ff.v v4, (a0)
+	vlseg2e16ff.v v4, 0(a0)
+	vlseg2e16ff.v v4, (a0), v0.t
+
+	vlseg3e16ff.v v4, (a0)
+	vlseg3e16ff.v v4, 0(a0)
+	vlseg3e16ff.v v4, (a0), v0.t
+
+	vlseg4e16ff.v v4, (a0)
+	vlseg4e16ff.v v4, 0(a0)
+	vlseg4e16ff.v v4, (a0), v0.t
+
+	vlseg5e16ff.v v4, (a0)
+	vlseg5e16ff.v v4, 0(a0)
+	vlseg5e16ff.v v4, (a0), v0.t
+
+	vlseg6e16ff.v v4, (a0)
+	vlseg6e16ff.v v4, 0(a0)
+	vlseg6e16ff.v v4, (a0), v0.t
+
+	vlseg7e16ff.v v4, (a0)
+	vlseg7e16ff.v v4, 0(a0)
+	vlseg7e16ff.v v4, (a0), v0.t
+
+	vlseg8e16ff.v v4, (a0)
+	vlseg8e16ff.v v4, 0(a0)
+	vlseg8e16ff.v v4, (a0), v0.t
+
+	vlseg2e32ff.v v4, (a0)
+	vlseg2e32ff.v v4, 0(a0)
+	vlseg2e32ff.v v4, (a0), v0.t
+
+	vlseg3e32ff.v v4, (a0)
+	vlseg3e32ff.v v4, 0(a0)
+	vlseg3e32ff.v v4, (a0), v0.t
+
+	vlseg4e32ff.v v4, (a0)
+	vlseg4e32ff.v v4, 0(a0)
+	vlseg4e32ff.v v4, (a0), v0.t
+
+	vlseg5e32ff.v v4, (a0)
+	vlseg5e32ff.v v4, 0(a0)
+	vlseg5e32ff.v v4, (a0), v0.t
+
+	vlseg6e32ff.v v4, (a0)
+	vlseg6e32ff.v v4, 0(a0)
+	vlseg6e32ff.v v4, (a0), v0.t
+
+	vlseg7e32ff.v v4, (a0)
+	vlseg7e32ff.v v4, 0(a0)
+	vlseg7e32ff.v v4, (a0), v0.t
+
+	vlseg8e32ff.v v4, (a0)
+	vlseg8e32ff.v v4, 0(a0)
+	vlseg8e32ff.v v4, (a0), v0.t
+
+	vlseg2e64ff.v v4, (a0)
+	vlseg2e64ff.v v4, 0(a0)
+	vlseg2e64ff.v v4, (a0), v0.t
+
+	vlseg3e64ff.v v4, (a0)
+	vlseg3e64ff.v v4, 0(a0)
+	vlseg3e64ff.v v4, (a0), v0.t
+
+	vlseg4e64ff.v v4, (a0)
+	vlseg4e64ff.v v4, 0(a0)
+	vlseg4e64ff.v v4, (a0), v0.t
+
+	vlseg5e64ff.v v4, (a0)
+	vlseg5e64ff.v v4, 0(a0)
+	vlseg5e64ff.v v4, (a0), v0.t
+
+	vlseg6e64ff.v v4, (a0)
+	vlseg6e64ff.v v4, 0(a0)
+	vlseg6e64ff.v v4, (a0), v0.t
+
+	vlseg7e64ff.v v4, (a0)
+	vlseg7e64ff.v v4, 0(a0)
+	vlseg7e64ff.v v4, (a0), v0.t
+
+	vlseg8e64ff.v v4, (a0)
+	vlseg8e64ff.v v4, 0(a0)
+	vlseg8e64ff.v v4, (a0), v0.t
+
+	vlseg2e128ff.v v4, (a0)
+	vlseg2e128ff.v v4, 0(a0)
+	vlseg2e128ff.v v4, (a0), v0.t
+
+	vlseg3e128ff.v v4, (a0)
+	vlseg3e128ff.v v4, 0(a0)
+	vlseg3e128ff.v v4, (a0), v0.t
+
+	vlseg4e128ff.v v4, (a0)
+	vlseg4e128ff.v v4, 0(a0)
+	vlseg4e128ff.v v4, (a0), v0.t
+
+	vlseg5e128ff.v v4, (a0)
+	vlseg5e128ff.v v4, 0(a0)
+	vlseg5e128ff.v v4, (a0), v0.t
+
+	vlseg6e128ff.v v4, (a0)
+	vlseg6e128ff.v v4, 0(a0)
+	vlseg6e128ff.v v4, (a0), v0.t
+
+	vlseg7e128ff.v v4, (a0)
+	vlseg7e128ff.v v4, 0(a0)
+	vlseg7e128ff.v v4, (a0), v0.t
+
+	vlseg8e128ff.v v4, (a0)
+	vlseg8e128ff.v v4, 0(a0)
+	vlseg8e128ff.v v4, (a0), v0.t
+
+	vlseg2e256ff.v v4, (a0)
+	vlseg2e256ff.v v4, 0(a0)
+	vlseg2e256ff.v v4, (a0), v0.t
+
+	vlseg3e256ff.v v4, (a0)
+	vlseg3e256ff.v v4, 0(a0)
+	vlseg3e256ff.v v4, (a0), v0.t
+
+	vlseg4e256ff.v v4, (a0)
+	vlseg4e256ff.v v4, 0(a0)
+	vlseg4e256ff.v v4, (a0), v0.t
+
+	vlseg5e256ff.v v4, (a0)
+	vlseg5e256ff.v v4, 0(a0)
+	vlseg5e256ff.v v4, (a0), v0.t
+
+	vlseg6e256ff.v v4, (a0)
+	vlseg6e256ff.v v4, 0(a0)
+	vlseg6e256ff.v v4, (a0), v0.t
+
+	vlseg7e256ff.v v4, (a0)
+	vlseg7e256ff.v v4, 0(a0)
+	vlseg7e256ff.v v4, (a0), v0.t
+
+	vlseg8e256ff.v v4, (a0)
+	vlseg8e256ff.v v4, 0(a0)
+	vlseg8e256ff.v v4, (a0), v0.t
+
+	vlseg2e512ff.v v4, (a0)
+	vlseg2e512ff.v v4, 0(a0)
+	vlseg2e512ff.v v4, (a0), v0.t
+
+	vlseg3e512ff.v v4, (a0)
+	vlseg3e512ff.v v4, 0(a0)
+	vlseg3e512ff.v v4, (a0), v0.t
+
+	vlseg4e512ff.v v4, (a0)
+	vlseg4e512ff.v v4, 0(a0)
+	vlseg4e512ff.v v4, (a0), v0.t
+
+	vlseg5e512ff.v v4, (a0)
+	vlseg5e512ff.v v4, 0(a0)
+	vlseg5e512ff.v v4, (a0), v0.t
+
+	vlseg6e512ff.v v4, (a0)
+	vlseg6e512ff.v v4, 0(a0)
+	vlseg6e512ff.v v4, (a0), v0.t
+
+	vlseg7e512ff.v v4, (a0)
+	vlseg7e512ff.v v4, 0(a0)
+	vlseg7e512ff.v v4, (a0), v0.t
+
+	vlseg8e512ff.v v4, (a0)
+	vlseg8e512ff.v v4, 0(a0)
+	vlseg8e512ff.v v4, (a0), v0.t
+
+	vlseg2e1024ff.v v4, (a0)
+	vlseg2e1024ff.v v4, 0(a0)
+	vlseg2e1024ff.v v4, (a0), v0.t
+
+	vlseg3e1024ff.v v4, (a0)
+	vlseg3e1024ff.v v4, 0(a0)
+	vlseg3e1024ff.v v4, (a0), v0.t
+
+	vlseg4e1024ff.v v4, (a0)
+	vlseg4e1024ff.v v4, 0(a0)
+	vlseg4e1024ff.v v4, (a0), v0.t
+
+	vlseg5e1024ff.v v4, (a0)
+	vlseg5e1024ff.v v4, 0(a0)
+	vlseg5e1024ff.v v4, (a0), v0.t
+
+	vlseg6e1024ff.v v4, (a0)
+	vlseg6e1024ff.v v4, 0(a0)
+	vlseg6e1024ff.v v4, (a0), v0.t
+
+	vlseg7e1024ff.v v4, (a0)
+	vlseg7e1024ff.v v4, 0(a0)
+	vlseg7e1024ff.v v4, (a0), v0.t
+
+	vlseg8e1024ff.v v4, (a0)
+	vlseg8e1024ff.v v4, 0(a0)
+	vlseg8e1024ff.v v4, (a0), v0.t
 
 	vl1r.v v3, (a0)
 	vl1r.v v3, 0(a0)
 	vs1r.v v3, (a1)
 	vs1r.v v3, 0(a1)
 
-	vamoaddw.v v4, (a1), v8, v4
-	vamoaddw.v x0, (a1), v8, v4
-	vamoadde.v v4, (a1), v8, v4
-	vamoadde.v x0, (a1), v8, v4
-	vamoaddw.v v4, (a1), v8, v4, v0.t
-	vamoaddw.v x0, (a1), v8, v4, v0.t
-	vamoadde.v v4, (a1), v8, v4, v0.t
-	vamoadde.v x0, (a1), v8, v4, v0.t
-	vamoswapw.v v4, (a1), v8, v4
-	vamoswapw.v x0, (a1), v8, v4
-	vamoswape.v v4, (a1), v8, v4
-	vamoswape.v x0, (a1), v8, v4
-	vamoswapw.v v4, (a1), v8, v4, v0.t
-	vamoswapw.v x0, (a1), v8, v4, v0.t
-	vamoswape.v v4, (a1), v8, v4, v0.t
-	vamoswape.v x0, (a1), v8, v4, v0.t
+	vamoaddei8.v v4, (a1), v8, v4
+	vamoaddei8.v x0, (a1), v8, v4
+	vamoaddei8.v v4, (a1), v8, v4, v0.t
+	vamoaddei8.v x0, (a1), v8, v4, v0.t
+	vamoswapei8.v v4, (a1), v8, v4
+	vamoswapei8.v x0, (a1), v8, v4
+	vamoswapei8.v v4, (a1), v8, v4, v0.t
+	vamoswapei8.v x0, (a1), v8, v4, v0.t
 
-	vamoxorw.v v4, (a1), v8, v4
-	vamoxorw.v x0, (a1), v8, v4
-	vamoxore.v v4, (a1), v8, v4
-	vamoxore.v x0, (a1), v8, v4
-	vamoxorw.v v4, (a1), v8, v4, v0.t
-	vamoxorw.v x0, (a1), v8, v4, v0.t
-	vamoxore.v v4, (a1), v8, v4, v0.t
-	vamoxore.v x0, (a1), v8, v4, v0.t
-	vamoandw.v v4, (a1), v8, v4
-	vamoandw.v x0, (a1), v8, v4
-	vamoande.v v4, (a1), v8, v4
-	vamoande.v x0, (a1), v8, v4
-	vamoandw.v v4, (a1), v8, v4, v0.t
-	vamoandw.v x0, (a1), v8, v4, v0.t
-	vamoande.v v4, (a1), v8, v4, v0.t
-	vamoande.v x0, (a1), v8, v4, v0.t
-	vamoorw.v v4, (a1), v8, v4
-	vamoorw.v x0, (a1), v8, v4
-	vamoore.v v4, (a1), v8, v4
-	vamoore.v x0, (a1), v8, v4
-	vamoorw.v v4, (a1), v8, v4, v0.t
-	vamoorw.v x0, (a1), v8, v4, v0.t
-	vamoore.v v4, (a1), v8, v4, v0.t
-	vamoore.v x0, (a1), v8, v4, v0.t
+	vamoxorei8.v v4, (a1), v8, v4
+	vamoxorei8.v x0, (a1), v8, v4
+	vamoxorei8.v v4, (a1), v8, v4, v0.t
+	vamoxorei8.v x0, (a1), v8, v4, v0.t
+	vamoandei8.v v4, (a1), v8, v4
+	vamoandei8.v x0, (a1), v8, v4
+	vamoandei8.v v4, (a1), v8, v4, v0.t
+	vamoandei8.v x0, (a1), v8, v4, v0.t
+	vamoorei8.v v4, (a1), v8, v4
+	vamoorei8.v x0, (a1), v8, v4
+	vamoorei8.v v4, (a1), v8, v4, v0.t
+	vamoorei8.v x0, (a1), v8, v4, v0.t
 
-	vamominw.v v4, (a1), v8, v4
-	vamominw.v x0, (a1), v8, v4
-	vamomine.v v4, (a1), v8, v4
-	vamomine.v x0, (a1), v8, v4
-	vamominw.v v4, (a1), v8, v4, v0.t
-	vamominw.v x0, (a1), v8, v4, v0.t
-	vamomine.v v4, (a1), v8, v4, v0.t
-	vamomine.v x0, (a1), v8, v4, v0.t
-	vamomaxw.v v4, (a1), v8, v4
-	vamomaxw.v x0, (a1), v8, v4
-	vamomaxe.v v4, (a1), v8, v4
-	vamomaxe.v x0, (a1), v8, v4
-	vamomaxw.v v4, (a1), v8, v4, v0.t
-	vamomaxw.v x0, (a1), v8, v4, v0.t
-	vamomaxe.v v4, (a1), v8, v4, v0.t
-	vamomaxe.v x0, (a1), v8, v4, v0.t
-	vamominuw.v v4, (a1), v8, v4
-	vamominuw.v x0, (a1), v8, v4
-	vamominue.v v4, (a1), v8, v4
-	vamominue.v x0, (a1), v8, v4
-	vamominuw.v v4, (a1), v8, v4, v0.t
-	vamominuw.v x0, (a1), v8, v4, v0.t
-	vamominue.v v4, (a1), v8, v4, v0.t
-	vamominue.v x0, (a1), v8, v4, v0.t
-	vamomaxuw.v v4, (a1), v8, v4
-	vamomaxuw.v x0, (a1), v8, v4
-	vamomaxue.v v4, (a1), v8, v4
-	vamomaxue.v x0, (a1), v8, v4
-	vamomaxuw.v v4, (a1), v8, v4, v0.t
-	vamomaxuw.v x0, (a1), v8, v4, v0.t
-	vamomaxue.v v4, (a1), v8, v4, v0.t
-	vamomaxue.v x0, (a1), v8, v4, v0.t
+	vamominei8.v v4, (a1), v8, v4
+	vamominei8.v x0, (a1), v8, v4
+	vamominei8.v v4, (a1), v8, v4, v0.t
+	vamominei8.v x0, (a1), v8, v4, v0.t
+	vamomaxei8.v v4, (a1), v8, v4
+	vamomaxei8.v x0, (a1), v8, v4
+	vamomaxei8.v v4, (a1), v8, v4, v0.t
+	vamomaxei8.v x0, (a1), v8, v4, v0.t
+	vamominuei8.v v4, (a1), v8, v4
+	vamominuei8.v x0, (a1), v8, v4
+	vamominuei8.v v4, (a1), v8, v4, v0.t
+	vamominuei8.v x0, (a1), v8, v4, v0.t
+	vamomaxuei8.v v4, (a1), v8, v4
+	vamomaxuei8.v x0, (a1), v8, v4
+	vamomaxuei8.v v4, (a1), v8, v4, v0.t
+	vamomaxuei8.v x0, (a1), v8, v4, v0.t
 
-	vamoaddw.v v4, 0(a1), v8, v4
-	vamoaddw.v x0, 0(a1), v8, v4
-	vamoadde.v v4, 0(a1), v8, v4
-	vamoadde.v x0, 0(a1), v8, v4
-	vamoaddw.v v4, 0(a1), v8, v4, v0.t
-	vamoaddw.v x0, 0(a1), v8, v4, v0.t
-	vamoadde.v v4, 0(a1), v8, v4, v0.t
-	vamoadde.v x0, 0(a1), v8, v4, v0.t
-	vamoswapw.v v4, 0(a1), v8, v4
-	vamoswapw.v x0, 0(a1), v8, v4
-	vamoswape.v v4, 0(a1), v8, v4
-	vamoswape.v x0, 0(a1), v8, v4
-	vamoswapw.v v4, 0(a1), v8, v4, v0.t
-	vamoswapw.v x0, 0(a1), v8, v4, v0.t
-	vamoswape.v v4, 0(a1), v8, v4, v0.t
-	vamoswape.v x0, 0(a1), v8, v4, v0.t
+	vamoaddei8.v v4, 0(a1), v8, v4
+	vamoaddei8.v x0, 0(a1), v8, v4
+	vamoaddei8.v v4, 0(a1), v8, v4, v0.t
+	vamoaddei8.v x0, 0(a1), v8, v4, v0.t
+	vamoswapei8.v v4, 0(a1), v8, v4
+	vamoswapei8.v x0, 0(a1), v8, v4
+	vamoswapei8.v v4, 0(a1), v8, v4, v0.t
+	vamoswapei8.v x0, 0(a1), v8, v4, v0.t
 
-	vamoxorw.v v4, 0(a1), v8, v4
-	vamoxorw.v x0, 0(a1), v8, v4
-	vamoxore.v v4, 0(a1), v8, v4
-	vamoxore.v x0, 0(a1), v8, v4
-	vamoxorw.v v4, 0(a1), v8, v4, v0.t
-	vamoxorw.v x0, 0(a1), v8, v4, v0.t
-	vamoxore.v v4, 0(a1), v8, v4, v0.t
-	vamoxore.v x0, 0(a1), v8, v4, v0.t
-	vamoandw.v v4, 0(a1), v8, v4
-	vamoandw.v x0, 0(a1), v8, v4
-	vamoande.v v4, 0(a1), v8, v4
-	vamoande.v x0, 0(a1), v8, v4
-	vamoandw.v v4, 0(a1), v8, v4, v0.t
-	vamoandw.v x0, 0(a1), v8, v4, v0.t
-	vamoande.v v4, 0(a1), v8, v4, v0.t
-	vamoande.v x0, 0(a1), v8, v4, v0.t
-	vamoorw.v v4, 0(a1), v8, v4
-	vamoorw.v x0, 0(a1), v8, v4
-	vamoore.v v4, 0(a1), v8, v4
-	vamoore.v x0, 0(a1), v8, v4
-	vamoorw.v v4, 0(a1), v8, v4, v0.t
-	vamoorw.v x0, 0(a1), v8, v4, v0.t
-	vamoore.v v4, 0(a1), v8, v4, v0.t
-	vamoore.v x0, 0(a1), v8, v4, v0.t
+	vamoxorei8.v v4, 0(a1), v8, v4
+	vamoxorei8.v x0, 0(a1), v8, v4
+	vamoxorei8.v v4, 0(a1), v8, v4, v0.t
+	vamoxorei8.v x0, 0(a1), v8, v4, v0.t
+	vamoandei8.v v4, 0(a1), v8, v4
+	vamoandei8.v x0, 0(a1), v8, v4
+	vamoandei8.v v4, 0(a1), v8, v4, v0.t
+	vamoandei8.v x0, 0(a1), v8, v4, v0.t
+	vamoorei8.v v4, 0(a1), v8, v4
+	vamoorei8.v x0, 0(a1), v8, v4
+	vamoorei8.v v4, 0(a1), v8, v4, v0.t
+	vamoorei8.v x0, 0(a1), v8, v4, v0.t
 
-	vamominw.v v4, 0(a1), v8, v4
-	vamominw.v x0, 0(a1), v8, v4
-	vamomine.v v4, 0(a1), v8, v4
-	vamomine.v x0, 0(a1), v8, v4
-	vamominw.v v4, 0(a1), v8, v4, v0.t
-	vamominw.v x0, 0(a1), v8, v4, v0.t
-	vamomine.v v4, 0(a1), v8, v4, v0.t
-	vamomine.v x0, 0(a1), v8, v4, v0.t
-	vamomaxw.v v4, 0(a1), v8, v4
-	vamomaxw.v x0, 0(a1), v8, v4
-	vamomaxe.v v4, 0(a1), v8, v4
-	vamomaxe.v x0, 0(a1), v8, v4
-	vamomaxw.v v4, 0(a1), v8, v4, v0.t
-	vamomaxw.v x0, 0(a1), v8, v4, v0.t
-	vamomaxe.v v4, 0(a1), v8, v4, v0.t
-	vamomaxe.v x0, 0(a1), v8, v4, v0.t
-	vamominuw.v v4, 0(a1), v8, v4
-	vamominuw.v x0, 0(a1), v8, v4
-	vamominue.v v4, 0(a1), v8, v4
-	vamominue.v x0, 0(a1), v8, v4
-	vamominuw.v v4, 0(a1), v8, v4, v0.t
-	vamominuw.v x0, 0(a1), v8, v4, v0.t
-	vamominue.v v4, 0(a1), v8, v4, v0.t
-	vamominue.v x0, 0(a1), v8, v4, v0.t
-	vamomaxuw.v v4, 0(a1), v8, v4
-	vamomaxuw.v x0, 0(a1), v8, v4
-	vamomaxue.v v4, 0(a1), v8, v4
-	vamomaxue.v x0, 0(a1), v8, v4
-	vamomaxuw.v v4, 0(a1), v8, v4, v0.t
-	vamomaxuw.v x0, 0(a1), v8, v4, v0.t
-	vamomaxue.v v4, 0(a1), v8, v4, v0.t
-	vamomaxue.v x0, 0(a1), v8, v4, v0.t
+	vamominei8.v v4, 0(a1), v8, v4
+	vamominei8.v x0, 0(a1), v8, v4
+	vamominei8.v v4, 0(a1), v8, v4, v0.t
+	vamominei8.v x0, 0(a1), v8, v4, v0.t
+	vamomaxei8.v v4, 0(a1), v8, v4
+	vamomaxei8.v x0, 0(a1), v8, v4
+	vamomaxei8.v v4, 0(a1), v8, v4, v0.t
+	vamomaxei8.v x0, 0(a1), v8, v4, v0.t
+	vamominuei8.v v4, 0(a1), v8, v4
+	vamominuei8.v x0, 0(a1), v8, v4
+	vamominuei8.v v4, 0(a1), v8, v4, v0.t
+	vamominuei8.v x0, 0(a1), v8, v4, v0.t
+	vamomaxuei8.v v4, 0(a1), v8, v4
+	vamomaxuei8.v x0, 0(a1), v8, v4
+	vamomaxuei8.v v4, 0(a1), v8, v4, v0.t
+	vamomaxuei8.v x0, 0(a1), v8, v4, v0.t
+
+	vamoaddei16.v v4, (a1), v8, v4
+	vamoaddei16.v x0, (a1), v8, v4
+	vamoaddei16.v v4, (a1), v8, v4, v0.t
+	vamoaddei16.v x0, (a1), v8, v4, v0.t
+	vamoswapei16.v v4, (a1), v8, v4
+	vamoswapei16.v x0, (a1), v8, v4
+	vamoswapei16.v v4, (a1), v8, v4, v0.t
+	vamoswapei16.v x0, (a1), v8, v4, v0.t
+
+	vamoxorei16.v v4, (a1), v8, v4
+	vamoxorei16.v x0, (a1), v8, v4
+	vamoxorei16.v v4, (a1), v8, v4, v0.t
+	vamoxorei16.v x0, (a1), v8, v4, v0.t
+	vamoandei16.v v4, (a1), v8, v4
+	vamoandei16.v x0, (a1), v8, v4
+	vamoandei16.v v4, (a1), v8, v4, v0.t
+	vamoandei16.v x0, (a1), v8, v4, v0.t
+	vamoorei16.v v4, (a1), v8, v4
+	vamoorei16.v x0, (a1), v8, v4
+	vamoorei16.v v4, (a1), v8, v4, v0.t
+	vamoorei16.v x0, (a1), v8, v4, v0.t
+
+	vamominei16.v v4, (a1), v8, v4
+	vamominei16.v x0, (a1), v8, v4
+	vamominei16.v v4, (a1), v8, v4, v0.t
+	vamominei16.v x0, (a1), v8, v4, v0.t
+	vamomaxei16.v v4, (a1), v8, v4
+	vamomaxei16.v x0, (a1), v8, v4
+	vamomaxei16.v v4, (a1), v8, v4, v0.t
+	vamomaxei16.v x0, (a1), v8, v4, v0.t
+	vamominuei16.v v4, (a1), v8, v4
+	vamominuei16.v x0, (a1), v8, v4
+	vamominuei16.v v4, (a1), v8, v4, v0.t
+	vamominuei16.v x0, (a1), v8, v4, v0.t
+	vamomaxuei16.v v4, (a1), v8, v4
+	vamomaxuei16.v x0, (a1), v8, v4
+	vamomaxuei16.v v4, (a1), v8, v4, v0.t
+	vamomaxuei16.v x0, (a1), v8, v4, v0.t
+
+	vamoaddei16.v v4, 0(a1), v8, v4
+	vamoaddei16.v x0, 0(a1), v8, v4
+	vamoaddei16.v v4, 0(a1), v8, v4, v0.t
+	vamoaddei16.v x0, 0(a1), v8, v4, v0.t
+	vamoswapei16.v v4, 0(a1), v8, v4
+	vamoswapei16.v x0, 0(a1), v8, v4
+	vamoswapei16.v v4, 0(a1), v8, v4, v0.t
+	vamoswapei16.v x0, 0(a1), v8, v4, v0.t
+
+	vamoxorei16.v v4, 0(a1), v8, v4
+	vamoxorei16.v x0, 0(a1), v8, v4
+	vamoxorei16.v v4, 0(a1), v8, v4, v0.t
+	vamoxorei16.v x0, 0(a1), v8, v4, v0.t
+	vamoandei16.v v4, 0(a1), v8, v4
+	vamoandei16.v x0, 0(a1), v8, v4
+	vamoandei16.v v4, 0(a1), v8, v4, v0.t
+	vamoandei16.v x0, 0(a1), v8, v4, v0.t
+	vamoorei16.v v4, 0(a1), v8, v4
+	vamoorei16.v x0, 0(a1), v8, v4
+	vamoorei16.v v4, 0(a1), v8, v4, v0.t
+	vamoorei16.v x0, 0(a1), v8, v4, v0.t
+
+	vamominei16.v v4, 0(a1), v8, v4
+	vamominei16.v x0, 0(a1), v8, v4
+	vamominei16.v v4, 0(a1), v8, v4, v0.t
+	vamominei16.v x0, 0(a1), v8, v4, v0.t
+	vamomaxei16.v v4, 0(a1), v8, v4
+	vamomaxei16.v x0, 0(a1), v8, v4
+	vamomaxei16.v v4, 0(a1), v8, v4, v0.t
+	vamomaxei16.v x0, 0(a1), v8, v4, v0.t
+	vamominuei16.v v4, 0(a1), v8, v4
+	vamominuei16.v x0, 0(a1), v8, v4
+	vamominuei16.v v4, 0(a1), v8, v4, v0.t
+	vamominuei16.v x0, 0(a1), v8, v4, v0.t
+	vamomaxuei16.v v4, 0(a1), v8, v4
+	vamomaxuei16.v x0, 0(a1), v8, v4
+	vamomaxuei16.v v4, 0(a1), v8, v4, v0.t
+	vamomaxuei16.v x0, 0(a1), v8, v4, v0.t
+
+	vamoaddei32.v v4, (a1), v8, v4
+	vamoaddei32.v x0, (a1), v8, v4
+	vamoaddei32.v v4, (a1), v8, v4, v0.t
+	vamoaddei32.v x0, (a1), v8, v4, v0.t
+	vamoswapei32.v v4, (a1), v8, v4
+	vamoswapei32.v x0, (a1), v8, v4
+	vamoswapei32.v v4, (a1), v8, v4, v0.t
+	vamoswapei32.v x0, (a1), v8, v4, v0.t
+
+	vamoxorei32.v v4, (a1), v8, v4
+	vamoxorei32.v x0, (a1), v8, v4
+	vamoxorei32.v v4, (a1), v8, v4, v0.t
+	vamoxorei32.v x0, (a1), v8, v4, v0.t
+	vamoandei32.v v4, (a1), v8, v4
+	vamoandei32.v x0, (a1), v8, v4
+	vamoandei32.v v4, (a1), v8, v4, v0.t
+	vamoandei32.v x0, (a1), v8, v4, v0.t
+	vamoorei32.v v4, (a1), v8, v4
+	vamoorei32.v x0, (a1), v8, v4
+	vamoorei32.v v4, (a1), v8, v4, v0.t
+	vamoorei32.v x0, (a1), v8, v4, v0.t
+
+	vamominei32.v v4, (a1), v8, v4
+	vamominei32.v x0, (a1), v8, v4
+	vamominei32.v v4, (a1), v8, v4, v0.t
+	vamominei32.v x0, (a1), v8, v4, v0.t
+	vamomaxei32.v v4, (a1), v8, v4
+	vamomaxei32.v x0, (a1), v8, v4
+	vamomaxei32.v v4, (a1), v8, v4, v0.t
+	vamomaxei32.v x0, (a1), v8, v4, v0.t
+	vamominuei32.v v4, (a1), v8, v4
+	vamominuei32.v x0, (a1), v8, v4
+	vamominuei32.v v4, (a1), v8, v4, v0.t
+	vamominuei32.v x0, (a1), v8, v4, v0.t
+	vamomaxuei32.v v4, (a1), v8, v4
+	vamomaxuei32.v x0, (a1), v8, v4
+	vamomaxuei32.v v4, (a1), v8, v4, v0.t
+	vamomaxuei32.v x0, (a1), v8, v4, v0.t
+
+	vamoaddei32.v v4, 0(a1), v8, v4
+	vamoaddei32.v x0, 0(a1), v8, v4
+	vamoaddei32.v v4, 0(a1), v8, v4, v0.t
+	vamoaddei32.v x0, 0(a1), v8, v4, v0.t
+	vamoswapei32.v v4, 0(a1), v8, v4
+	vamoswapei32.v x0, 0(a1), v8, v4
+	vamoswapei32.v v4, 0(a1), v8, v4, v0.t
+	vamoswapei32.v x0, 0(a1), v8, v4, v0.t
+
+	vamoxorei32.v v4, 0(a1), v8, v4
+	vamoxorei32.v x0, 0(a1), v8, v4
+	vamoxorei32.v v4, 0(a1), v8, v4, v0.t
+	vamoxorei32.v x0, 0(a1), v8, v4, v0.t
+	vamoandei32.v v4, 0(a1), v8, v4
+	vamoandei32.v x0, 0(a1), v8, v4
+	vamoandei32.v v4, 0(a1), v8, v4, v0.t
+	vamoandei32.v x0, 0(a1), v8, v4, v0.t
+	vamoorei32.v v4, 0(a1), v8, v4
+	vamoorei32.v x0, 0(a1), v8, v4
+	vamoorei32.v v4, 0(a1), v8, v4, v0.t
+	vamoorei32.v x0, 0(a1), v8, v4, v0.t
+
+	vamominei32.v v4, 0(a1), v8, v4
+	vamominei32.v x0, 0(a1), v8, v4
+	vamominei32.v v4, 0(a1), v8, v4, v0.t
+	vamominei32.v x0, 0(a1), v8, v4, v0.t
+	vamomaxei32.v v4, 0(a1), v8, v4
+	vamomaxei32.v x0, 0(a1), v8, v4
+	vamomaxei32.v v4, 0(a1), v8, v4, v0.t
+	vamomaxei32.v x0, 0(a1), v8, v4, v0.t
+	vamominuei32.v v4, 0(a1), v8, v4
+	vamominuei32.v x0, 0(a1), v8, v4
+	vamominuei32.v v4, 0(a1), v8, v4, v0.t
+	vamominuei32.v x0, 0(a1), v8, v4, v0.t
+	vamomaxuei32.v v4, 0(a1), v8, v4
+	vamomaxuei32.v x0, 0(a1), v8, v4
+	vamomaxuei32.v v4, 0(a1), v8, v4, v0.t
+	vamomaxuei32.v x0, 0(a1), v8, v4, v0.t
+
+	vamoaddei64.v v4, (a1), v8, v4
+	vamoaddei64.v x0, (a1), v8, v4
+	vamoaddei64.v v4, (a1), v8, v4, v0.t
+	vamoaddei64.v x0, (a1), v8, v4, v0.t
+	vamoswapei64.v v4, (a1), v8, v4
+	vamoswapei64.v x0, (a1), v8, v4
+	vamoswapei64.v v4, (a1), v8, v4, v0.t
+	vamoswapei64.v x0, (a1), v8, v4, v0.t
+
+	vamoxorei64.v v4, (a1), v8, v4
+	vamoxorei64.v x0, (a1), v8, v4
+	vamoxorei64.v v4, (a1), v8, v4, v0.t
+	vamoxorei64.v x0, (a1), v8, v4, v0.t
+	vamoandei64.v v4, (a1), v8, v4
+	vamoandei64.v x0, (a1), v8, v4
+	vamoandei64.v v4, (a1), v8, v4, v0.t
+	vamoandei64.v x0, (a1), v8, v4, v0.t
+	vamoorei64.v v4, (a1), v8, v4
+	vamoorei64.v x0, (a1), v8, v4
+	vamoorei64.v v4, (a1), v8, v4, v0.t
+	vamoorei64.v x0, (a1), v8, v4, v0.t
+
+	vamominei64.v v4, (a1), v8, v4
+	vamominei64.v x0, (a1), v8, v4
+	vamominei64.v v4, (a1), v8, v4, v0.t
+	vamominei64.v x0, (a1), v8, v4, v0.t
+	vamomaxei64.v v4, (a1), v8, v4
+	vamomaxei64.v x0, (a1), v8, v4
+	vamomaxei64.v v4, (a1), v8, v4, v0.t
+	vamomaxei64.v x0, (a1), v8, v4, v0.t
+	vamominuei64.v v4, (a1), v8, v4
+	vamominuei64.v x0, (a1), v8, v4
+	vamominuei64.v v4, (a1), v8, v4, v0.t
+	vamominuei64.v x0, (a1), v8, v4, v0.t
+	vamomaxuei64.v v4, (a1), v8, v4
+	vamomaxuei64.v x0, (a1), v8, v4
+	vamomaxuei64.v v4, (a1), v8, v4, v0.t
+	vamomaxuei64.v x0, (a1), v8, v4, v0.t
+
+	vamoaddei64.v v4, 0(a1), v8, v4
+	vamoaddei64.v x0, 0(a1), v8, v4
+	vamoaddei64.v v4, 0(a1), v8, v4, v0.t
+	vamoaddei64.v x0, 0(a1), v8, v4, v0.t
+	vamoswapei64.v v4, 0(a1), v8, v4
+	vamoswapei64.v x0, 0(a1), v8, v4
+	vamoswapei64.v v4, 0(a1), v8, v4, v0.t
+	vamoswapei64.v x0, 0(a1), v8, v4, v0.t
+
+	vamoxorei64.v v4, 0(a1), v8, v4
+	vamoxorei64.v x0, 0(a1), v8, v4
+	vamoxorei64.v v4, 0(a1), v8, v4, v0.t
+	vamoxorei64.v x0, 0(a1), v8, v4, v0.t
+	vamoandei64.v v4, 0(a1), v8, v4
+	vamoandei64.v x0, 0(a1), v8, v4
+	vamoandei64.v v4, 0(a1), v8, v4, v0.t
+	vamoandei64.v x0, 0(a1), v8, v4, v0.t
+	vamoorei64.v v4, 0(a1), v8, v4
+	vamoorei64.v x0, 0(a1), v8, v4
+	vamoorei64.v v4, 0(a1), v8, v4, v0.t
+	vamoorei64.v x0, 0(a1), v8, v4, v0.t
+
+	vamominei64.v v4, 0(a1), v8, v4
+	vamominei64.v x0, 0(a1), v8, v4
+	vamominei64.v v4, 0(a1), v8, v4, v0.t
+	vamominei64.v x0, 0(a1), v8, v4, v0.t
+	vamomaxei64.v v4, 0(a1), v8, v4
+	vamomaxei64.v x0, 0(a1), v8, v4
+	vamomaxei64.v v4, 0(a1), v8, v4, v0.t
+	vamomaxei64.v x0, 0(a1), v8, v4, v0.t
+	vamominuei64.v v4, 0(a1), v8, v4
+	vamominuei64.v x0, 0(a1), v8, v4
+	vamominuei64.v v4, 0(a1), v8, v4, v0.t
+	vamominuei64.v x0, 0(a1), v8, v4, v0.t
+	vamomaxuei64.v v4, 0(a1), v8, v4
+	vamomaxuei64.v x0, 0(a1), v8, v4
+	vamomaxuei64.v v4, 0(a1), v8, v4, v0.t
+	vamomaxuei64.v x0, 0(a1), v8, v4, v0.t
 
 	vadd.vv v4, v8, v12
 	vadd.vx v4, v8, a1
@@ -1222,6 +2016,19 @@
 	vwsub.wx v4, v8, a1
 	vwsub.wv v4, v8, v12, v0.t
 	vwsub.wx v4, v8, a1, v0.t
+
+	vzext.vf2 v4, v8
+	vzext.vf2 v4, v8, v0.t
+	vsext.vf2 v4, v8
+	vsext.vf2 v4, v8, v0.t
+	vzext.vf4 v4, v8
+	vzext.vf4 v4, v8, v0.t
+	vsext.vf4 v4, v8
+	vsext.vf4 v4, v8, v0.t
+	vzext.vf8 v4, v8
+	vzext.vf8 v4, v8, v0.t
+	vsext.vf8 v4, v8
+	vsext.vf8 v4, v8, v0.t
 
 	vadc.vvm v4, v8, v12, v0
 	vadc.vxm v4, v8, a1, v0
@@ -1748,32 +2555,44 @@
 
 	vfcvt.xu.f.v v4, v8
 	vfcvt.x.f.v v4, v8
+	vfcvt.rtz.xu.f.v v4, v8
+	vfcvt.rtz.x.f.v v4, v8
 	vfcvt.f.xu.v v4, v8
 	vfcvt.f.x.v v4, v8
 	vfcvt.xu.f.v v4, v8, v0.t
 	vfcvt.x.f.v v4, v8, v0.t
+	vfcvt.rtz.xu.f.v v4, v8, v0.t
+	vfcvt.rtz.x.f.v v4, v8, v0.t
 	vfcvt.f.xu.v v4, v8, v0.t
 	vfcvt.f.x.v v4, v8, v0.t
 
 	vfwcvt.xu.f.v v4, v8
 	vfwcvt.x.f.v v4, v8
+	vfwcvt.rtz.xu.f.v v4, v8
+	vfwcvt.rtz.x.f.v v4, v8
 	vfwcvt.f.xu.v v4, v8
 	vfwcvt.f.x.v v4, v8
 	vfwcvt.f.f.v v4, v8
 	vfwcvt.xu.f.v v4, v8, v0.t
 	vfwcvt.x.f.v v4, v8, v0.t
+	vfwcvt.rtz.xu.f.v v4, v8, v0.t
+	vfwcvt.rtz.x.f.v v4, v8, v0.t
 	vfwcvt.f.xu.v v4, v8, v0.t
 	vfwcvt.f.x.v v4, v8, v0.t
 	vfwcvt.f.f.v v4, v8, v0.t
 
 	vfncvt.xu.f.w v4, v8
 	vfncvt.x.f.w v4, v8
+	vfncvt.rtz.xu.f.w v4, v8
+	vfncvt.rtz.x.f.w v4, v8
 	vfncvt.f.xu.w v4, v8
 	vfncvt.f.x.w v4, v8
 	vfncvt.f.f.w v4, v8
 	vfncvt.rod.f.f.w v4, v8
 	vfncvt.xu.f.w v4, v8, v0.t
 	vfncvt.x.f.w v4, v8, v0.t
+	vfncvt.rtz.xu.f.w v4, v8, v0.t
+	vfncvt.rtz.x.f.w v4, v8, v0.t
 	vfncvt.f.xu.w v4, v8, v0.t
 	vfncvt.f.x.w v4, v8, v0.t
 	vfncvt.f.f.w v4, v8, v0.t
@@ -1817,6 +2636,7 @@
 
 	# Aliases
 	vmcpy.m v4, v8
+	vmmv.m v4, v8
 	vmclr.m v4
 	vmset.m v4
 	vmnot.m v4, v8
@@ -1868,6 +2688,11 @@
 	vslide1down.vx v4, v8, a1
 	vslide1up.vx v4, v8, a1, v0.t
 	vslide1down.vx v4, v8, a1, v0.t
+
+	vfslide1up.vf v4, v8, fa1
+	vfslide1down.vf v4, v8, fa1
+	vfslide1up.vf v4, v8, fa1, v0.t
+	vfslide1down.vf v4, v8, fa1, v0.t
 
 	vrgather.vv v4, v8, v12
 	vrgather.vx v4, v8, a1
