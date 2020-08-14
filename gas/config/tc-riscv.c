@@ -2058,6 +2058,8 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
       if (!riscv_multi_subset_supports (insn->insn_class))
 	continue;
 
+      /* Reset error message of the previous round.  */
+      error = _("illegal operands");
       create_insn (ip, insn);
       argnum = 1;
 
@@ -2074,7 +2076,8 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      if (insn->pinfo != INSN_MACRO)
 		{
 		  if (!insn->match_func (insn, ip->insn_opcode,
-					 riscv_opts.check_constraints))
+					 riscv_opts.check_constraints,
+					 &error))
 		    break;
 
 		  /* For .insn, insn->match and insn->mask are 0.  */
@@ -2923,7 +2926,6 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	  break;
 	}
       s = argsStart;
-      error = _("illegal operands");
       insn_with_csr = FALSE;
     }
 
