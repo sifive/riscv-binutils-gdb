@@ -2758,6 +2758,8 @@ const struct riscv_ext_version riscv_ext_version_table[] =
 {"c", ISA_SPEC_CLASS_20190608, 2, 0},
 {"c", ISA_SPEC_CLASS_2P2,      2, 0},
 
+{"b", ISA_SPEC_CLASS_NONE,     0, 92},
+
 {"v", ISA_SPEC_CLASS_NONE,     1, 0},
 
 {"zicsr", ISA_SPEC_CLASS_20191213, 2, 0},
@@ -2767,6 +2769,17 @@ const struct riscv_ext_version riscv_ext_version_table[] =
 {"zifencei", ISA_SPEC_CLASS_20190608, 2, 0},
 
 {"zfh", ISA_SPEC_CLASS_NONE, 0, 1},
+
+{"zba", ISA_SPEC_CLASS_NONE, 0, 92},
+{"zbb", ISA_SPEC_CLASS_NONE, 0, 92},
+{"zbc", ISA_SPEC_CLASS_NONE, 0, 92},
+{"zbe", ISA_SPEC_CLASS_NONE, 0, 92},
+{"zbf", ISA_SPEC_CLASS_NONE, 0, 92},
+{"zbm", ISA_SPEC_CLASS_NONE, 0, 92},
+{"zbp", ISA_SPEC_CLASS_NONE, 0, 92},
+{"zbr", ISA_SPEC_CLASS_NONE, 0, 92},
+{"zbs", ISA_SPEC_CLASS_NONE, 0, 92},
+{"zbt", ISA_SPEC_CLASS_NONE, 0, 92},
 
 {"zvamo",   ISA_SPEC_CLASS_NONE, 1, 0},
 {"zvediv",  ISA_SPEC_CLASS_NONE, 1, 0},
