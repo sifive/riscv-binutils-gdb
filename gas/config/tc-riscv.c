@@ -260,39 +260,35 @@ riscv_multi_subset_supports (enum riscv_insn_class insn_class)
     case INSN_CLASS_V_AND_ZVQMAC:
       return riscv_subset_supports ("v") && riscv_subset_supports ("zvqmac");
 
-    case INSN_CLASS_B_OR_ZBB:
-      return riscv_subset_supports ("b") || riscv_subset_supports ("zbb");
-
+    /* Sure.  */
     case INSN_CLASS_B_OR_ZBA:
       return riscv_subset_supports ("b") || riscv_subset_supports ("zba");
-
+    case INSN_CLASS_B_OR_ZBB:
+      return riscv_subset_supports ("b") || riscv_subset_supports ("zbb");
     case INSN_CLASS_B_OR_ZBC:
       return riscv_subset_supports ("b") || riscv_subset_supports ("zbc");
-
-    case INSN_CLASS_B_OR_ZBE:
-      return riscv_subset_supports ("b") || riscv_subset_supports ("zbe");
-
-    case INSN_CLASS_B_OR_ZBF:
-      return riscv_subset_supports ("b") || riscv_subset_supports ("zbf");
-
-    case INSN_CLASS_B_OR_ZBM:
-      return riscv_subset_supports ("b") || riscv_subset_supports ("zbm");
-
-    case INSN_CLASS_B_OR_ZBP:
-      return riscv_subset_supports ("b") || riscv_subset_supports ("zbp");
-
-    case INSN_CLASS_B_OR_ZBR:
-      return riscv_subset_supports ("b") || riscv_subset_supports ("zbr");
-
     case INSN_CLASS_B_OR_ZBS:
       return riscv_subset_supports ("b") || riscv_subset_supports ("zbs");
+    case INSN_CLASS_B_OR_ZBA_OR_ZBB:
+      return (riscv_subset_supports ("b")
+	      || riscv_subset_supports ("zba")
+	      || riscv_subset_supports ("zbb"));
 
-    case INSN_CLASS_B_OR_ZBT:
-      return riscv_subset_supports ("b") || riscv_subset_supports ("zbt");
-
-    case INSN_CLASS_B_OR_ZBB_OR_ZBP:
-      return riscv_subset_supports ("b") || riscv_subset_supports ("zbb")
-	|| riscv_subset_supports ("zbp");
+    /* Not sure.  */
+    case INSN_CLASS_B:
+      return riscv_subset_supports ("b");
+    case INSN_CLASS_B_OR_ZBE:
+      return riscv_subset_supports ("b") || riscv_subset_supports ("zbe");
+    case INSN_CLASS_B_OR_ZBF:
+      return riscv_subset_supports ("b") || riscv_subset_supports ("zbf");
+    case INSN_CLASS_B_OR_ZBM:
+      return riscv_subset_supports ("b") || riscv_subset_supports ("zbm");
+    case INSN_CLASS_B_OR_ZBP:
+      return riscv_subset_supports ("b") || riscv_subset_supports ("zbp");
+    case INSN_CLASS_ZBR:
+      return riscv_subset_supports ("zbr");
+    case INSN_CLASS_ZBT:
+      return riscv_subset_supports ("zbt");
 
     default:
       as_fatal ("Unreachable");
