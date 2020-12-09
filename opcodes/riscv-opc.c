@@ -705,6 +705,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"mv",          0, INSN_CLASS_I,   "d,s",  MATCH_ADDI, MASK_ADDI | MASK_IMM, match_opcode, INSN_ALIAS },
 {"move",        0, INSN_CLASS_C,   "d,CV",  MATCH_C_MV, MASK_C_MV, match_c_add, INSN_ALIAS },
 {"move",        0, INSN_CLASS_I,   "d,s",  MATCH_ADDI, MASK_ADDI | MASK_IMM, match_opcode, INSN_ALIAS },
+{"zext.b",      0, INSN_CLASS_I,   "d,s",  MATCH_ANDI | ENCODE_ITYPE_IMM (255), MASK_ANDI | MASK_IMM, match_opcode, INSN_ALIAS },
 {"andi",        0, INSN_CLASS_C,   "Cs,Cw,Co",  MATCH_C_ANDI, MASK_C_ANDI, match_opcode, INSN_ALIAS },
 {"andi",        0, INSN_CLASS_I,   "d,s,j",  MATCH_ANDI, MASK_ANDI, match_opcode, 0 },
 {"and",         0, INSN_CLASS_C,   "Cs,Cw,Ct",  MATCH_C_AND, MASK_C_AND, match_opcode, INSN_ALIAS },
@@ -1162,6 +1163,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sh3add",    0, INSN_CLASS_B_OR_ZBA,   "d,s,t",  MATCH_SH3ADD, MASK_SH3ADD, match_opcode, 0 },
 {"slliu.w",  64, INSN_CLASS_B_OR_ZBA,   "d,s,>",  MATCH_SLLIU_W, MASK_SLLIU_W, match_opcode, 0 },
 {"zext.w",   64, INSN_CLASS_B_OR_ZBA_OR_ZBB,   "d,s",  MATCH_ADDU_W, MASK_ADDU_W | MASK_RS2, match_opcode, INSN_ALIAS },
+{"zext.w",   64, INSN_CLASS_I,                 "d,s",  0, (int) M_ZEXTW,  match_never, INSN_MACRO },
 {"addu.w",   64, INSN_CLASS_B_OR_ZBA,   "d,s,t",  MATCH_ADDU_W, MASK_ADDU_W, match_opcode, 0 },
 {"sh1addu.w",64, INSN_CLASS_B_OR_ZBA,   "d,s,t",  MATCH_SH1ADDU_W, MASK_SH1ADDU_W, match_opcode, 0 },
 {"sh2addu.w",64, INSN_CLASS_B_OR_ZBA,   "d,s,t",  MATCH_SH2ADDU_W, MASK_SH2ADDU_W, match_opcode, 0 },
@@ -1184,9 +1186,12 @@ const struct riscv_opcode riscv_opcodes[] =
 {"ror",       0, INSN_CLASS_B_OR_ZBB,   "d,s,t",  MATCH_ROR, MASK_ROR, match_opcode, 0 },
 {"ror",       0, INSN_CLASS_B_OR_ZBB,   "d,s,>",  MATCH_RORI, MASK_RORI, match_opcode, INSN_ALIAS },
 {"sext.b",    0, INSN_CLASS_B_OR_ZBB,   "d,s",  MATCH_SEXT_B, MASK_SEXT_B, match_opcode, 0 },
+{"sext.b",    0, INSN_CLASS_I,          "d,s",  0, (int) M_SEXTB,  match_never, INSN_MACRO },
 {"sext.h",    0, INSN_CLASS_B_OR_ZBB,   "d,s",  MATCH_SEXT_H, MASK_SEXT_H, match_opcode, 0 },
+{"sext.h",    0, INSN_CLASS_I,          "d,s",  0, (int) M_SEXTH,  match_never, INSN_MACRO },
 {"zext.h",   32, INSN_CLASS_B_OR_ZBB,   "d,s",  MATCH_PACK, MASK_PACK | MASK_RS2, match_opcode, INSN_ALIAS },	/* pack with rs2=x0  */
 {"zext.h",   64, INSN_CLASS_B_OR_ZBB,   "d,s",  MATCH_PACKW, MASK_PACKW | MASK_RS2, match_opcode, INSN_ALIAS },	/* packw with rs2=x0  */
+{"zext.h",    0, INSN_CLASS_I,          "d,s",  0, (int) M_ZEXTH,  match_never, INSN_MACRO },
 {"clzw",     64, INSN_CLASS_B_OR_ZBB,   "d,s",  MATCH_CLZW, MASK_CLZW, match_opcode, 0 },
 {"ctzw",     64, INSN_CLASS_B_OR_ZBB,   "d,s",  MATCH_CTZW, MASK_CTZW, match_opcode, 0 },
 {"pcntw",    64, INSN_CLASS_B_OR_ZBB,   "d,s",  MATCH_PCNTW, MASK_PCNTW, match_opcode, 0 },
