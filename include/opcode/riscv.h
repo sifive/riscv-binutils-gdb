@@ -583,6 +583,10 @@ enum
   M_VMSGEU,
   M_RL,
   M_FL,
+  M_ZEXTH,
+  M_ZEXTW,
+  M_SEXTB,
+  M_SEXTH,
   M_NUM_MACROS
 };
 
