@@ -69,6 +69,51 @@ const char * const riscv_vecm_names_numeric[NVECM] =
   "v0.t"
 };
 
+/* The MATCH/MASK immediate macros for rvb pseudo instructions.  */
+
+#define MASK_RVB_IMM (OP_MASK_SHAMT << OP_SH_SHAMT)
+
+#define ENCODE_PERM_IMM(xlen, prefix, suffix) \
+  (ENCODE_ITYPE_IMM ((((xlen) - 1) & (((xlen) - 1) << (prefix)) & (suffix))))
+
+#define MATCH_PERM_IMM(xlen)    (ENCODE_PERM_IMM ((xlen), 0, -1))
+#define MATCH_PERM2_IMM(xlen)   (ENCODE_PERM_IMM ((xlen), 1, -1))
+#define MATCH_PERM4_IMM(xlen)   (ENCODE_PERM_IMM ((xlen), 2, -1))
+#define MATCH_PERM8_IMM(xlen)   (ENCODE_PERM_IMM ((xlen), 3, -1))
+#define MATCH_PERM16_IMM(xlen)  (ENCODE_PERM_IMM ((xlen), 4, -1))
+#define MATCH_PERM32_IMM(xlen)  (ENCODE_PERM_IMM ((xlen), 5, -1))
+#define MATCH_PERMP_IMM(xlen)   (ENCODE_PERM_IMM ((xlen), 0, 0x1))
+#define MATCH_PERMN_IMM(xlen)   (ENCODE_PERM_IMM ((xlen), 0, 0x3))
+#define MATCH_PERMB_IMM(xlen)   (ENCODE_PERM_IMM ((xlen), 0, 0x7))
+#define MATCH_PERMH_IMM(xlen)   (ENCODE_PERM_IMM ((xlen), 0, 0xf))
+#define MATCH_PERMW_IMM(xlen)   (ENCODE_PERM_IMM ((xlen), 0, 0x1f))
+#define MATCH_PERM2N_IMM(xlen)  (ENCODE_PERM_IMM ((xlen), 1, 0x3))
+#define MATCH_PERM2B_IMM(xlen)  (ENCODE_PERM_IMM ((xlen), 1, 0x7))
+#define MATCH_PERM4B_IMM(xlen)  (ENCODE_PERM_IMM ((xlen), 2, 0x7))
+#define MATCH_PERM2H_IMM(xlen)  (ENCODE_PERM_IMM ((xlen), 1, 0xf))
+#define MATCH_PERM4H_IMM(xlen)  (ENCODE_PERM_IMM ((xlen), 2, 0xf))
+#define MATCH_PERM8H_IMM(xlen)  (ENCODE_PERM_IMM ((xlen), 3, 0xf))
+#define MATCH_PERM2W_IMM(xlen)  (ENCODE_PERM_IMM ((xlen), 1, 0x1f))
+#define MATCH_PERM4W_IMM(xlen)  (ENCODE_PERM_IMM ((xlen), 2, 0x1f))
+#define MATCH_PERM8W_IMM(xlen)  (ENCODE_PERM_IMM ((xlen), 3, 0x1f))
+#define MATCH_PERM16W_IMM(xlen) (ENCODE_PERM_IMM ((xlen), 4, 0x1f))
+
+#define MATCH_PERM_SHFL_IMM(xlen)    (ENCODE_PERM_IMM ((xlen/2), 0, -1))
+#define MATCH_PERM2_SHFL_IMM(xlen)   (ENCODE_PERM_IMM ((xlen/2), 1, -1))
+#define MATCH_PERM4_SHFL_IMM(xlen)   (ENCODE_PERM_IMM ((xlen/2), 2, -1))
+#define MATCH_PERM8_SHFL_IMM(xlen)   (ENCODE_PERM_IMM ((xlen/2), 3, -1))
+#define MATCH_PERM16_SHFL_IMM(xlen)  (ENCODE_PERM_IMM ((xlen/2), 4, -1))
+#define MATCH_PERMN_SHFL_IMM(xlen)   (ENCODE_PERM_IMM ((xlen/2), 0, 0x1))
+#define MATCH_PERMB_SHFL_IMM(xlen)   (ENCODE_PERM_IMM ((xlen/2), 0, 0x3))
+#define MATCH_PERMH_SHFL_IMM(xlen)   (ENCODE_PERM_IMM ((xlen/2), 0, 0x7))
+#define MATCH_PERMW_SHFL_IMM(xlen)   (ENCODE_PERM_IMM ((xlen/2), 0, 0xf))
+#define MATCH_PERM2B_SHFL_IMM(xlen)  (ENCODE_PERM_IMM ((xlen/2), 1, 0x3))
+#define MATCH_PERM2H_SHFL_IMM(xlen)  (ENCODE_PERM_IMM ((xlen/2), 1, 0x7))
+#define MATCH_PERM4H_SHFL_IMM(xlen)  (ENCODE_PERM_IMM ((xlen/2), 2, 0x7))
+#define MATCH_PERM2W_SHFL_IMM(xlen)  (ENCODE_PERM_IMM ((xlen/2), 1, 0xf))
+#define MATCH_PERM4W_SHFL_IMM(xlen)  (ENCODE_PERM_IMM ((xlen/2), 2, 0xf))
+#define MATCH_PERM8W_SHFL_IMM(xlen)  (ENCODE_PERM_IMM ((xlen/2), 3, 0xf))
+
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
    for arguments must apear in the correct order in this table for the
@@ -984,6 +1029,133 @@ const struct riscv_opcode riscv_opcodes[] =
 {"fcvt.h.lu", 64, INSN_CLASS_F_AND_ZFH,   "D,s",  MATCH_FCVT_H_LU | MASK_RM, MASK_FCVT_H_L | MASK_RM, match_opcode, 0 },
 {"fcvt.h.lu", 64, INSN_CLASS_F_AND_ZFH,   "D,s,m",  MATCH_FCVT_H_LU, MASK_FCVT_H_LU, match_opcode, 0 },
 
+/* Bitmanip pseudo-instructions.  */
+{"rev.p",    32, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERMP_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev.p",    64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERMP_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev2.n",   32, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM2N_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev2.n",   64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM2N_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev.n",    32, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERMN_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev.n",    64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERMN_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev4.b",   32, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM4B_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev4.b",   64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM4B_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev2.b",   32, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM2B_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev2.b",   64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM2B_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev.b",    32, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERMB_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev.b",    64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERMB_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev8.h",   32, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM8H_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev8.h",   64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM8H_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev4.h",   32, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM4H_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev4.h",   64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM4H_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev2.h",   32, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM2H_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev2.h",   64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM2H_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev.h",    32, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERMH_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev.h",    64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERMH_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev16",    32, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM16_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev16",    64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM16_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev8",     32, INSN_CLASS_B_OR_ZBB,   "d,s",  MATCH_GREVI | MATCH_PERM8_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev8",     64, INSN_CLASS_B_OR_ZBB,   "d,s",  MATCH_GREVI | MATCH_PERM8_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev4",     32, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM4_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev4",     64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM4_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev2",     32, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM2_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev2",     64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM2_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev",      32, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM_IMM (32), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev",      64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev16.w",  64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM16W_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev8.w",   64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM8W_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev4.w",   64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM4W_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev2.w",   64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM2W_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev.w",    64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERMW_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"rev32",    64, INSN_CLASS_B,   "d,s",  MATCH_GREVI | MATCH_PERM32_IMM (64), MASK_GREVI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+
+{"orc.p",    32, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERMP_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc.p",    64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERMP_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc2.n",   32, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM2N_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc2.n",   64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM2N_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc.n",    32, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERMN_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc.n",    64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERMN_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc4.b",   32, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM4B_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc4.b",   64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM4B_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc2.b",   32, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM2B_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc2.b",   64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM2B_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc.b",    32, INSN_CLASS_B_OR_ZBB,   "d,s",  MATCH_GORCI | MATCH_PERMB_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc.b",    64, INSN_CLASS_B_OR_ZBB,   "d,s",  MATCH_GORCI | MATCH_PERMB_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc8.h",   32, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM8H_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc8.h",   64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM8H_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc4.h",   32, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM4H_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc4.h",   64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM4H_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc2.h",   32, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM2H_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc2.h",   64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM2H_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc.h",    32, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERMH_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc.h",    64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERMH_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc16",    32, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM16_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc16",    64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM16_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc8",     32, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM8_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc8",     64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM8_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc4",     32, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM4_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc4",     64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM4_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc2",     32, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM2_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc2",     64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM2_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc",      32, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM_IMM (32), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc",      64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc16.w",  64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM16W_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc8.w",   64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM8W_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc4.w",   64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM4W_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc2.w",   64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM2W_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc.w",    64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERMW_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"orc32",    64, INSN_CLASS_B,   "d,s",  MATCH_GORCI | MATCH_PERM32_IMM (64), MASK_GORCI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+
+{"zip.n",    32, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERMN_SHFL_IMM (32), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip.n",    64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERMN_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip2.b",   32, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM2B_SHFL_IMM (32), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip2.b",   64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM2B_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip.b",    32, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERMB_SHFL_IMM (32), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip.b",    64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERMB_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip4.h",   32, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM4H_SHFL_IMM (32), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip4.h",   64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM4H_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip2.h",   32, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM2H_SHFL_IMM (32), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip2.h",   64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM2H_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip.h",    32, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERMH_SHFL_IMM (32), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip.h",    64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERMH_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip8",     32, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM8_SHFL_IMM (32), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip8",     64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM8_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip4",     32, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM4_SHFL_IMM (32), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip4",     64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM4_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip2",     32, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM2_SHFL_IMM (32), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip2",     64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM2_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip",      32, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM_SHFL_IMM (32), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip",      64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip8.w",   64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM8W_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip4.w",   64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM4W_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip2.w",   64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM2W_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip.w",    64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERMW_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"zip16",    64, INSN_CLASS_B,   "d,s",  MATCH_SHFLI | MATCH_PERM16_SHFL_IMM (64), MASK_SHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+
+{"unzip.n",  32, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERMN_SHFL_IMM (32), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip.n",  64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERMN_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip2.b", 32, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM2B_SHFL_IMM (32), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip2.b", 64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM2B_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip.b",  32, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERMB_SHFL_IMM (32), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip.b",  64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERMB_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip4.h", 32, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM4H_SHFL_IMM (32), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip4.h", 64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM4H_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip2.h", 32, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM2H_SHFL_IMM (32), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip2.h", 64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM2H_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip.h",  32, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERMH_SHFL_IMM (32), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip.h",  64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERMH_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip8",   32, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM8_SHFL_IMM (32), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip8",   64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM8_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip4",   32, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM4_SHFL_IMM (32), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip4",   64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM4_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip2",   32, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM2_SHFL_IMM (32), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip2",   64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM2_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip",    32, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM_SHFL_IMM (32), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip",    64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip8.w", 64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM8W_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip4.w", 64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM4W_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip2.w", 64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM2W_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip.w",  64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERMW_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+{"unzip16",  64, INSN_CLASS_B,   "d,s",  MATCH_UNSHFLI | MATCH_PERM16_SHFL_IMM (64), MASK_UNSHFLI | MASK_RVB_IMM, match_opcode, INSN_ALIAS },
+
 /* Bitmanip instruction subset - for sure  */
 {"sh1add",    0, INSN_CLASS_B_OR_ZBA,   "d,s,t",  MATCH_SH1ADD, MASK_SH1ADD, match_opcode, 0 },
 {"sh2add",    0, INSN_CLASS_B_OR_ZBA,   "d,s,t",  MATCH_SH2ADD, MASK_SH2ADD, match_opcode, 0 },
@@ -1024,8 +1196,6 @@ const struct riscv_opcode riscv_opcodes[] =
 {"roriw",    64, INSN_CLASS_B_OR_ZBB,   "d,s,<",  MATCH_RORIW, MASK_RORIW, match_opcode, 0 },
 {"rorw",     64, INSN_CLASS_B_OR_ZBB,   "d,s,t",  MATCH_RORW, MASK_RORW, match_opcode, 0 },
 {"rorw",     64, INSN_CLASS_B_OR_ZBB,   "d,s,<",  MATCH_RORIW, MASK_RORIW, match_opcode, INSN_ALIAS },
-{"rev8",      0, INSN_CLASS_B_OR_ZBB,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc.b",     0, INSN_CLASS_B_OR_ZBB,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
 
 {"clmul",     0, INSN_CLASS_B_OR_ZBC,   "d,s,t",  MATCH_CLMUL, MASK_CLMUL, match_opcode, 0 },
 {"clmulh",    0, INSN_CLASS_B_OR_ZBC,   "d,s,t",  MATCH_CLMULH, MASK_CLMULH, match_opcode, 0 },
@@ -1130,81 +1300,6 @@ const struct riscv_opcode riscv_opcodes[] =
 {"crc32c.w",  0, INSN_CLASS_ZBR,   "d,s",  MATCH_CRC32C_W, MASK_CRC32C_W, match_opcode, 0 },
 {"crc32.d",  64, INSN_CLASS_ZBR,   "d,s",  MATCH_CRC32_D, MASK_CRC32_D, match_opcode, 0 },
 {"crc32c.d", 64, INSN_CLASS_ZBR,   "d,s",  MATCH_CRC32C_D, MASK_CRC32C_D, match_opcode, 0 },
-
-/* Bitmanip pseudo-instructions  */
-{"rev.p",     0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev2.n",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev.n",     0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev4.b",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev2.b",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev.b",     0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev8.h",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev4.h",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev2.h",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev.h",     0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev16.w",  64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev8.w",   64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev4.w",   64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev2.w",   64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev.w",    64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev32",    64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev16",     0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev4",      0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev2",      0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"rev",       0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-
-{"orc.p",     0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc2.n",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc.n",     0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc4.b",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc2.b",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc8.h",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc4.h",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc2.h",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc.h",     0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc16.w",  64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc8.w",   64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc4.w",   64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc2.w",   64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc.w",    64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc32",    64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc16",     0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc8",      0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc4",      0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc2",      0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"orc",       0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-
-{"zip.n",     0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"zip2.b",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"zip.b",     0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"zip4.h",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"zip2.h",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"zip.h",     0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"zip8.w",   64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"zip4.w",   64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"zip2.w",   64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"zip.w",    64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"zip16",    64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"zip8",      0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"zip4",      0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"zip2",      0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"zip",       0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-
-{"unzip.n",   0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"unzip2.b",  0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"unzip.b",   0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"unzip4.h",  0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"unzip2.h",  0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"unzip.h",   0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"unzip8.w", 64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"unzip4.w", 64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"unzip2.w", 64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"unzip.w",  64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"unzip16",  64, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"unzip8",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"unzip4",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"unzip2",    0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
-{"unzip",     0, INSN_CLASS_B,   "d,s",  0, (int) M_PERM, match_never, INSN_MACRO },
 
 /* Single-precision floating-point instruction subset */
 {"frcsr",     0, INSN_CLASS_F,   "d",  MATCH_FRCSR, MASK_FRCSR, match_opcode, INSN_ALIAS },

@@ -583,7 +583,6 @@ enum
   M_VMSGEU,
   M_RL,
   M_FL,
-  M_PERM,
   M_NUM_MACROS
 };
 
