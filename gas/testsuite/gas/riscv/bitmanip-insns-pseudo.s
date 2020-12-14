@@ -1,3 +1,5 @@
+	zext.h	a0, a1	/* ZBB  */
+
 	rev.p	a0, a1
 	rev2.n	a0, a1
 	rev.n	a0, a1
@@ -9,7 +11,7 @@
 	rev2.h	a0, a1
 	rev.h	a0, a1
 	rev16	a0, a1
-	rev8	a0, a1
+	rev8	a0, a1	/* ZBB  */
 	rev4	a0, a1
 	rev2	a0, a1
 	rev	a0, a1
@@ -19,7 +21,7 @@
 	orc.n	a0, a1
 	orc4.b	a0, a1
 	orc2.b	a0, a1
-	orc.b	a0, a1
+	orc.b	a0, a1	/* ZBB  */
 	orc8.h	a0, a1
 	orc4.h	a0, a1
 	orc2.h	a0, a1
@@ -53,6 +55,8 @@
 	unzip		a0, a1
 
 .ifdef __64_bit__
+	zext.w	a0, a1	/* ZBA or ZBB  */
+
 	rev16.w	a0, a1
 	rev8.w	a0, a1
 	rev4.w	a0, a1
