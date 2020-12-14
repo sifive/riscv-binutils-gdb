@@ -8,6 +8,7 @@
 Disassembly of section .text:
 
 0+000 <.text>:
+[ 	]+[0-9a-f]+:[ 	]+0805c533[ 	]+zext.h[ 	]+a0,a1
 [ 	]+[0-9a-f]+:[ 	]+6815d513[ 	]+rev.p[ 	]+a0,a1
 [ 	]+[0-9a-f]+:[ 	]+6825d513[ 	]+rev2.n[ 	]+a0,a1
 [ 	]+[0-9a-f]+:[ 	]+6835d513[ 	]+rev.n[ 	]+a0,a1

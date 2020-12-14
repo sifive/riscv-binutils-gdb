@@ -8,6 +8,7 @@
 Disassembly of section .text:
 
 0+000 <.text>:
+[ 	]+[0-9a-f]+:[ 	]+0805c533[ 	]+pack[ 	]+a0,a1,zero
 [ 	]+[0-9a-f]+:[ 	]+6815d513[ 	]+grevi[ 	]+a0,a1,0x1
 [ 	]+[0-9a-f]+:[ 	]+6825d513[ 	]+grevi[ 	]+a0,a1,0x2
 [ 	]+[0-9a-f]+:[ 	]+6835d513[ 	]+grevi[ 	]+a0,a1,0x3
