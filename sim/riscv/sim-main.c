@@ -2220,7 +2220,7 @@ void step_once (SIM_CPU *cpu)
   for (; op->name; op++)
     {
       /* Does the opcode match?  */
-      if (!(op->match_func) (op, iw))
+      if (!(op->match_func) (op, iw, 0, NULL))
 	continue;
       /* Is this a pseudo-instruction?  */
       if ((op->pinfo & INSN_ALIAS))
