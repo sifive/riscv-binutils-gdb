@@ -61,6 +61,12 @@ if [istarget tic6x*-*-*] {
     append CFLAGS_FOR_TARGET " -mno-dsbt -msdata=none"
 }
 
+# The __global_pointer$ symbol need to be defined in the target linker
+# script, so don't test the compact model here.
+if { [istarget riscv*-*-*] } {
+    set CC_FOR_TARGET "$CC_FOR_TARGET -mcmodel=medlow"
+}
+
 if { ![ld_compile "$CC_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross1.c" tmpdir/cross1.o] \
      || ![ld_compile "$CC_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross2.c" tmpdir/cross2.o] } {
     unsupported $test1

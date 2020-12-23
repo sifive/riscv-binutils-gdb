@@ -18,6 +18,19 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
+# For riscv compact:
+# Consider that foo is a global function.  For now GCC codegen seems
+# always generate the following pattern when -mcmodel=compact is set,
+#
+#    la.got.gprel rd, foo, gp
+#    jr rd
+#
+# and probably missing - call/tail foo.  I think it's fine for the elf
+# toolchain.  But we will miss all plt patterns for the linux toolchain.
+# So we need to check this issue when we back to support the compact linux
+# toolchain.  However, all ld/testsuite/ld-plugin/* testcases need to be
+# fixed.
+
 # These tests require the plugin API to be configured in.
 if ![check_plugin_api_available] {
     return

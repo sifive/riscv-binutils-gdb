@@ -157,6 +157,47 @@ struct riscv_elf_link_hash_table
     && elf_hash_table_id (elf_hash_table (p)) == RISCV_ELF_DATA)	\
    ? (struct riscv_elf_link_hash_table *) (p)->hash : NULL)
 
+/* Generate the compact PLT header.  */
+static bool compact_plt = false;
+
+/* Set according to the linker target options.  */
+
+void
+bfd_elfNN_riscv_set_options (struct bfd *output_bfd ATTRIBUTE_UNUSED,
+			     struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			     bool option_compact_plt)
+{
+  compact_plt = option_compact_plt;
+}
+
+/* Check whether the compact PLT is used in this object.  Tools need this
+   to dump the correct PLT header contents.  */
+
+static long
+elfNN_riscv_get_synthetic_symtab (bfd *abfd,
+				  long symcount,
+				  asymbol **syms,
+				  long dynsymcount,
+				  asymbol **dynsyms,
+				  asymbol **ret)
+{
+  asection *plt;
+  bfd_byte *plt_content;
+
+  plt = bfd_get_section_by_name (abfd, ".plt");
+  if (plt != NULL
+      && plt->size != 0
+      && bfd_malloc_and_get_section (abfd, plt, &plt_content))
+    {
+      bfd_vma insn = bfd_get_32 (abfd, plt_content);
+      if (insn == RISCV_RTYPE (SUB, X_T1, X_T1, X_T3))
+	compact_plt = true;
+    }
+
+  return _bfd_elf_get_synthetic_symtab (abfd, symcount, syms,
+					dynsymcount, dynsyms, ret);
+}
+
 static bool
 riscv_info_to_howto_rela (bfd *abfd,
 			  arelent *cache_ptr,
@@ -192,8 +233,10 @@ riscv_is_insn_reloc (const reloc_howto_type *howto)
 
 /* PLT/GOT stuff.  */
 #define PLT_HEADER_INSNS 8
+#define COMPACT_PLT_HEADER_INSNS 8
+#define COMPACT_PLT_STUB_INSNS 8
+#define COMPACT_PLT_STUB_DATA_SIZE 16
 #define PLT_ENTRY_INSNS 4
-#define PLT_HEADER_SIZE (PLT_HEADER_INSNS * 4)
 #define PLT_ENTRY_SIZE (PLT_ENTRY_INSNS * 4)
 #define GOT_ENTRY_SIZE RISCV_ELF_WORD_BYTES
 /* Reserve two entries of GOTPLT for ld.so, one is used for PLT resolver,
@@ -203,21 +246,98 @@ riscv_is_insn_reloc (const reloc_howto_type *howto)
 
 #define sec_addr(sec) ((sec)->output_section->vma + (sec)->output_offset)
 
+static bfd_vma
+riscv_elf_plt_header_size (void)
+{
+  if (compact_plt)
+    return (COMPACT_PLT_HEADER_INSNS + COMPACT_PLT_STUB_INSNS) * 4
+	    + COMPACT_PLT_STUB_DATA_SIZE;
+  else
+    return PLT_HEADER_INSNS * 4;
+}
+
 #if ARCH_SIZE == 32
 # define MATCH_LREG MATCH_LW
 #else
 # define MATCH_LREG MATCH_LD
 #endif
 
+/* plt_header:
+   auipc  t2, %hi(.got.plt)
+   sub    t1, t1, t3
+   l[w|d] t3, %lo(.got.plt)(t2)		# t3 = _dl_runtime_resolve, .got.plt[0]
+   addi   t1, t1, -44			# &.plt[i] - &.plt[0], hdr_size + 12 = 44
+   addi   t0, t2, %lo(.got.plt)		# &.got.plt
+   srli   t1, t1, log2(n)		# n = sizeof(.plt[i]) / sizeof(.got.plt[i])
+					# t1 = &.got.plt[i] - &.got.plt[2]
+   l[w|d] t0, sizeof(.got.plt[i])(t0)	# t0 = link map, .got.plt[1]
+   jr      t3  */
+
+static uint32_t riscv_plt_header[] =
+{
+  RISCV_UTYPE (AUIPC, X_T2, 0),		/* gotplt_offset_high  */
+  RISCV_RTYPE (SUB, X_T1, X_T1, X_T3),
+  RISCV_ITYPE (LREG, X_T3, X_T2, 0),	/* gotplt_offset_low  */
+  RISCV_ITYPE (ADDI, X_T1, X_T1, 0),	/* -(hdr_size + 12)  */
+  RISCV_ITYPE (ADDI, X_T0, X_T2, 0),	/* gotplt_offset_low  */
+  RISCV_ITYPE (SRLI, X_T1, X_T1, 4 - RISCV_ELF_LOG_WORD_BYTES),
+  RISCV_ITYPE (LREG, X_T0, X_T0, RISCV_ELF_WORD_BYTES),
+  RISCV_ITYPE (JALR, 0, X_T3, 0)
+};
+
+/* compact_plt_header:
+   sub t1, t1, t3
+   ld  t3, 0(t2)		# t3 = _dl_runtime_resolve, .got.plt[0]
+   addi        t1, t1, -80	# &.plt[i] - &.plt[0], hdr_size + 12 = 80
+   srli        t1, t1, log2(n)	# n = sizeof(.plt[i]) / sizeof(.got.plt[i])
+				# t1 = &.got.plt[i] - &.got.plt[2]
+   ld  t0, 8(t2)		# t0 = link map, .got.plt[1]
+   jr  t3
+   nop
+   nop
+
+   compact_stub:
+   auipc t0, %hi_pcrel(compact_stub_data)
+   addi        t0, t0, %lo_pcrel(compact_stub)
+   ld  t2, 0(t0)		# offset between .got.plt and compact_stub_data
+   add t2, t0, t2		# t2 = &.got.plt
+   add t0, t2, t3		# t0 = &.got.plt[i]
+   ld  t3, 0(t0)		# t3 = address of .plt header/resolved function
+   jr  t3
+   nop
+
+   compact_stub_data:
+   .quad       &.got.plt - .,0  */
+
+static uint32_t riscv_compact_plt_header[] =
+{
+  /* Header */
+  RISCV_RTYPE (SUB, X_T1, X_T1, X_T3),
+  RISCV_ITYPE (LREG, X_T3, X_T2, 0),
+  RISCV_ITYPE (ADDI, X_T1, X_T1, 0),	/* -(hdr_size + 12)  */
+  RISCV_ITYPE (SRLI, X_T1, X_T1, 4 - RISCV_ELF_LOG_WORD_BYTES),
+  RISCV_ITYPE (LREG, X_T0, X_T2, RISCV_ELF_WORD_BYTES),
+  RISCV_ITYPE (JALR, 0, X_T3, 0),
+  RISCV_NOP,
+  RISCV_NOP,
+
+  /* Stub */
+  RISCV_UTYPE (AUIPC, X_T0, 0),		/* compact_stub_data_high  */
+  RISCV_ITYPE (ADDI, X_T0, X_T0, 0),	/* compact_stub_data_low  */
+  RISCV_ITYPE (LREG, X_T2, X_T0, 0),
+  RISCV_RTYPE (ADD, X_T2, X_T0, X_T2),
+  RISCV_RTYPE (ADD, X_T0, X_T2, X_T3),
+  RISCV_ITYPE (LREG, X_T3, X_T0, 0),
+  RISCV_ITYPE (JALR, 0, X_T3, 0),
+  RISCV_NOP
+};
+
 /* Generate a PLT header.  */
 
 static bool
-riscv_make_plt_header (bfd *output_bfd, bfd_vma gotplt_addr, bfd_vma addr,
-		       uint32_t *entry)
+riscv_make_plt_header (bfd *output_bfd, bfd_vma gotplt_addr, bfd_vma plt_addr,
+		       uint32_t **entry, int *insns)
 {
-  bfd_vma gotplt_offset_high = RISCV_PCREL_HIGH_PART (gotplt_addr, addr);
-  bfd_vma gotplt_offset_low = RISCV_PCREL_LOW_PART (gotplt_addr, addr);
-
   /* RVE has no t3 register, so this won't work, and is not supported.  */
   if (elf_elfheader (output_bfd)->e_flags & EF_RISCV_RVE)
     {
@@ -226,23 +346,62 @@ riscv_make_plt_header (bfd *output_bfd, bfd_vma gotplt_addr, bfd_vma addr,
       return false;
     }
 
-  /* auipc  t2, %hi(.got.plt)
-     sub    t1, t1, t3		     # shifted .got.plt offset + hdr size + 12
-     l[w|d] t3, %lo(.got.plt)(t2)    # _dl_runtime_resolve
-     addi   t1, t1, -(hdr size + 12) # shifted .got.plt offset
-     addi   t0, t2, %lo(.got.plt)    # &.got.plt
-     srli   t1, t1, log2(16/PTRSIZE) # .got.plt offset
-     l[w|d] t0, PTRSIZE(t0)	     # link map
-     jr	    t3  */
+  if (compact_plt)
+    {
+      bfd_vma pc = plt_addr + COMPACT_PLT_HEADER_INSNS * 4;
+      bfd_vma target = pc + COMPACT_PLT_STUB_INSNS * 4;
+      bfd_vma compact_stub_data_high = RISCV_PCREL_HIGH_PART (target, pc);
+      bfd_vma compact_stub_data_low = RISCV_PCREL_LOW_PART (target, pc);
+      bfd_vma shift = -(riscv_elf_plt_header_size () + 12);
 
-  entry[0] = RISCV_UTYPE (AUIPC, X_T2, gotplt_offset_high);
-  entry[1] = RISCV_RTYPE (SUB, X_T1, X_T1, X_T3);
-  entry[2] = RISCV_ITYPE (LREG, X_T3, X_T2, gotplt_offset_low);
-  entry[3] = RISCV_ITYPE (ADDI, X_T1, X_T1, (uint32_t) -(PLT_HEADER_SIZE + 12));
-  entry[4] = RISCV_ITYPE (ADDI, X_T0, X_T2, gotplt_offset_low);
-  entry[5] = RISCV_ITYPE (SRLI, X_T1, X_T1, 4 - RISCV_ELF_LOG_WORD_BYTES);
-  entry[6] = RISCV_ITYPE (LREG, X_T0, X_T0, RISCV_ELF_WORD_BYTES);
-  entry[7] = RISCV_ITYPE (JALR, 0, X_T3, 0);
+      /* Check the overflow.  */
+      if (!VALID_UTYPE_IMM (compact_stub_data_high)
+	  || !VALID_ITYPE_IMM (compact_stub_data_low)
+	  || !VALID_ITYPE_IMM (shift))
+	{
+	  (*_bfd_error_handler)
+	    (_("%pB: overflow when relocating the compact .plt header"),
+	     output_bfd);
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      /* Relocate the plt section.  */
+      riscv_compact_plt_header[2] |= ENCODE_ITYPE_IMM (shift);
+      riscv_compact_plt_header[6] |= ENCODE_UTYPE_IMM (compact_stub_data_high);
+      riscv_compact_plt_header[7] |= ENCODE_ITYPE_IMM (compact_stub_data_low);
+
+      *entry = riscv_compact_plt_header;
+      *insns = COMPACT_PLT_HEADER_INSNS + COMPACT_PLT_STUB_INSNS;
+    }
+  else
+    {
+      bfd_vma pc = plt_addr;	/* The pc of auipc  */
+      bfd_vma gotplt_offset_high = RISCV_PCREL_HIGH_PART (gotplt_addr, pc);
+      bfd_vma gotplt_offset_low = RISCV_PCREL_LOW_PART (gotplt_addr, pc);
+      bfd_vma shift = -(riscv_elf_plt_header_size () + 12);
+
+      /* Check the overflow.  */
+      if (!VALID_UTYPE_IMM (gotplt_offset_high)
+	  || !VALID_ITYPE_IMM (gotplt_offset_low)
+	  || !VALID_ITYPE_IMM (shift))
+	{
+	  (*_bfd_error_handler)
+	    (_("%pB: overflow when relocating the .plt header"),
+	     output_bfd);
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      /* Relocate the plt section.  */
+      riscv_plt_header[0] |= ENCODE_UTYPE_IMM (gotplt_offset_high);
+      riscv_plt_header[2] |= ENCODE_ITYPE_IMM (gotplt_offset_low);
+      riscv_plt_header[3] |= ENCODE_ITYPE_IMM (shift);
+      riscv_plt_header[4] |= ENCODE_ITYPE_IMM (gotplt_offset_low);
+
+      *entry = riscv_plt_header;
+      *insns = PLT_HEADER_INSNS;
+    }
 
   return true;
 }
@@ -250,8 +409,8 @@ riscv_make_plt_header (bfd *output_bfd, bfd_vma gotplt_addr, bfd_vma addr,
 /* Generate a PLT entry.  */
 
 static bool
-riscv_make_plt_entry (bfd *output_bfd, bfd_vma got, bfd_vma addr,
-		      uint32_t *entry)
+riscv_make_plt_entry (bfd *output_bfd, bfd_vma got, bfd_vma got_offset,
+		      bfd_vma plt, bfd_vma plt_offset, uint32_t *entry)
 {
   /* RVE has no t3 register, so this won't work, and is not supported.  */
   if (elf_elfheader (output_bfd)->e_flags & EF_RISCV_RVE)
@@ -261,15 +420,75 @@ riscv_make_plt_entry (bfd *output_bfd, bfd_vma got, bfd_vma addr,
       return false;
     }
 
-  /* auipc  t3, %hi(.got.plt entry)
-     l[w|d] t3, %lo(.got.plt entry)(t3)
-     jalr   t1, t3
-     nop  */
+  if (compact_plt)
+    {
+      /* lui   t3, %hi(offset)
+	 addi   t3, t3, %lo(offset)	# t3 = offset between .got.plt and .got.plt entry
+	 jal    t1, compact_stub	# t1 = address of nop
+	 nop  */
 
-  entry[0] = RISCV_UTYPE (AUIPC, X_T3, RISCV_PCREL_HIGH_PART (got, addr));
-  entry[1] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART (got, addr));
-  entry[2] = RISCV_ITYPE (JALR, X_T1, X_T3, 0);
-  entry[3] = RISCV_NOP;
+      bfd_vma addr = got_offset - got;
+      bfd_vma offset = plt + COMPACT_PLT_HEADER_INSNS * 4
+		       - (plt + plt_offset + 8);
+
+      /* Check the overflow.  */
+      if (!VALID_UTYPE_IMM (RISCV_CONST_HIGH_PART (addr))
+	  || !VALID_ITYPE_IMM (addr))
+	{
+	  (*_bfd_error_handler)
+	    (_("%pB: overflow when relocating the compact .plt entry, "
+	       "offset between .got.plt and .got.plt entry outside the "
+	       "32-bit range"),
+	     output_bfd);
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      if (!VALID_ITYPE_IMM (offset))
+	{
+	  (*_bfd_error_handler)
+	    (_("%pB: overflow when relocating the compact .plt entry, "
+	       "offset between compact stub and jal outside the "
+	       "JAL range"),
+	     output_bfd);
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      entry[0] = RISCV_UTYPE (LUI, X_T3, RISCV_CONST_HIGH_PART (addr));
+      entry[1] = RISCV_ITYPE (ADDI, X_T3, X_T3, addr);
+      entry[2] = RISCV_JTYPE (JAL, X_T1, offset);
+      entry[3] = RISCV_NOP;
+    }
+  else
+    {
+      bfd_vma addr = plt + plt_offset;
+      bfd_vma offset_high = RISCV_PCREL_HIGH_PART (got_offset, addr);
+      bfd_vma offset_low = RISCV_PCREL_LOW_PART (got_offset, addr);
+
+      /* auipc  t3, %hi(.got.plt entry)
+	 l[w|d] t3, %lo(.got.plt entry)(t3)
+	 jalr   t1, t3  # t1 = address of nop
+	 nop  */
+
+      /* Check the overflow.  */
+      if (!VALID_UTYPE_IMM (offset_high)
+	  || !VALID_ITYPE_IMM (offset_low))
+	{
+	  (*_bfd_error_handler)
+	    (_("%pB: overflow when relocating the .plt entry, "
+	       "offset between .got.plt and .plt entry outside "
+	       "the PCREL range"),
+	     output_bfd);
+	  bfd_set_error (bfd_error_bad_value);
+	  return false;
+	}
+
+      entry[0] = RISCV_UTYPE (AUIPC, X_T3, offset_high);
+      entry[1] = RISCV_ITYPE (LREG, X_T3, X_T3, offset_low);
+      entry[2] = RISCV_ITYPE (JALR, X_T1, X_T3, 0);
+      entry[3] = RISCV_NOP;
+    }
 
   return true;
 }
@@ -531,6 +750,15 @@ riscv_elf_create_dynamic_sections (bfd *dynobj,
       || (!bfd_link_pic (info) && (!htab->elf.srelbss || !htab->sdyntdata)))
     abort ();
 
+  if (htab->elf.splt && compact_plt)
+    {
+      /* Add the symbol at the compact plt stub.  */
+      struct elf_link_hash_entry *h =
+	_bfd_elf_define_linkage_sym (dynobj, info, htab->elf.splt,
+				     "_compact_plt_stub");
+      h->root.u.def.value = COMPACT_PLT_HEADER_INSNS * 4;
+    }
+
   return true;
 }
 
@@ -726,12 +954,14 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       switch (r_type)
 	{
 	case R_RISCV_TLS_GD_HI20:
+	case R_RISCV_TLS_GD_GPREL_HI20:
 	  if (!riscv_elf_record_got_reference (abfd, info, h, r_symndx)
 	      || !riscv_elf_record_tls_type (abfd, h, r_symndx, GOT_TLS_GD))
 	    return false;
 	  break;
 
 	case R_RISCV_TLS_GOT_HI20:
+	case R_RISCV_TLS_GOT_GPREL_HI20:
 	  if (bfd_link_pic (info))
 	    info->flags |= DF_STATIC_TLS;
 	  if (!riscv_elf_record_got_reference (abfd, info, h, r_symndx)
@@ -740,6 +970,7 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case R_RISCV_GOT_HI20:
+	case R_RISCV_GOT_GPREL_HI20:
 	  if (!riscv_elf_record_got_reference (abfd, info, h, r_symndx)
 	      || !riscv_elf_record_tls_type (abfd, h, r_symndx, GOT_NORMAL))
 	    return false;
@@ -780,6 +1011,7 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_RISCV_BRANCH:
 	case R_RISCV_RVC_BRANCH:
 	case R_RISCV_RVC_JUMP:
+	case R_RISCV_GPREL_HI20:
 	  /* In shared libraries and pie, these relocs are known
 	     to bind locally.  */
 	  if (bfd_link_pic (info))
@@ -1151,7 +1383,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  asection *s = htab->elf.splt;
 
 	  if (s->size == 0)
-	    s->size = PLT_HEADER_SIZE;
+	    s->size = riscv_elf_plt_header_size ();
 
 	  h->plt.offset = s->size;
 
@@ -1350,7 +1582,7 @@ allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
     return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
 					       &h->dyn_relocs,
 					       PLT_ENTRY_SIZE,
-					       PLT_HEADER_SIZE,
+					       riscv_elf_plt_header_size (),
 					       GOT_ENTRY_SIZE,
 					       true);
   return true;
@@ -1653,11 +1885,15 @@ perform_relocation (const reloc_howto_type *howto,
   switch (ELFNN_R_TYPE (rel->r_info))
     {
     case R_RISCV_HI20:
+    case R_RISCV_GPREL_HI20:
     case R_RISCV_TPREL_HI20:
     case R_RISCV_PCREL_HI20:
     case R_RISCV_GOT_HI20:
+    case R_RISCV_GOT_GPREL_HI20:
     case R_RISCV_TLS_GOT_HI20:
+    case R_RISCV_TLS_GOT_GPREL_HI20:
     case R_RISCV_TLS_GD_HI20:
+    case R_RISCV_TLS_GD_GPREL_HI20:
       if (ARCH_SIZE > 32 && !VALID_UTYPE_IMM (RISCV_CONST_HIGH_PART (value)))
 	return bfd_reloc_overflow;
       value = ENCODE_UTYPE_IMM (RISCV_CONST_HIGH_PART (value));
@@ -1665,14 +1901,19 @@ perform_relocation (const reloc_howto_type *howto,
 
     case R_RISCV_LO12_I:
     case R_RISCV_GPREL_I:
+    case R_RISCV_GPREL_LO12_I:
     case R_RISCV_TPREL_LO12_I:
     case R_RISCV_TPREL_I:
     case R_RISCV_PCREL_LO12_I:
+    case R_RISCV_GOT_GPREL_LO12_I:
+    case R_RISCV_TLS_GOT_GPREL_LO12_I:
+    case R_RISCV_TLS_GD_GPREL_LO12_I:
       value = ENCODE_ITYPE_IMM (value);
       break;
 
     case R_RISCV_LO12_S:
     case R_RISCV_GPREL_S:
+    case R_RISCV_GPREL_LO12_S:
     case R_RISCV_TPREL_LO12_S:
     case R_RISCV_TPREL_S:
     case R_RISCV_PCREL_LO12_S:
@@ -1764,6 +2005,7 @@ perform_relocation (const reloc_howto_type *howto,
     case R_RISCV_SET16:
     case R_RISCV_SET32:
     case R_RISCV_32_PCREL:
+    case R_RISCV_64_PCREL:
     case R_RISCV_TLS_DTPREL32:
     case R_RISCV_TLS_DTPREL64:
       break;
@@ -1996,6 +2238,69 @@ riscv_resolve_pcrel_lo_relocs (riscv_pcrel_relocs *p)
   return true;
 }
 
+/* We have to check both high and low instructions at the same time,
+   in case we have changed one of them, but another can not be changed.
+
+   Generally, we only need to handle the case for GPREL undefined weak
+   symbol.  The GOT_GPREL cases should always fine since gp is placed
+   nearly the whole data in the compact code model.  The nearly-zero
+   symbols for GPREL means the gp is also nealy zero, so we don't need
+   to handle it, too.  */
+
+static bool
+riscv_zero_gprel_reloc (Elf_Internal_Rela *rel,
+			struct bfd_link_info *info,
+			bfd_vma gp,
+			bfd_vma addr,
+			bfd_byte *contents,
+			const reloc_howto_type *howto ATTRIBUTE_UNUSED,
+			bfd *input_bfd)
+{
+  int r_type = ELFNN_R_TYPE (rel->r_info);
+
+  /*  Keep the original pattern when
+      1. generating shared library or PIE.
+      2. the offset (addr - gp) is still in the range of gp for
+	 both high and low instructions.
+      3. RV64 toolchain, the symbol is placed at the high 32-bit
+	 of the 64-bit address, and far from gp.  So users still
+	 see the GP-relative relocation in the truncation message.  */
+  bfd_vma offset = addr + rel->r_addend - gp;
+  if (bfd_link_pic (info)
+      || VALID_UTYPE_IMM (RISCV_CONST_HIGH_PART (offset))
+      /* It's hard to check whether the low 12-bit of a 64-bit address
+	 if valid (signed-ext).  Beside, it should be enough that only
+	 check the high part.  */
+      || (ARCH_SIZE > 32
+	  && !VALID_UTYPE_IMM (RISCV_CONST_HIGH_PART (addr))))
+    return false;
+
+  switch (r_type)
+    {
+    case R_RISCV_GPREL_HI20:
+      rel->r_info = ELFNN_R_INFO(ELFNN_R_SYM (rel->r_info), R_RISCV_HI20);
+      break;
+
+    case R_RISCV_GPREL_LO12_I:
+      rel->r_info = ELFNN_R_INFO(ELFNN_R_SYM (rel->r_info), R_RISCV_LO12_I);
+      break;
+
+    case R_RISCV_GPREL_LO12_S:
+      rel->r_info = ELFNN_R_INFO(ELFNN_R_SYM (rel->r_info), R_RISCV_LO12_S);
+      break;
+
+    case R_RISCV_GPREL_ADD:
+      rel->r_info = ELFNN_R_INFO(0, R_RISCV_NONE);
+      bfd_put_32 (input_bfd, RISCV_NOP, contents + rel->r_offset);
+      break;
+
+    default:
+      return false;
+    }
+
+  return true;
+}
+
 /* Relocate a RISC-V ELF section.
 
    The RELOCATE_SECTION function is called by the new ELF backend linker
@@ -2042,6 +2347,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
   Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (input_bfd);
   struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
   bfd_vma *local_got_offsets = elf_local_got_offsets (input_bfd);
+  bfd_vma gp = riscv_global_pointer_value (info);
   bool absolute;
   bfd_vma uleb128_vma = 0;
   Elf_Internal_Rela *uleb128_rel = NULL;
@@ -2266,7 +2572,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 
 		    if (htab->elf.splt != NULL)
 		      {
-			plt_idx = (h->plt.offset - PLT_HEADER_SIZE)
+			plt_idx = (h->plt.offset - riscv_elf_plt_header_size ())
 				  / PLT_ENTRY_SIZE;
 			off = GOTPLT_HEADER_SIZE + (plt_idx * GOT_ENTRY_SIZE);
 			base_got = htab->elf.sgotplt;
@@ -2364,7 +2670,14 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	{
 	case R_RISCV_NONE:
 	case R_RISCV_RELAX:
+	case R_RISCV_GPREL_LOAD:
+	case R_RISCV_GPREL_STORE:
+	case R_RISCV_GOT_GPREL_ADD:
+	case R_RISCV_GOT_GPREL_LOAD:
+	case R_RISCV_GOT_GPREL_STORE:
 	case R_RISCV_TPREL_ADD:
+	case R_RISCV_TLS_GD_GPREL_ADD:
+	case R_RISCV_TLS_GOT_GPREL_ADD:
 	case R_RISCV_COPY:
 	case R_RISCV_JUMP_SLOT:
 	case R_RISCV_RELATIVE:
@@ -2382,6 +2695,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	case R_RISCV_SET16:
 	case R_RISCV_SET32:
 	case R_RISCV_32_PCREL:
+	case R_RISCV_64_PCREL:
 	case R_RISCV_DELETE:
 	  /* These require no special handling beyond perform_relocation.  */
 	  break;
@@ -2431,6 +2745,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_RISCV_GOT_HI20:
+	case R_RISCV_GOT_GPREL_HI20:
+	case R_RISCV_GOT_GPREL_LO12_I:
 	  if (h != NULL)
 	    {
 	      bool dyn, pic;
@@ -2514,18 +2830,23 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	    {
 	      /* Address of got entry.  */
 	      relocation = sec_addr (htab->elf.sgot) + off;
-	      absolute = riscv_zero_pcrel_hi_reloc (rel, info, pc,
-						    relocation, contents,
-						    howto);
+	      if (r_type == R_RISCV_GOT_HI20)
+		{
+		  absolute = riscv_zero_pcrel_hi_reloc (rel, info, pc,
+							relocation, contents,
+							howto);
+		  if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc,
+						    relocation, r_type,
+						    absolute))
+		    r = bfd_reloc_overflow;
+		}
+	      else
+		relocation -= gp;
 	      /* Update howto if relocation is changed.  */
 	      howto = riscv_elf_rtype_to_howto (input_bfd,
 						ELFNN_R_TYPE (rel->r_info));
 	      if (howto == NULL)
 		r = bfd_reloc_notsupported;
-	      else if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc,
-						     relocation, r_type,
-						     absolute))
-		r = bfd_reloc_overflow;
 	    }
 	  break;
 
@@ -2604,10 +2925,25 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	    r = bfd_reloc_overflow;
 	  break;
 
+	case R_RISCV_GPREL_HI20:
+	case R_RISCV_GPREL_LO12_I:
+	case R_RISCV_GPREL_LO12_S:
+	  absolute = riscv_zero_gprel_reloc (rel, info, gp,
+					     relocation, contents,
+					     howto, input_bfd);
+	  if (!absolute)
+	    relocation -= gp;
+	  break;
+
+	case R_RISCV_GPREL_ADD:
+	  absolute = riscv_zero_gprel_reloc (rel, info, gp,
+					     relocation, contents,
+					     howto, input_bfd);
+	  continue;
+
 	case R_RISCV_GPREL_I:
 	case R_RISCV_GPREL_S:
 	  {
-	    bfd_vma gp = riscv_global_pointer_value (info);
 	    bool x0_base = VALID_ITYPE_IMM (relocation + rel->r_addend);
 	    if (x0_base || VALID_ITYPE_IMM (relocation + rel->r_addend - gp))
 	      {
@@ -2728,10 +3064,14 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_RISCV_TLS_GOT_HI20:
+	case R_RISCV_TLS_GOT_GPREL_HI20:
+	case R_RISCV_TLS_GOT_GPREL_LO12_I:
 	  is_ie = true;
 	  /* Fall through.  */
 
 	case R_RISCV_TLS_GD_HI20:
+	case R_RISCV_TLS_GD_GPREL_HI20:
+	case R_RISCV_TLS_GD_GPREL_LO12_I:
 	  if (h != NULL)
 	    {
 	      off = h->got.offset;
@@ -2849,9 +3189,14 @@ riscv_elf_relocate_section (bfd *output_bfd,
 
 	  BFD_ASSERT (off < (bfd_vma) -2);
 	  relocation = sec_addr (htab->elf.sgot) + off + (is_ie ? ie_off : 0);
-	  if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc,
-					    relocation, r_type,
-					    false))
+	  if (r_type == R_RISCV_TLS_GOT_GPREL_HI20
+	      || r_type == R_RISCV_TLS_GOT_GPREL_LO12_I
+	      || r_type == R_RISCV_TLS_GD_GPREL_HI20
+	      || r_type == R_RISCV_TLS_GD_GPREL_LO12_I)
+	    relocation -= gp;
+	  else if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc,
+						 relocation, r_type,
+						 false))
 	    r = bfd_reloc_overflow;
 	  unresolved_reloc = false;
 	  break;
@@ -3018,7 +3363,8 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
 	 For static executables, we don't reserve anything.  */
       if (plt == htab->elf.splt)
 	{
-	  plt_idx = (h->plt.offset - PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
+	  plt_idx = (h->plt.offset - riscv_elf_plt_header_size ())
+		     / PLT_ENTRY_SIZE;
 	  got_offset = GOTPLT_HEADER_SIZE + (plt_idx * GOT_ENTRY_SIZE);
 	}
       else
@@ -3034,8 +3380,9 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
       loc = plt->contents + h->plt.offset;
 
       /* Fill in the PLT entry itself.  */
-      if (! riscv_make_plt_entry (output_bfd, got_address,
-				  header_address + h->plt.offset,
+      if (! riscv_make_plt_entry (output_bfd,
+				  sec_addr (htab->elf.sgotplt), got_address,
+				  header_address, h->plt.offset,
 				  plt_entry))
 	return false;
 
@@ -3181,7 +3528,19 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
 	     or a pie link, or the symbol was forced to be local because
 	     of a version file.  The entry in the global offset table will
 	     already have been initialized in the relocate_section function.  */
-	  BFD_ASSERT ((h->got.offset & 1) != 0);
+
+	  /* Looks like we had converted all possible compact GOT GP-relative
+	     relocs to compact GP-relative relocs, but not yet have a good
+	     method to delete the unused GOT entry.  Ideally, we probably
+	     need to delete the unused entry, but there is a workaround could
+	     work - Handle and fill the unused got entry when the compact
+	     GP-relative relocs are converted from the compact GOT GP-relative
+	     relocs.  However, it should be fine that just remove the BFD_ASSERT
+	     temporarily.
+
+	     BFD_ASSERT((h->got.offset & 1) != 0);
+	  */
+
 	  asection *sec = h->root.u.def.section;
 	  rela.r_info = ELFNN_R_INFO (0, R_RISCV_RELATIVE);
 	  rela.r_addend = (h->root.u.def.value
@@ -3328,16 +3687,26 @@ riscv_elf_finish_dynamic_sections (bfd *output_bfd,
       /* Fill in the head and tail entries in the procedure linkage table.  */
       if (splt->size > 0)
 	{
-	  int i;
-	  uint32_t plt_header[PLT_HEADER_INSNS];
+	  int i, insns;;
+	  uint32_t *plt_header;
 	  ret = riscv_make_plt_header (output_bfd,
 				       sec_addr (htab->elf.sgotplt),
-				       sec_addr (splt), plt_header);
+				       sec_addr (splt),
+				       &plt_header,
+				       &insns);
 	  if (!ret)
 	    return ret;
 
-	  for (i = 0; i < PLT_HEADER_INSNS; i++)
+	  for (i = 0; i < insns; i++)
 	    bfd_putl32 (plt_header[i], splt->contents + 4*i);
+
+	  if (compact_plt)
+	    {
+	      bfd_vma offset = sec_addr (htab->elf.sgotplt)
+			       - sec_addr (splt)
+			       - insns * 4;
+	      bfd_put_64 (output_bfd, offset, splt->contents + insns * 4);
+	    }
 
 	  elf_section_data (splt->output_section)->this_hdr.sh_entsize
 	    = PLT_ENTRY_SIZE;
@@ -3397,7 +3766,7 @@ static bfd_vma
 riscv_elf_plt_sym_val (bfd_vma i, const asection *plt,
 		       const arelent *rel ATTRIBUTE_UNUSED)
 {
-  return plt->vma + PLT_HEADER_SIZE + i * PLT_ENTRY_SIZE;
+  return plt->vma + riscv_elf_plt_header_size () + i * PLT_ENTRY_SIZE;
 }
 
 static enum elf_reloc_type_class
@@ -4358,7 +4727,8 @@ _bfd_riscv_get_max_alignment (asection *sec)
   return (bfd_vma) 1 << max_alignment_power;
 }
 
-/* Relax non-PIC global variable references to GP-relative references.  */
+/* Relax non-PIC global variable, compact GP-relative and GOT GP-relative
+   references.  */
 
 static bool
 _bfd_riscv_relax_lui (bfd *abfd,
@@ -4389,6 +4759,15 @@ _bfd_riscv_relax_lui (bfd *abfd,
       if (h->u.def.section->output_section == sym_sec->output_section
 	  && sym_sec->output_section != bfd_abs_section_ptr)
 	max_alignment = (bfd_vma) 1 << sym_sec->output_section->alignment_power;
+
+      /* We had aligned gp to 16-byte for compact gcc optimizations, but
+	 gp relaxation also need to consider the alignment, otherwise we
+	 will get GPREL truncated errors when running the gcc testcases
+	 with medlow but use the rv32 medany toolchains.
+
+	 This is just a workaround, and need to find a better way to fix
+	 the problems.  */
+	max_alignment = max_alignment > 0x10 ? max_alignment : 0x10;
     }
 
   /* Is the reference in range of x0 or gp?
@@ -4403,6 +4782,11 @@ _bfd_riscv_relax_lui (bfd *abfd,
       unsigned sym = ELFNN_R_SYM (rel->r_info);
       switch (ELFNN_R_TYPE (rel->r_info))
 	{
+	case R_RISCV_GPREL_LO12_I:
+	  if (undefined_weak)
+	    rel->r_info = ELFNN_R_INFO (sym, R_RISCV_LO12_I);
+	  /* Fall through.  */
+
 	case R_RISCV_LO12_I:
 	  if (undefined_weak)
 	    {
@@ -4414,6 +4798,11 @@ _bfd_riscv_relax_lui (bfd *abfd,
 	  else
 	    rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_I);
 	  return true;
+
+	case R_RISCV_GPREL_LO12_S:
+	  if (undefined_weak)
+	    rel->r_info = ELFNN_R_INFO (sym, R_RISCV_LO12_S);
+	  /* Fall through.  */
 
 	case R_RISCV_LO12_S:
 	  if (undefined_weak)
@@ -4427,7 +4816,29 @@ _bfd_riscv_relax_lui (bfd *abfd,
 	    rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_S);
 	  return true;
 
+	case R_RISCV_GOT_GPREL_LO12_I:
+	  {
+	    /* Change the RS1 to GP.  */
+	    bfd_vma insn = bfd_get_32 (abfd, contents + rel->r_offset);
+	    insn &= ~(OP_MASK_RS1 << OP_SH_RS1);
+	    insn |= X_GP << OP_SH_RS1;
+	    bfd_put_32 (abfd, insn, contents + rel->r_offset);
+	    /* Maybe we can add an internel reloc, R_RISCV_GOT_GPREL_I.  */
+	  }
+	  break;
+
+	case R_RISCV_GPREL_LOAD:
+	case R_RISCV_GPREL_STORE:
+	case R_RISCV_GOT_GPREL_LOAD:
+	case R_RISCV_GOT_GPREL_STORE:
+	  rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
+	  break;
+
 	case R_RISCV_HI20:
+	case R_RISCV_GPREL_HI20:
+	case R_RISCV_GPREL_ADD:
+	case R_RISCV_GOT_GPREL_HI20:
+	case R_RISCV_GOT_GPREL_ADD:
 	  /* We can delete the unnecessary LUI and reloc.  */
 	  rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
 	  *again = true;
@@ -4655,6 +5066,9 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
       if (h->u.def.section->output_section == sym_sec->output_section
 	  && sym_sec->output_section != bfd_abs_section_ptr)
 	max_alignment = (bfd_vma) 1 << sym_sec->output_section->alignment_power;
+
+      /* Same as the relax_lui, it is a workaround.  */
+      max_alignment = max_alignment > 0x10 ? max_alignment : 0x10;
     }
 
   /* Is the reference in range of x0 or gp?
@@ -4748,6 +5162,91 @@ _bfd_riscv_relax_delete (bfd *abfd,
   return true;
 }
 
+/* Convert compact GOT GP-relative reference to GP-relative reference if
+   possible.  But it is hard to also remove the unused GOT entry at this
+   stage, so just relax the pattern, and keep the unused GOT entry so far.  */
+
+static bool
+_bfd_riscv_compact_got_transition (bfd *abfd,
+				   asection *sec,
+				   asection *sym_sec,
+				   struct bfd_link_info *link_info,
+				   Elf_Internal_Rela *rel,
+				   bfd_vma symval,
+				   bfd_vma max_alignment,
+				   bfd_vma reserve_size,
+				   bool *again ATTRIBUTE_UNUSED,
+				   riscv_pcgp_relocs *pcgp_relocs ATTRIBUTE_UNUSED,
+				   bool undefined_weak ATTRIBUTE_UNUSED)
+{
+  bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
+  bfd_vma gp = riscv_global_pointer_value (link_info);
+
+  BFD_ASSERT (rel->r_offset + 4 <= sec->size);
+
+  if (gp)
+    {
+      /* If gp and the symbol are in the same output section, which is not the
+	 abs section, then consider only that output section's alignment.  */
+      struct bfd_link_hash_entry *h =
+	bfd_link_hash_lookup (link_info->hash, RISCV_GP_SYMBOL, false, false,
+			      true);
+      if (h->u.def.section->output_section == sym_sec->output_section
+	  && sym_sec->output_section != bfd_abs_section_ptr)
+	max_alignment = (bfd_vma) 1 << sym_sec->output_section->alignment_power;
+
+      /* Same as the relax_lui, it is a workaround.  */
+      max_alignment = max_alignment > 0x10 ? max_alignment : 0x10;
+    }
+
+  /* Is the reference in range of x0 or gp?
+     Valid gp range conservatively because of alignment issue.  */
+  if (VALID_ITYPE_IMM (symval)
+      || (symval >= gp
+	  && VALID_ITYPE_IMM (symval - gp + max_alignment + reserve_size))
+      || (symval < gp
+	  && VALID_ITYPE_IMM (symval - gp - max_alignment - reserve_size)))
+    {
+      unsigned sym = ELFNN_R_SYM (rel->r_info);
+      switch (ELFNN_R_TYPE (rel->r_info))
+	{
+	case R_RISCV_GOT_GPREL_LO12_I:
+	  {
+	    /* Convert instruction LD to ADDI,
+	       ld    rd  rs1  imm12  14..12=3  6..2=0x00  1..0=3
+	       addi  rd  rs1  imm12  14..12=0  6..2=0x04  1..0=3.  */
+	    bfd_vma insn = bfd_get_32 (abfd, contents + rel->r_offset);
+	    insn &= ~(0x7 << 12);
+	    insn |= 0x4 << 2;
+	    bfd_put_32 (abfd, insn, contents + rel->r_offset);
+	    rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_LO12_I);
+	  }
+	  break;
+
+	case R_RISCV_GOT_GPREL_HI20:
+	  rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_HI20);
+	  break;
+
+	case R_RISCV_GOT_GPREL_ADD:
+	  rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_ADD);
+	  break;
+
+	case R_RISCV_GOT_GPREL_LOAD:
+	  rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_LOAD);
+	  break;
+
+	case R_RISCV_GOT_GPREL_STORE:
+	  rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_STORE);
+	  break;
+
+	default:
+	  abort ();
+	}
+    }
+
+  return true;
+}
+
 /* Called by after_allocation to set the information of data segment
    before relaxing.  */
 
@@ -4761,9 +5260,10 @@ bfd_elfNN_riscv_set_data_segment_info (struct bfd_link_info *info,
 
 /* Relax a section.
 
-   Pass 0: Shortens code sequences for LUI/CALL/TPREL/PCREL relocs.
-   Pass 1: Deletes the bytes that PCREL relaxation in pass 0 made obsolete.
-   Pass 2: Which cannot be disabled, handles code alignment directives.  */
+   Pass 0: Convert compact GOT GP-relative to compact GP-relative.
+   Pass 1: Shortens code sequences for LUI/CALL/TPREL/PCREL relocs.
+   Pass 2: Deletes the bytes that PCREL relaxation in pass 0 made obsolete.
+   Pass 3: Which cannot be disabled, handles code alignment directives.  */
 
 static bool
 _bfd_riscv_relax_section (bfd *abfd, asection *sec,
@@ -4776,7 +5276,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
   Elf_Internal_Rela *relocs;
   bool ret = false;
   unsigned int i;
-  bfd_vma max_alignment, reserve_size = 0;
+  bfd_vma max_alignment;
   riscv_pcgp_relocs pcgp_relocs;
 
   *again = false;
@@ -4786,7 +5286,8 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (info->disable_target_specific_optimizations
-	  && info->relax_pass == 0)
+	  && (info->relax_pass == 0
+	      || info->relax_pass == 1))
       /* The exp_seg_relro_adjust is enum phase_enum (0x4),
 	 and defined in ld/ldexp.h.  */
       || *(htab->data_segment_phase) == 4)
@@ -4820,12 +5321,21 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
       Elf_Internal_Rela *rel = relocs + i;
       relax_func_t relax_func;
       int type = ELFNN_R_TYPE (rel->r_info);
-      bfd_vma symval;
+      bfd_vma symval = 0;
       char symtype;
       bool undefined_weak = false;
+      bool compact_got = false;
+      bfd_vma reserve_size = 0;
 
       relax_func = NULL;
-      if (info->relax_pass == 0)
+      if (info->relax_pass == 0
+	  && (type == R_RISCV_GOT_GPREL_HI20
+	      || type == R_RISCV_GOT_GPREL_ADD
+	      || type == R_RISCV_GOT_GPREL_LO12_I
+	      || type == R_RISCV_GOT_GPREL_LOAD
+	      || type == R_RISCV_GOT_GPREL_STORE))
+	relax_func = _bfd_riscv_compact_got_transition;
+      else if (info->relax_pass == 1)
 	{
 	  if (type == R_RISCV_CALL
 	      || type == R_RISCV_CALL_PLT)
@@ -4844,6 +5354,22 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 		       || type == R_RISCV_PCREL_LO12_I
 		       || type == R_RISCV_PCREL_LO12_S))
 	    relax_func = _bfd_riscv_relax_pc;
+	  else if (!bfd_link_pic(info)
+		   && (type == R_RISCV_GPREL_HI20
+		       || type == R_RISCV_GPREL_ADD
+		       || type == R_RISCV_GPREL_LO12_I
+		       || type == R_RISCV_GPREL_LO12_S))
+	    relax_func = _bfd_riscv_relax_lui;
+	  else if (!bfd_link_pic(info)
+		   && (type == R_RISCV_GOT_GPREL_HI20
+		       || type == R_RISCV_GOT_GPREL_ADD
+		       || type == R_RISCV_GOT_GPREL_LO12_I
+		       || type == R_RISCV_GOT_GPREL_LOAD
+		       || type == R_RISCV_GOT_GPREL_STORE))
+	    {
+	      relax_func = _bfd_riscv_relax_lui;
+	      compact_got = true;
+	    }
 	  else
 	    continue;
 
@@ -4856,9 +5382,9 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  /* Skip over the R_RISCV_RELAX.  */
 	  i++;
 	}
-      else if (info->relax_pass == 1 && type == R_RISCV_DELETE)
+      else if (info->relax_pass == 2 && type == R_RISCV_DELETE)
 	relax_func = _bfd_riscv_relax_delete;
-      else if (info->relax_pass == 2 && type == R_RISCV_ALIGN)
+      else if (info->relax_pass == 3 && type == R_RISCV_ALIGN)
 	relax_func = _bfd_riscv_relax_align;
       else
 	continue;
@@ -4885,8 +5411,6 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  /* A local symbol.  */
 	  Elf_Internal_Sym *isym = ((Elf_Internal_Sym *) symtab_hdr->contents
 				    + ELFNN_R_SYM (rel->r_info));
-	  reserve_size = (isym->st_size - rel->r_addend) > isym->st_size
-	    ? 0 : isym->st_size - rel->r_addend;
 
 	  /* Relocate against local STT_GNU_IFUNC symbol.  we have created
 	     a fake global symbol entry for this, so deal with the local ifunc
@@ -4910,7 +5434,29 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 #endif
 	      symval = isym->st_value;
 	    }
+
 	  symtype = ELF_ST_TYPE (isym->st_info);
+
+	  /* Reserve the remainning size of array.  */
+	  reserve_size = (isym->st_size - rel->r_addend) > isym->st_size
+			 ? 0 : isym->st_size - rel->r_addend;
+
+	  if (compact_got)
+	    {
+	      bfd_vma *local_got_offsets = elf_local_got_offsets (abfd);
+	      unsigned long r_symndx = ELFNN_R_SYM (rel->r_info);
+
+	      if (local_got_offsets != NULL
+		  && local_got_offsets[r_symndx] != MINUS_ONE)
+		{
+		  sym_sec = htab->elf.sgot;
+		  symval = local_got_offsets[r_symndx];
+		  /* Don't need to consider the reserve_size for GOT.  */
+		  reserve_size = 0;
+		}
+	      else
+		continue;
+	    }
 	}
       else
 	{
@@ -4928,9 +5474,63 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  if (h != NULL && h->type == STT_GNU_IFUNC)
 	    continue;
 
-	  if (h->root.type == bfd_link_hash_undefweak
-	      && (relax_func == _bfd_riscv_relax_lui
-		  || relax_func == _bfd_riscv_relax_pc))
+	  symtype = h->type;
+
+	  /* Reserve the remainning size of array.  */
+	  if (h->type != STT_FUNC)
+	    reserve_size = (h->size - rel->r_addend) > h->size ?
+			    0 : h->size - rel->r_addend;
+
+	  if (relax_func == _bfd_riscv_compact_got_transition)
+	    {
+	      bool dyn, pic;
+	      dyn= elf_hash_table (info)->dynamic_sections_created;
+	      pic = bfd_link_pic (info);
+
+	      /* Local compact GOT GP-relative could be relaxed to compact
+		 GP-relative anyway, if the range is enough.
+
+		 Try to convert compact GOT GP-relative to compact
+		 GP-relative if it is a static link, or it is a -Bsymbolic
+		 link and the symbol is defined locally, or the symbol was
+		 forced to be local because of a version file.
+
+		 In other words - we don't convert GOT GP-relative to
+		 GP-relative if we are generating dynamic PDE (the symbol
+		 should be preemptible), or we are generating dynamic
+		 shared library (or pie), but the symbol isn't referenced
+		 locally.  */
+	      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, pic, h)
+		  && (!pic || !SYMBOL_REFERENCES_LOCAL (info, h)))
+		continue;
+	    }
+
+	  if (compact_got)
+	    {
+	      if (h->got.offset != MINUS_ONE)
+		{
+		  sym_sec = htab->elf.sgot;
+		  symval = h->got.offset;
+		  /* Don't need to consider the reserve_size for GOT.  */
+		  reserve_size = 0;
+		}
+	      else
+		continue;
+	    }
+	  else if (bfd_link_pic (info)
+		   && h->plt.offset != MINUS_ONE
+		   && relax_func == _bfd_riscv_relax_call)
+	    {
+	      /* This line has to match the check in riscv_elf_relocate_section
+		 in the R_RISCV_CALL[_PLT] case.  */
+	      sym_sec = htab->elf.splt;
+	      symval = h->plt.offset;
+	      /* Don't need to consider the reserve_size for PLT.  */
+	      reserve_size = 0;
+	    }
+	  else if (h->root.type == bfd_link_hash_undefweak
+		   && (relax_func == _bfd_riscv_relax_lui
+		       || relax_func == _bfd_riscv_relax_pc))
 	    {
 	      /* For the lui and auipc relaxations, since the symbol
 		 value of an undefined weak symbol is always be zero,
@@ -4945,36 +5545,20 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 		 libraries can not happen currently.  Once we support the
 		 auipc relaxations when creating shared libraries, then we will
 		 need the more rigorous checking for this optimization.  */
-	      undefined_weak = true;
-	    }
-
-	  /* This line has to match the check in riscv_elf_relocate_section
-	     in the R_RISCV_CALL[_PLT] case.  */
-	  if (bfd_link_pic (info) && h->plt.offset != MINUS_ONE)
-	    {
-	      sym_sec = htab->elf.splt;
-	      symval = h->plt.offset;
-	    }
-	  else if (undefined_weak)
-	    {
-	      symval = 0;
 	      sym_sec = bfd_und_section_ptr;
+	      symval = 0;
+	      undefined_weak = true;
 	    }
 	  else if ((h->root.type == bfd_link_hash_defined
 		    || h->root.type == bfd_link_hash_defweak)
 		   && h->root.u.def.section != NULL
 		   && h->root.u.def.section->output_section != NULL)
 	    {
-	      symval = h->root.u.def.value;
 	      sym_sec = h->root.u.def.section;
+	      symval = h->root.u.def.value;
 	    }
 	  else
 	    continue;
-
-	  if (h->type != STT_FUNC)
-	    reserve_size =
-	      (h->size - rel->r_addend) > h->size ? 0 : h->size - rel->r_addend;
-	  symtype = h->type;
 	}
 
       if (sym_sec->sec_info_type == SEC_INFO_TYPE_MERGE
@@ -5356,6 +5940,7 @@ riscv_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 #define elf_info_to_howto			riscv_info_to_howto_rela
 #define bfd_elfNN_bfd_relax_section		_bfd_riscv_relax_section
 #define bfd_elfNN_mkobject			elfNN_riscv_mkobject
+#define bfd_elfNN_get_synthetic_symtab		elfNN_riscv_get_synthetic_symtab
 #define elf_backend_additional_program_headers \
   riscv_elf_additional_program_headers
 #define elf_backend_modify_segment_map		riscv_elf_modify_segment_map

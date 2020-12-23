@@ -31,9 +31,9 @@ TEXT_START_ADDR=0x10000
 MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
 COMMONPAGESIZE="CONSTANT (COMMONPAGESIZE)"
 
-DATA_START_SYMBOLS="${CREATE_SHLIB-__DATA_BEGIN__ = .;}"
+DATA_START_SYMBOLS="__DATA_BEGIN__ = .;"
 
-SDATA_START_SYMBOLS="${CREATE_SHLIB-__SDATA_BEGIN__ = .;}
+SDATA_START_SYMBOLS="__SDATA_BEGIN__ = .;
     *(.srodata.cst16) *(.srodata.cst8) *(.srodata.cst4) *(.srodata.cst2) *(.srodata .srodata.*)"
 
 INITIAL_READONLY_SECTIONS=".interp         : { *(.interp) } ${CREATE_PIE-${INITIAL_READONLY_SECTIONS}}"
@@ -44,6 +44,16 @@ INITIAL_READONLY_SECTIONS="${RELOCATING+${CREATE_SHLIB-${INITIAL_READONLY_SECTIO
 # the program as possible.  But we can't allow gp to cover any of rodata, as
 # the address of variables in rodata may change during relaxation, so we start
 # from data in that case.
-OTHER_END_SYMBOLS="${CREATE_SHLIB-__BSS_END__ = .;
-    __global_pointer$ = MIN(__SDATA_BEGIN__ + 0x800,
-		            MAX(__DATA_BEGIN__ + 0x800, __BSS_END__ - 0x800));}"
+#
+# For compact, the aligned gp helps gcc to do the optimization (TOOLCHAIN-1006).
+# The orginal workaround aligned all related sections (data, sdata and bss) and
+# gp to 16-byte.  But it will make the sections discontinuous, and may cause the
+# wrong program header when enabling gc-sections by accident.  However, we can
+# just align the gp rather than all related sections.  Besies, the 16-byte
+# aligned gp cause the pcgp-relax and restart-relax testcases fail.  Therefore,
+# the saftest method is that maybe we should align the gp to 16-byte only for
+# the compact code model.
+
+OTHER_END_SYMBOLS="__BSS_END__ = .;
+  __global_pointer$ = ALIGN(MIN(__SDATA_BEGIN__ + 0x800,
+			    MAX(__DATA_BEGIN__ + 0x800, __BSS_END__ - 0x800)), 16);"

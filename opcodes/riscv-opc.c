@@ -351,7 +351,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"add",         0, INSN_CLASS_C, "Cc,Cc,CL",  MATCH_C_ADDI16SP, MASK_C_ADDI16SP, match_c_addi16sp, INSN_ALIAS },
 {"add",         0, INSN_CLASS_C, "d,Cz,CV",   MATCH_C_MV, MASK_C_MV, match_c_add, INSN_ALIAS },
 {"add",         0, INSN_CLASS_I, "d,s,t",     MATCH_ADD, MASK_ADD, match_opcode, 0 },
-{"add",         0, INSN_CLASS_I, "d,s,t,1",   MATCH_ADD, MASK_ADD, match_opcode, 0 },
+{"add",         0, INSN_CLASS_I, "d,s,t,1r",  MATCH_ADD, MASK_ADD, match_opcode, 0 }, /* For linker/compact relaxation.  */
 {"add",         0, INSN_CLASS_I, "d,s,j",     MATCH_ADDI, MASK_ADDI, match_opcode, INSN_ALIAS },
 {"la",          0, INSN_CLASS_I, "d,B",       0, (int) M_LA, match_never, INSN_MACRO },
 {"lla",         0, INSN_CLASS_I, "d,B",       0, (int) M_LLA, match_never, INSN_MACRO },
@@ -376,16 +376,21 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sub",         0, INSN_CLASS_C, "Cs,Cw,Ct",  MATCH_C_SUB, MASK_C_SUB, match_opcode, INSN_ALIAS },
 {"sub",         0, INSN_CLASS_I, "d,s,t",     MATCH_SUB, MASK_SUB, match_opcode, 0 },
 {"lb",          0, INSN_CLASS_I, "d,o(s)",    MATCH_LB, MASK_LB, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"lb",          0, INSN_CLASS_I, "d,o(s),1i", MATCH_LB, MASK_LB, match_opcode, INSN_DREF|INSN_1_BYTE }, /* For compact relaxation.  */
 {"lb",          0, INSN_CLASS_I, "d,A",       0, (int) M_LB, match_never, INSN_MACRO },
 {"lbu",         0, INSN_CLASS_I, "d,o(s)",    MATCH_LBU, MASK_LBU, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"lbu",         0, INSN_CLASS_I, "d,o(s),1i", MATCH_LBU, MASK_LBU, match_opcode, INSN_DREF|INSN_1_BYTE }, /* For compact relaxation.  */
 {"lbu",         0, INSN_CLASS_I, "d,A",       0, (int) M_LBU, match_never, INSN_MACRO },
 {"lh",          0, INSN_CLASS_I, "d,o(s)",    MATCH_LH, MASK_LH, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"lh",          0, INSN_CLASS_I, "d,o(s),1i", MATCH_LH, MASK_LH, match_opcode, INSN_DREF|INSN_2_BYTE }, /* For compact relaxation.  */
 {"lh",          0, INSN_CLASS_I, "d,A",       0, (int) M_LH, match_never, INSN_MACRO },
 {"lhu",         0, INSN_CLASS_I, "d,o(s)",    MATCH_LHU, MASK_LHU, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"lhu",         0, INSN_CLASS_I, "d,o(s),1i", MATCH_LHU, MASK_LHU, match_opcode, INSN_DREF|INSN_2_BYTE }, /* For compact relaxation.  */
 {"lhu",         0, INSN_CLASS_I, "d,A",       0, (int) M_LHU, match_never, INSN_MACRO },
 {"lw",          0, INSN_CLASS_C, "d,Cm(Cc)",  MATCH_C_LWSP, MASK_C_LWSP, match_rd_nonzero, INSN_ALIAS|INSN_DREF|INSN_4_BYTE },
 {"lw",          0, INSN_CLASS_C, "Ct,Ck(Cs)", MATCH_C_LW, MASK_C_LW, match_opcode, INSN_ALIAS|INSN_DREF|INSN_4_BYTE },
 {"lw",          0, INSN_CLASS_I, "d,o(s)",    MATCH_LW, MASK_LW, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"lw",          0, INSN_CLASS_I, "d,o(s),1i", MATCH_LW, MASK_LW, match_opcode, INSN_DREF|INSN_4_BYTE }, /* For compact relaxation.  */
 {"lw",          0, INSN_CLASS_I, "d,A",       0, (int) M_LW, match_never, INSN_MACRO },
 {"not",         0, INSN_CLASS_I, "d,s",       MATCH_XORI|MASK_IMM, MASK_XORI|MASK_IMM, match_opcode, INSN_ALIAS },
 {"prefetch.i",  0, INSN_CLASS_ZICBOP, "f(s)", MATCH_PREFETCH_I, MASK_PREFETCH_I, match_opcode, 0 },
@@ -410,12 +415,15 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sgt",         0, INSN_CLASS_I, "d,t,s",     MATCH_SLT, MASK_SLT, match_opcode, INSN_ALIAS },
 {"sgtu",        0, INSN_CLASS_I, "d,t,s",     MATCH_SLTU, MASK_SLTU, match_opcode, INSN_ALIAS },
 {"sb",          0, INSN_CLASS_I, "t,q(s)",    MATCH_SB, MASK_SB, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"sb",          0, INSN_CLASS_I, "t,q(s),1s", MATCH_SB, MASK_SB, match_opcode, INSN_DREF|INSN_1_BYTE }, /* For compact relaxation.  */
 {"sb",          0, INSN_CLASS_I, "t,A,s",     0, (int) M_SB, match_never, INSN_MACRO },
 {"sh",          0, INSN_CLASS_I, "t,q(s)",    MATCH_SH, MASK_SH, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"sh",          0, INSN_CLASS_I, "t,q(s),1s", MATCH_SH, MASK_SH, match_opcode, INSN_DREF|INSN_2_BYTE }, /* For compact relaxation.  */
 {"sh",          0, INSN_CLASS_I, "t,A,s",     0, (int) M_SH, match_never, INSN_MACRO },
 {"sw",          0, INSN_CLASS_C, "CV,CM(Cc)", MATCH_C_SWSP, MASK_C_SWSP, match_opcode, INSN_ALIAS|INSN_DREF|INSN_4_BYTE },
 {"sw",          0, INSN_CLASS_C, "Ct,Ck(Cs)", MATCH_C_SW, MASK_C_SW, match_opcode, INSN_ALIAS|INSN_DREF|INSN_4_BYTE },
 {"sw",          0, INSN_CLASS_I, "t,q(s)",    MATCH_SW, MASK_SW, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"sw",          0, INSN_CLASS_I, "t,q(s),1s", MATCH_SW, MASK_SW, match_opcode, INSN_DREF|INSN_4_BYTE }, /* For compact relaxation.  */
 {"sw",          0, INSN_CLASS_I, "t,A,s",     0, (int) M_SW, match_never, INSN_MACRO },
 {"pause",       0, INSN_CLASS_ZIHINTPAUSE, "",MATCH_PAUSE, MASK_PAUSE, match_opcode, 0 },
 {"fence",       0, INSN_CLASS_I, "",          MATCH_FENCE|MASK_PRED|MASK_SUCC, MASK_FENCE|MASK_RD|MASK_RS1|MASK_IMM, match_opcode, INSN_ALIAS },
@@ -436,14 +444,17 @@ const struct riscv_opcode riscv_opcodes[] =
 {"xor",         0, INSN_CLASS_I, "d,s,t",     MATCH_XOR, MASK_XOR, match_opcode, 0 },
 {"xor",         0, INSN_CLASS_I, "d,s,j",     MATCH_XORI, MASK_XORI, match_opcode, INSN_ALIAS },
 {"lwu",        64, INSN_CLASS_I, "d,o(s)",    MATCH_LWU, MASK_LWU, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"lwu",        64, INSN_CLASS_I, "d,o(s),1i", MATCH_LWU, MASK_LWU, match_opcode, INSN_DREF|INSN_4_BYTE }, /* For compact relaxation.  */
 {"lwu",        64, INSN_CLASS_I, "d,A",       0, (int) M_LWU, match_never, INSN_MACRO },
 {"ld",         64, INSN_CLASS_C, "d,Cn(Cc)",  MATCH_C_LDSP, MASK_C_LDSP, match_rd_nonzero, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"ld",         64, INSN_CLASS_C, "Ct,Cl(Cs)", MATCH_C_LD, MASK_C_LD, match_opcode, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"ld",         64, INSN_CLASS_I, "d,o(s)",    MATCH_LD, MASK_LD, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"ld",         64, INSN_CLASS_I, "d,o(s),1i", MATCH_LD, MASK_LD, match_opcode, INSN_DREF|INSN_8_BYTE }, /* For compact relaxation.  */
 {"ld",         64, INSN_CLASS_I, "d,A",       0, (int) M_LD, match_never, INSN_MACRO },
 {"sd",         64, INSN_CLASS_C, "CV,CN(Cc)", MATCH_C_SDSP, MASK_C_SDSP, match_opcode, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"sd",         64, INSN_CLASS_C, "Ct,Cl(Cs)", MATCH_C_SD, MASK_C_SD, match_opcode, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"sd",         64, INSN_CLASS_I, "t,q(s)",    MATCH_SD, MASK_SD, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"sd",         64, INSN_CLASS_I, "t,q(s),1s", MATCH_SD, MASK_SD, match_opcode, INSN_DREF|INSN_8_BYTE }, /* For compact relaxation.  */
 {"sd",         64, INSN_CLASS_I, "t,A,s",     0, (int) M_SD, match_never, INSN_MACRO },
 {"sext.w",     64, INSN_CLASS_C, "d,CU",      MATCH_C_ADDIW, MASK_C_ADDIW|MASK_RVC_IMM, match_rd_nonzero, INSN_ALIAS },
 {"sext.w",     64, INSN_CLASS_I, "d,s",       MATCH_ADDIW, MASK_ADDIW|MASK_IMM, match_opcode, INSN_ALIAS },
@@ -574,8 +585,10 @@ const struct riscv_opcode riscv_opcodes[] =
 
 /* Half-precision floating-point instruction subset.  */
 {"flh",        0, INSN_CLASS_ZFHMIN,  "D,o(s)",    MATCH_FLH, MASK_FLH, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"flh",        0, INSN_CLASS_ZFH,  "D,o(s),1i", MATCH_FLH, MASK_FLH, match_opcode, INSN_DREF|INSN_2_BYTE }, /* For compact relaxation.  */
 {"flh",        0, INSN_CLASS_ZFHMIN,  "D,A,s",     0, (int) M_FLH, match_never, INSN_MACRO },
 {"fsh",        0, INSN_CLASS_ZFHMIN,  "T,q(s)",    MATCH_FSH, MASK_FSH, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"fsh",        0, INSN_CLASS_ZFH,  "T,q(s),1s", MATCH_FSH, MASK_FSH, match_opcode, INSN_DREF|INSN_2_BYTE }, /* For compact relaxation.  */
 {"fsh",        0, INSN_CLASS_ZFHMIN,  "T,A,s",     0, (int) M_FSH, match_never, INSN_MACRO },
 {"fmv.h",      0, INSN_CLASS_ZFH,  "D,U",       MATCH_FSGNJ_H, MASK_FSGNJ_H, match_rs1_eq_rs2, INSN_ALIAS },
 {"fneg.h",     0, INSN_CLASS_ZFH,  "D,U",       MATCH_FSGNJN_H, MASK_FSGNJN_H, match_rs1_eq_rs2, INSN_ALIAS },
@@ -657,10 +670,12 @@ const struct riscv_opcode riscv_opcodes[] =
 {"flw",       32, INSN_CLASS_F_AND_C, "D,Cm(Cc)",  MATCH_C_FLWSP, MASK_C_FLWSP, match_opcode, INSN_ALIAS|INSN_DREF|INSN_4_BYTE },
 {"flw",       32, INSN_CLASS_F_AND_C, "CD,Ck(Cs)", MATCH_C_FLW, MASK_C_FLW, match_opcode, INSN_ALIAS|INSN_DREF|INSN_4_BYTE },
 {"flw",        0, INSN_CLASS_F,   "D,o(s)",    MATCH_FLW, MASK_FLW, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"flw",        0, INSN_CLASS_F,   "D,o(s),1i", MATCH_FLW, MASK_FLW, match_opcode, INSN_DREF|INSN_4_BYTE }, /* For compact relaxation.  */
 {"flw",        0, INSN_CLASS_F,   "D,A,s",     0, (int) M_FLW, match_never, INSN_MACRO },
 {"fsw",       32, INSN_CLASS_F_AND_C, "CT,CM(Cc)", MATCH_C_FSWSP, MASK_C_FSWSP, match_opcode, INSN_ALIAS|INSN_DREF|INSN_4_BYTE },
 {"fsw",       32, INSN_CLASS_F_AND_C, "CD,Ck(Cs)", MATCH_C_FSW, MASK_C_FSW, match_opcode, INSN_ALIAS|INSN_DREF|INSN_4_BYTE },
 {"fsw",        0, INSN_CLASS_F,   "T,q(s)",    MATCH_FSW, MASK_FSW, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"fsw",        0, INSN_CLASS_F,   "T,q(s),1s", MATCH_FSW, MASK_FSW, match_opcode, INSN_DREF|INSN_4_BYTE }, /* For compact relaxation.  */
 {"fsw",        0, INSN_CLASS_F,   "T,A,s",     0, (int) M_FSW, match_never, INSN_MACRO },
 {"fmv.x.w",    0, INSN_CLASS_F,   "d,S",       MATCH_FMV_X_S, MASK_FMV_X_S, match_opcode, 0 },
 {"fmv.w.x",    0, INSN_CLASS_F,   "D,s",       MATCH_FMV_S_X, MASK_FMV_S_X, match_opcode, 0 },
@@ -719,10 +734,12 @@ const struct riscv_opcode riscv_opcodes[] =
 {"fld",        0, INSN_CLASS_D_AND_C, "D,Cn(Cc)",  MATCH_C_FLDSP, MASK_C_FLDSP, match_opcode, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"fld",        0, INSN_CLASS_D_AND_C, "CD,Cl(Cs)", MATCH_C_FLD, MASK_C_FLD, match_opcode, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"fld",        0, INSN_CLASS_D,   "D,o(s)",    MATCH_FLD, MASK_FLD, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"fld",        0, INSN_CLASS_D,   "D,o(s),1i", MATCH_FLD, MASK_FLD, match_opcode, INSN_DREF|INSN_8_BYTE }, /* For compact relaxation.  */
 {"fld",        0, INSN_CLASS_D,   "D,A,s",     0, (int) M_FLD, match_never, INSN_MACRO },
 {"fsd",        0, INSN_CLASS_D_AND_C, "CT,CN(Cc)", MATCH_C_FSDSP, MASK_C_FSDSP, match_opcode, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"fsd",        0, INSN_CLASS_D_AND_C, "CD,Cl(Cs)", MATCH_C_FSD, MASK_C_FSD, match_opcode, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"fsd",        0, INSN_CLASS_D,   "T,q(s)",    MATCH_FSD, MASK_FSD, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"fsd",        0, INSN_CLASS_D,   "T,q(s),1s", MATCH_FSD, MASK_FSD, match_opcode, INSN_DREF|INSN_8_BYTE }, /* For compact relaxation.  */
 {"fsd",        0, INSN_CLASS_D,   "T,A,s",     0, (int) M_FSD, match_never, INSN_MACRO },
 {"fmv.d",      0, INSN_CLASS_D,   "D,U",       MATCH_FSGNJ_D, MASK_FSGNJ_D, match_rs1_eq_rs2, INSN_ALIAS },
 {"fneg.d",     0, INSN_CLASS_D_OR_ZDINX,   "D,U",       MATCH_FSGNJN_D, MASK_FSGNJN_D, match_rs1_eq_rs2, INSN_ALIAS },
@@ -778,8 +795,10 @@ const struct riscv_opcode riscv_opcodes[] =
 
 /* Quad-precision floating-point instruction subset.  */
 {"flq",        0, INSN_CLASS_Q,   "D,o(s)",    MATCH_FLQ, MASK_FLQ, match_opcode, INSN_DREF|INSN_16_BYTE },
+{"flq",        0, INSN_CLASS_Q,   "D,o(s),1i", MATCH_FLQ, MASK_FLQ, match_opcode, INSN_DREF|INSN_16_BYTE }, /* For compact relaxation.  */
 {"flq",        0, INSN_CLASS_Q,   "D,A,s",     0, (int) M_FLQ, match_never, INSN_MACRO },
 {"fsq",        0, INSN_CLASS_Q,   "T,q(s)",    MATCH_FSQ, MASK_FSQ, match_opcode, INSN_DREF|INSN_16_BYTE },
+{"fsq",        0, INSN_CLASS_Q,   "T,q(s),1s", MATCH_FSQ, MASK_FSQ, match_opcode, INSN_DREF|INSN_16_BYTE }, /* For compact relaxation.  */
 {"fsq",        0, INSN_CLASS_Q,   "T,A,s",     0, (int) M_FSQ, match_never, INSN_MACRO },
 {"fmv.q",      0, INSN_CLASS_Q,   "D,U",       MATCH_FSGNJ_Q, MASK_FSGNJ_Q, match_rs1_eq_rs2, INSN_ALIAS },
 {"fneg.q",     0, INSN_CLASS_Q_OR_ZQINX,   "D,U",       MATCH_FSGNJN_Q, MASK_FSGNJN_Q, match_rs1_eq_rs2, INSN_ALIAS },
@@ -1866,6 +1885,31 @@ const struct riscv_opcode riscv_opcodes[] =
 {"hsv.h",       0, INSN_CLASS_H, "t,0(s)", MATCH_HSV_H, MASK_HSV_H, match_opcode, INSN_DREF|INSN_2_BYTE },
 {"hsv.w",       0, INSN_CLASS_H, "t,0(s)", MATCH_HSV_W, MASK_HSV_W, match_opcode, INSN_DREF|INSN_4_BYTE },
 {"hsv.d",      64, INSN_CLASS_H, "t,0(s)", MATCH_HSV_D, MASK_HSV_D, match_opcode, INSN_DREF|INSN_8_BYTE },
+
+/* Sifive compact pseudo instruction.  */
+{"la.got.gprel",    0, INSN_CLASS_I,   "d,Ag",   0, (int) M_LA_GOT_GPREL, match_never, INSN_MACRO },
+{"lla.gprel",       0, INSN_CLASS_I,   "d,Ag",   0, (int) M_LLA_GPREL, match_never, INSN_MACRO },
+{"la.tls.gd.gprel", 0, INSN_CLASS_I,   "d,Ag",   0, (int) M_LA_TLS_GD_GPREL, match_never, INSN_MACRO },
+{"la.tls.ie.gprel", 0, INSN_CLASS_I,   "d,Ag",   0, (int) M_LA_TLS_IE_GPREL, match_never, INSN_MACRO },
+{"lb.gprel",        0, INSN_CLASS_I,   "d,Ag",   0, (int) M_LB_GPREL, match_never, INSN_MACRO },
+{"lh.gprel",        0, INSN_CLASS_I,   "d,Ag",   0, (int) M_LH_GPREL, match_never, INSN_MACRO },
+{"lw.gprel",        0, INSN_CLASS_I,   "d,Ag",   0, (int) M_LW_GPREL, match_never, INSN_MACRO },
+{"lbu.gprel",       0, INSN_CLASS_I,   "d,Ag",   0, (int) M_LBU_GPREL, match_never, INSN_MACRO },
+{"lhu.gprel",       0, INSN_CLASS_I,   "d,Ag",   0, (int) M_LHU_GPREL, match_never, INSN_MACRO },
+{"sb.gprel",        0, INSN_CLASS_I,   "t,A,sg", 0, (int) M_SB_GPREL, match_never, INSN_MACRO },
+{"sh.gprel",        0, INSN_CLASS_I,   "t,A,sg", 0, (int) M_SH_GPREL, match_never, INSN_MACRO },
+{"sw.gprel",        0, INSN_CLASS_I,   "t,A,sg", 0, (int) M_SW_GPREL, match_never, INSN_MACRO },
+{"flh.gprel",       0, INSN_CLASS_ZFH, "D,A,sg", 0, (int) M_FLH_GPREL, match_never, INSN_MACRO },
+{"fsh.gprel",       0, INSN_CLASS_ZFH, "T,A,sg", 0, (int) M_FSH_GPREL, match_never, INSN_MACRO },
+{"flw.gprel",       0, INSN_CLASS_F,   "D,A,sg", 0, (int) M_FLW_GPREL, match_never, INSN_MACRO },
+{"fsw.gprel",       0, INSN_CLASS_F,   "T,A,sg", 0, (int) M_FSW_GPREL, match_never, INSN_MACRO },
+{"fld.gprel",       0, INSN_CLASS_D,   "D,A,sg", 0, (int) M_FLD_GPREL, match_never, INSN_MACRO },
+{"fsd.gprel",       0, INSN_CLASS_D,   "T,A,sg", 0, (int) M_FSD_GPREL, match_never, INSN_MACRO },
+{"flq.gprel",       0, INSN_CLASS_Q,   "D,A,sg", 0, (int) M_FLQ_GPREL, match_never, INSN_MACRO },
+{"fsq.gprel",       0, INSN_CLASS_Q,   "T,A,sg", 0, (int) M_FSQ_GPREL, match_never, INSN_MACRO },
+{"ld.gprel",       64, INSN_CLASS_I,   "d,Ag",   0, (int) M_LD_GPREL, match_never, INSN_MACRO },
+{"lwu.gprel",      64, INSN_CLASS_I,   "d,Ag",   0, (int) M_LWU_GPREL, match_never, INSN_MACRO },
+{"sd.gprel",       64, INSN_CLASS_I,   "t,A,sg", 0, (int) M_SD_GPREL, match_never, INSN_MACRO },
 
 /* SiFive MNRET instruction.  */
 {"mnret",  0, INSN_CLASS_I, "", MATCH_MNRET, MASK_MNRET, match_opcode, 0 },

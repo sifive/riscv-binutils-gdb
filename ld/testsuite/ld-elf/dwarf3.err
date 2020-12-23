@@ -1,4 +1,7 @@
-.*/dwarf3\.o: in function `main':
+# For riscv compact:
+# Since GCC now will help to add the compact prologue for each function,
+# the local symbol of compact prologue might make the error message.
+.*/dwarf3\.o: in function `.*':
 .*\(\.text.*\+0x[0-9a-f]+\): undefined reference to `bar'
 .*\(\.text.*\+0x[0-9a-f]+\): undefined reference to `bar'
 #...
