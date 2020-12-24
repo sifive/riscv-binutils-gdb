@@ -35,4 +35,5 @@ TODO: Recover the branch by shell script, too.
 
       --------- Archived gdb branches ---------
   Archived Date		Branch Name
+  2020-12-24		sifive-gdb-9.1-rvv-1.0-with-sim-obsolete
   Archived branch of gdb
