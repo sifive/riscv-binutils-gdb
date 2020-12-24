@@ -1,0 +1,37 @@
+NOTE: This branch exists to archive branches that are no longer useful.
+Do not delete this branch or force push over it.
+
+
+TODO: Describe how this method can work.
+
+Syntax: archive-branches.sh <operation> <branch_type> <branch_name>
+
+Options:
+operation	[archive|remove].
+branch_type	[binutils|gdb].
+branch_name	Which branch we don't need anymore.
+
+
+* How to archive and remove the branch if we no longer need it?
+
+sh archive-branches.sh archive binutils sifive-binutils-xxx
+sh archive-branches.sh remove  binutils sifive-binutils-xxx
+
+
+* How to recover the removed branch in local side?
+
+Find the removed branch name below, and then search it's commit
+id in the commit history.  Afterwards, use the "git checkout "
+to recover the branch.
+
+TODO: Recover the branch by shell script, too.
+
+
+
+      --------- Archived binutils branches ---------
+  Archived Date		Branch Name
+  Archived branch of binutils
+
+      --------- Archived gdb branches ---------
+  Archived Date		Branch Name
+  Archived branch of gdb
