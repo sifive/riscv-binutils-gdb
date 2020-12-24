@@ -30,6 +30,7 @@ TODO: Recover the branch by shell script, too.
 
       --------- Archived binutils branches ---------
   Archived Date		Branch Name
+  2020-12-24		sifive-rvv-1.0.x-zfh-obsolete
   Archived branch of binutils
 
       --------- Archived gdb branches ---------
