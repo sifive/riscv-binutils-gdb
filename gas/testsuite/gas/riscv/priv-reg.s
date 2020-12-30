@@ -297,3 +297,9 @@
 	csr mnxti
 	csr mintstatus
 	csrrw sp,mscratchcsw,sp
+
+	# RNMI registers
+	csr mnscratch
+	csr mnepc
+	csr mncause
+	csr mnstatus

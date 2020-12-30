@@ -789,6 +789,7 @@ riscv_csr_address (const char *csr_name,
       break;
     case CSR_CLASS_DEBUG:
     case CSR_CLASS_CLIC:
+    case CSR_CLASS_RNMI:
       need_check_version = FALSE;
       break;
     default:
