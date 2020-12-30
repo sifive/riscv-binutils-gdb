@@ -722,3 +722,11 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+34602573[ 	]+csrr[ 	]+a0,mintstatus
 [ 	]+[0-9a-f]+:[ 	]+34659073[ 	]+csrw[ 	]+mintstatus,a1
 [ 	]+[0-9a-f]+:[ 	]+34811173[ 	]+csrrw[ 	]+sp,mscratchcsw,sp
+[ 	]+[0-9a-f]+:[ 	]+35002573[ 	]+csrr[ 	]+a0,mnscratch
+[ 	]+[0-9a-f]+:[ 	]+35059073[ 	]+csrw[ 	]+mnscratch,a1
+[ 	]+[0-9a-f]+:[ 	]+35102573[ 	]+csrr[ 	]+a0,mnepc
+[ 	]+[0-9a-f]+:[ 	]+35159073[ 	]+csrw[ 	]+mnepc,a1
+[ 	]+[0-9a-f]+:[ 	]+35202573[ 	]+csrr[ 	]+a0,mncause
+[ 	]+[0-9a-f]+:[ 	]+35259073[ 	]+csrw[ 	]+mncause,a1
+[ 	]+[0-9a-f]+:[ 	]+35302573[ 	]+csrr[ 	]+a0,mnstatus
+[ 	]+[0-9a-f]+:[ 	]+35359073[ 	]+csrw[ 	]+mnstatus,a1

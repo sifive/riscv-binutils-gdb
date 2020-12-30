@@ -414,3 +414,9 @@
 	csr mnxti
 	csr mintstatus
 	csrrw sp,mscratchcsw,sp
+
+	# SiFive RNMI
+	csr mnscratch
+	csr mnepc
+	csr mncause
+	csr mnstatus
