@@ -122,3 +122,6 @@ extern void bfd_elf32_riscv_set_options
 
 extern void bfd_elf64_riscv_set_options
   (bfd *, struct bfd_link_info *, bfd_boolean);
+
+extern int
+riscv_compare_subsets (const char *, const char *);
