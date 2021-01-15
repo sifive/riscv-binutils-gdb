@@ -4357,10 +4357,10 @@ RISC-V options:\n\
 "));
 }
 
-/* Define the frame addr size to 8 bytes for compact code model.  */
+/* Define the fde reloc size to 8 bytes for compact code model.  */
 
 int
-riscv_dwarf2_addr_size (void)
+riscv_dwarf2_fde_reloc_size (void)
 {
   if (riscv_opts.compact)
     return 8;
