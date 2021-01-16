@@ -191,8 +191,8 @@ riscv_elf_append_rela (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
 
 #define PLT_HEADER_INSNS 8
 
-#define COMPACT_PLT_HEADER_INSNS 6
-#define COMPACT_PLT_STUB_INSNS 7
+#define COMPACT_PLT_HEADER_INSNS 8
+#define COMPACT_PLT_STUB_INSNS 8
 #define COMPACT_PLT_STUB_DATA_SIZE 16
 
 #define PLT_ENTRY_INSNS 4
@@ -257,6 +257,8 @@ static uint32_t riscv_plt_header[] =
 			# t1 = &.got.plt[i] - &.got.plt[2]
    ld	t0, 8(t2)	# t0 = link map, .got.plt[1]
    jr	t3
+   nop
+   nop
 
    compact_stub:
    auipc t0, %hi_pcrel(compact_stub_data)
@@ -266,18 +268,24 @@ static uint32_t riscv_plt_header[] =
    add	t0, t2, t3	# t0 = &.got.plt[i]
    ld	t3, 0(t0)	# t3 = address of .plt header/resolved function
    jr	t3
+   nop
 
    compact_stub_data:
    .quad	&.got.plt - .,0  */
 
 static uint32_t riscv_compact_plt_header[] =
 {
+  /* Header */
   RISCV_RTYPE (SUB, X_T1, X_T1, X_T3),
   RISCV_ITYPE (LREG, X_T3, X_T2, 0),
   RISCV_ITYPE (ADDI, X_T1, X_T1, 0),	/* -(hdr_size + 12)  */
   RISCV_ITYPE (SRLI, X_T1, X_T1, 4 - RISCV_ELF_LOG_WORD_BYTES),
   RISCV_ITYPE (LREG, X_T0, X_T2, RISCV_ELF_WORD_BYTES),
   RISCV_ITYPE (JALR, 0, X_T3, 0),
+  RISCV_NOP,
+  RISCV_NOP,
+
+  /* Stub */
   RISCV_UTYPE (AUIPC, X_T0, 0),		/* compact_stub_data_high  */
   RISCV_ITYPE (ADDI, X_T0, X_T0, 0),	/* compact_stub_data_low  */
   RISCV_ITYPE (LREG, X_T2, X_T0, 0),
@@ -285,6 +293,7 @@ static uint32_t riscv_compact_plt_header[] =
   RISCV_RTYPE (ADD, X_T0, X_T2, X_T3),
   RISCV_ITYPE (LREG, X_T3, X_T0, 0),
   RISCV_ITYPE (JALR, 0, X_T3, 0),
+  RISCV_NOP
 };
 
 /* Generate a PLT header.  */
