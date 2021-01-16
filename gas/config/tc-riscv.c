@@ -1365,9 +1365,9 @@ gprel_access (int destreg, int tempreg, int gpreg, expressionS *ep,
 {
   macro_build (ep, "lui", "d,u", tempreg, hi_reloc);
   if (add_reloc != BFD_RELOC_UNUSED)
-    macro_build (ep, "add", "d,s,t,1", tempreg, tempreg, gpreg, add_reloc);
+    macro_build (ep, "add", "d,s,t,1", tempreg, gpreg, tempreg, add_reloc);
   else
-    macro_build (NULL, "add", "d,s,t", tempreg, tempreg, gpreg);
+    macro_build (NULL, "add", "d,s,t", tempreg, gpreg, tempreg);
   macro_build (ep, lo_insn, lo_pattern, destreg, tempreg, lo_reloc);
 }
 

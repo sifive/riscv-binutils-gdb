@@ -12,28 +12,28 @@ _start:
 .ifdef __undefweak__
 	# Refer to undefined weak symbol by GPREL.
 	lui	t0, %gprel_hi(symbolW)
-	add	t0, t0, gp, %gprel(symbolW)
+	add	t0, gp, t0, %gprel(symbolW)
 	addi	t0, t0, %gprel_lo(symbolW)
 	# Refer to undefined weak symbol by GOT_GPREL.
 	lui	t0, %got_gprel_hi(symbolW)
-	add	t0, t0, gp, %got_gprel(symbolW)
+	add	t0, gp, t0, %got_gprel(symbolW)
 	ld	t0, %got_gprel_lo(symbolW)(t0)
 .else
 	# Refer to local data symbol by GPREL.
 	lui	t0, %gprel_hi(symbolL)
-	add	t0, t0, gp, %gprel(symbolL)
+	add	t0, gp, t0, %gprel(symbolL)
 	addi	t0, t0, %gprel_lo(symbolL)
 	# Refer to global data symbol by GPREL.
 	lui	t0, %gprel_hi(symbolG)
-	add	t0, t0, gp, %gprel(symbolG)
+	add	t0, gp, t0, %gprel(symbolG)
 	addi	t0, t0, %gprel_lo(symbolG)
 	# Refer to local data symbol by GOT_GPREL.
 	lui	t0, %got_gprel_hi(symbolL)
-	add	t0, t0, gp, %got_gprel(symbolL)
+	add	t0, gp, t0, %got_gprel(symbolL)
 	ld	t0, %got_gprel_lo(symbolL)(t0)
 	# Refer to global data symbol by GOT_GPREL.
 	lui	t0, %got_gprel_hi(symbolG)
-	add	t0, t0, gp, %got_gprel(symbolG)
+	add	t0, gp, t0, %got_gprel(symbolG)
 	ld	t0, %got_gprel_lo(symbolG)(t0)
 .endif
 .endif
