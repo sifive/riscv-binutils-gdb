@@ -1295,6 +1295,13 @@ static struct riscv_supported_ext riscv_supported_std_zxm_ext[] =
   {NULL, 0, 0, 0, 0}
 };
 
+static struct riscv_supported_ext riscv_supported_nonstd_ext[] =
+{
+  {"xsfvqmaccqoq", ISA_SPEC_CLASS_DRAFT, 0, 1, 0},
+  {"xsfvqmaccdod", ISA_SPEC_CLASS_DRAFT, 0, 1, 0},
+  {NULL, 0, 0, 0, 0}
+};
+
 const struct riscv_supported_ext *riscv_all_supported_ext[] =
 {
   riscv_supported_std_ext,
@@ -1302,6 +1309,7 @@ const struct riscv_supported_ext *riscv_all_supported_ext[] =
   riscv_supported_std_s_ext,
   riscv_supported_std_h_ext,
   riscv_supported_std_zxm_ext,
+  riscv_supported_nonstd_ext,
   NULL
 };
 
@@ -1567,8 +1575,7 @@ riscv_get_default_ext_version (enum riscv_spec_class *default_isa_spec,
     case RV_ISA_CLASS_Z: table = riscv_supported_std_z_ext; break;
     case RV_ISA_CLASS_S: table = riscv_supported_std_s_ext; break;
     case RV_ISA_CLASS_H: table = riscv_supported_std_h_ext; break;
-    case RV_ISA_CLASS_X:
-      break;
+    case RV_ISA_CLASS_X: table = riscv_supported_nonstd_ext; break;
     default:
       table = riscv_supported_std_ext;
     }
@@ -2450,6 +2457,12 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "svinval");
     case INSN_CLASS_H:
       return riscv_subset_supports (rps, "h");
+    case INSN_CLASS_V_AND_XSFVQMACCQOQ:
+      return (riscv_subset_supports (rps, "v")
+	      && riscv_subset_supports (rps, "xsfvqmaccqoq"));
+    case INSN_CLASS_V_AND_XSFVQMACCDOD:
+      return (riscv_subset_supports (rps, "v")
+	      && riscv_subset_supports (rps, "xsfvqmaccdod"));
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));

@@ -1826,6 +1826,16 @@ const struct riscv_opcode riscv_opcodes[] =
 {"cdiscard.d.l1", 0, INSN_CLASS_I, "s", MATCH_CDISCARD_D_L1, MASK_CDISCARD_D_L1, match_opcode, 0 },
 {"cflush.i.l1",   0, INSN_CLASS_I, "", MATCH_CFLUSH_I_L1, MASK_CFLUSH_I_L1, match_opcode, 0 },
 
+/* SiFive custom int8 matrix-multiply instructions.  */
+{"sf.vqmaccu.4x8x4",  0, INSN_CLASS_V_AND_XSFVQMACCQOQ, "Vd,Vs,Vt", MATCH_SFVQMACCU4X8X4, MASK_SFVQMACCU4X8X4, match_opcode, 0},
+{"sf.vqmacc.4x8x4",   0, INSN_CLASS_V_AND_XSFVQMACCQOQ, "Vd,Vs,Vt", MATCH_SFVQMACC4X8X4, MASK_SFVQMACC4X8X4, match_opcode, 0},
+{"sf.vqmaccus.4x8x4", 0, INSN_CLASS_V_AND_XSFVQMACCQOQ, "Vd,Vs,Vt", MATCH_SFVQMACCUS4X8X4, MASK_SFVQMACCUS4X8X4, match_opcode, 0},
+{"sf.vqmaccsu.4x8x4", 0, INSN_CLASS_V_AND_XSFVQMACCQOQ, "Vd,Vs,Vt", MATCH_SFVQMACCSU4X8X4, MASK_SFVQMACCSU4X8X4, match_opcode, 0},
+{"sf.vqmaccu.2x8x2",  0, INSN_CLASS_V_AND_XSFVQMACCDOD, "Vd,Vs,Vt", MATCH_SFVQMACCU2X8X2, MASK_SFVQMACCU2X8X2, match_opcode, 0},
+{"sf.vqmacc.2x8x2",   0, INSN_CLASS_V_AND_XSFVQMACCDOD, "Vd,Vs,Vt", MATCH_SFVQMACC2X8X2, MASK_SFVQMACC2X8X2, match_opcode, 0},
+{"sf.vqmaccus.2x8x2", 0, INSN_CLASS_V_AND_XSFVQMACCDOD, "Vd,Vs,Vt", MATCH_SFVQMACCUS2X8X2, MASK_SFVQMACCUS2X8X2, match_opcode, 0},
+{"sf.vqmaccsu.2x8x2", 0, INSN_CLASS_V_AND_XSFVQMACCDOD, "Vd,Vs,Vt", MATCH_SFVQMACCSU2X8X2, MASK_SFVQMACCSU2X8X2, match_opcode, 0},
+
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
 };
