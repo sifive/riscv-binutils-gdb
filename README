@@ -34,6 +34,7 @@ TODO: Recover the branch by shell script, too.
   2021-03-11		riscv-rebase-2015.10.08
   2021-03-11		riscv-rebase-2015.10.30
   2021-03-11		riscv-rebase-2016.02.11
+  2021-03-11		riscv32-hotfix
   Archived branch of binutils
 
       --------- Archived gdb branches ---------
