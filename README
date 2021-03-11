@@ -32,6 +32,7 @@ TODO: Recover the branch by shell script, too.
   Archived Date		Branch Name
   2020-12-24		sifive-rvv-1.0.x-zfh-obsolete
   2021-03-11		riscv-rebase-2015.10.08
+  2021-03-11		riscv-rebase-2015.10.30
   Archived branch of binutils
 
       --------- Archived gdb branches ---------
