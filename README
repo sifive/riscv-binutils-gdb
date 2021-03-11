@@ -49,4 +49,5 @@ TODO: Recover the branch by shell script, too.
   2021-03-11		riscv-gdb-7.10
   2021-03-11		riscv-gdb
   2021-03-11		riscv-gdb-8.1.0
+  2021-03-11		fsf-gdb-with-sim
   Archived branch of gdb
