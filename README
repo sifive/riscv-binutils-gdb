@@ -43,6 +43,7 @@ TODO: Recover the branch by shell script, too.
   2021-03-11		lto-patches
   2021-03-11		sifive-binutils-2.30
   2021-03-11		clic-patches-2
+  2021-03-11		bullet-patches
   Archived branch of binutils
 
       --------- Archived gdb branches ---------
