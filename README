@@ -37,6 +37,7 @@ TODO: Recover the branch by shell script, too.
   2021-03-11		riscv32-hotfix
   2021-03-11		riscv-binutils-2.26
   2021-03-11		decr_pc
+  2021-03-11		riscv-binutils-2.30
   Archived branch of binutils
 
       --------- Archived gdb branches ---------
