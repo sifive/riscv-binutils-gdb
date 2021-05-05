@@ -2128,6 +2128,11 @@
 #define MASK_SFVQMACCUS2X8X2 0xfe00707f
 #define MATCH_SFVQMACCSU2X8X2 0xbe00205b
 #define MASK_SFVQMACCSU2X8X2 0xfe00707f
+/* SiFive custom minimal bfloat16 vector instruction.  */
+#define MATCH_SFVFWCVTFBF16V 0x48069057
+#define MASK_SFVFWCVTFBF16V 0xfc0ff07f
+#define MATCH_SFVFNCVTBF16FW 0x480e9057
+#define MASK_SFVFNCVTBF16FW 0xfc0ff07f
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01

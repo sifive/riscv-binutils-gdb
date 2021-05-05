@@ -1836,6 +1836,10 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sf.vqmaccus.2x8x2", 0, INSN_CLASS_V_AND_XSFVQMACCDOD, "Vd,Vs,Vt", MATCH_SFVQMACCUS2X8X2, MASK_SFVQMACCUS2X8X2, match_opcode, 0},
 {"sf.vqmaccsu.2x8x2", 0, INSN_CLASS_V_AND_XSFVQMACCDOD, "Vd,Vs,Vt", MATCH_SFVQMACCSU2X8X2, MASK_SFVQMACCSU2X8X2, match_opcode, 0},
 
+/* SiFive custom minimal bfloat16 vector instructions.  */
+{"sf.vfwcvt.f.bf16.v",0, INSN_CLASS_V_AND_XSFVFHBFMIN, "Vd,VtVm", MATCH_SFVFWCVTFBF16V, MASK_SFVFWCVTFBF16V, match_opcode, 0},
+{"sf.vfncvt.bf16.f.w",0, INSN_CLASS_V_AND_XSFVFHBFMIN, "Vd,VtVm", MATCH_SFVFNCVTBF16FW, MASK_SFVFNCVTBF16FW, match_opcode, 0},
+
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
 };

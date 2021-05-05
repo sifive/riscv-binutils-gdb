@@ -29,3 +29,13 @@
 	#.insn r CUSTOM_2, 0x2, 0x5b, v4, v8, v12
 	#.insn r 0x5b, 0x2, 0x5d, v4, v8, v12
 	#.insn r 0x5b, 0x2, 0x5f, v4, v8, v12
+
+	# xsfvfhbfmin
+	sf.vfwcvt.f.bf16.v v4, v8
+	sf.vfncvt.bf16.f.w v4, v8
+	sf.vfwcvt.f.bf16.v v4, v8, v0.t
+	sf.vfncvt.bf16.f.w v4, v8, v0.t
+	#.insn r 0x57, 0x1, 0x25, v4, a3, v8
+	#.insn r 0x57, 0x1, 0x25, v4, t4, v8
+	#.insn r 0x57, 0x1, 0x24, v4, a3, v8
+	#.insn r 0x57, 0x1, 0x24, v4, t4, v8
