@@ -3282,9 +3282,58 @@ md_assemble (char *str)
     append_insn (&insn, &imm_expr, imm_reloc);
 }
 
+static const char *
+bfloat16_md_atof (char *litP, int *sizeP)
+{
+  char *t;
+  LITTLENUM_TYPE words[MAX_LITTLENUMS];
+  FLONUM_TYPE generic_float;
+
+  t = atof_ieee_detail (input_line_pointer, 1, 8, words, &generic_float);
+
+  if (t)
+    input_line_pointer = t;
+  else
+    return _("invalid floating point number");
+
+  switch (generic_float.sign)
+    {
+      /* Is +Inf.  */
+      case 'P':
+	words[0] = 0x7f80;
+	break;
+
+      /* Is -Inf.  */
+      case 'N':
+	words[0] = 0xff80;
+	break;
+
+      /* Is NaN.  */
+      /* bfloat16 has two types of NaN - quiet and signalling.
+         Quiet NaN has bit[6] == 1 && faction != 0, whereas
+         signalling Nan's have bit[0] == 0 && fraction != 0.
+         Chose this specific encoding as it is the same form
+         as used by other IEEE 754 encodings in GAS.  */
+      case 0:
+	words[0] = 0x7fff;
+	break;
+
+      default:
+	break;
+    }
+
+    *sizeP = 2;
+    md_number_to_chars (litP, (valueT) words[0], sizeof (LITTLENUM_TYPE));
+    return NULL;
+}
+
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
+  /* Parse bfloat16 specially since it does not follow the IEEE standard.  */
+  if (type == 'b')
+    return bfloat16_md_atof (litP, sizeP);
+
   return ieee_md_atof (type, litP, sizeP, TARGET_BYTES_BIG_ENDIAN);
 }
 
@@ -4585,6 +4634,7 @@ static const pseudo_typeS riscv_pseudo_table[] =
   {"attribute", s_riscv_attribute, 0},
   {"variant_cc", s_variant_cc, 0},
   {"float16", float_cons, 'h'},
+  {"bfloat16", float_cons, 'b'},
 
   { NULL, NULL, 0 },
 };
