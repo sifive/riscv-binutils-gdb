@@ -1794,7 +1794,6 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 {
   int major_version;
   int minor_version;
-  const char *last_name;
   enum riscv_prefix_ext_class class;
 
   while (*p)
@@ -1867,28 +1866,6 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 	  rps->error_handler
 	    (_("%s: unknown prefixed ISA extension `%s'"),
 	     arch, subset);
-	  free (subset);
-	  return NULL;
-	}
-
-      /* Check that the extension isn't duplicate.  */
-      last_name = rps->subset_list->tail->name;
-      if (!strcasecmp (last_name, subset))
-	{
-	  rps->error_handler
-	    (_("%s: duplicate prefixed ISA extension `%s'"),
-	     arch, subset);
-	  free (subset);
-	  return NULL;
-	}
-
-      /* Check that the extension is in expected order.  */
-      if (riscv_compare_subsets (last_name, subset) > 0)
-	{
-	  rps->error_handler
-	    (_("%s: prefixed ISA extension `%s' is not in expected "
-	       "order.  It must come before `%s'"),
-	     arch, subset, last_name);
 	  free (subset);
 	  return NULL;
 	}
@@ -2084,7 +2061,8 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
   if (p == NULL)
     return false;
 
-  /* Parse the different classes of extensions in the specified order.  */
+  /* Parse the prefixed extensions, we will help to reorder them to
+     the correct order.  */
   while (*p != '\0')
     {
       p = riscv_parse_prefixed_ext (rps, arch, p);
