@@ -137,6 +137,9 @@ struct riscv_elf_link_hash_table
 
   /* Relocations for variant CC symbols may be present.  */
   int variant_cc;
+
+  /* Find compact relocations in check_relocs.  */
+  bool compact_relocs;
 };
 
 /* Instruction access functions. */
@@ -624,6 +627,7 @@ riscv_elf_link_hash_table_create (bfd *abfd)
     }
 
   ret->max_alignment = (bfd_vma) -1;
+  ret->compact_relocs = false;
 
   /* Create hash table for local ifunc.  */
   ret->loc_hash_table = htab_try_create (1024,
@@ -949,6 +953,18 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  /* It is referenced by a non-shared object.  */
 	  h->ref_regular = 1;
+	}
+
+      switch (r_type)
+	{
+	case R_RISCV_GPREL_HI20:
+	case R_RISCV_GOT_GPREL_HI20:
+	case R_RISCV_TLS_GD_GPREL_HI20:
+	case R_RISCV_TLS_GOT_GPREL_HI20:
+	  htab->compact_relocs = true;
+	  break;
+	default:
+	  break;
 	}
 
       switch (r_type)
@@ -1837,15 +1853,28 @@ tpoff (struct bfd_link_info *info, bfd_vma address)
 /* Return the global pointer's value, or 0 if it is not in use.  */
 
 static bfd_vma
-riscv_global_pointer_value (struct bfd_link_info *info)
+riscv_global_pointer_value (struct bfd_link_info *info, bool update)
 {
   struct bfd_link_hash_entry *h;
+  struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (info);
+  bfd_vma value = 0;
 
   h = bfd_link_hash_lookup (info->hash, RISCV_GP_SYMBOL, false, false, true);
   if (h == NULL || h->type != bfd_link_hash_defined)
-    return 0;
+    return value;
 
-  return h->u.def.value + sec_addr (h->u.def.section);
+  value = h->u.def.value + sec_addr (h->u.def.section);
+  if (htab->compact_relocs)
+    {
+      /* For compact, the aligned gp helps gcc to do the optimization
+	 (TOOLCHAIN-1006).  */
+      bfd_vma r = value % 16;
+      value = r ? value + (16 - r) : value;
+      if (update)
+	h->u.def.value = r ? h->u.def.value + (16 - r) : h->u.def.value;
+    }
+
+  return value;
 }
 
 /* Write VAL in uleb128 format to P, returning a pointer to the
@@ -2347,7 +2376,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
   Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (input_bfd);
   struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
   bfd_vma *local_got_offsets = elf_local_got_offsets (input_bfd);
-  bfd_vma gp = riscv_global_pointer_value (info);
+  bfd_vma gp = riscv_global_pointer_value (info, true);
   bool absolute;
   bfd_vma uleb128_vma = 0;
   Elf_Internal_Rela *uleb128_rel = NULL;
@@ -4744,7 +4773,7 @@ _bfd_riscv_relax_lui (bfd *abfd,
 		      bool undefined_weak)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
-  bfd_vma gp = riscv_global_pointer_value (link_info);
+  bfd_vma gp = riscv_global_pointer_value (link_info, false);
   int use_rvc = elf_elfheader (abfd)->e_flags & EF_RISCV_RVC;
 
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
@@ -4762,11 +4791,13 @@ _bfd_riscv_relax_lui (bfd *abfd,
 
       /* We had aligned gp to 16-byte for compact gcc optimizations, but
 	 gp relaxation also need to consider the alignment, otherwise we
-	 will get GPREL truncated errors when running the gcc testcases
-	 with medlow but use the rv32 medany toolchains.
+	 will get GPREL truncated errors.
 
 	 This is just a workaround, and need to find a better way to fix
 	 the problems.  */
+      struct riscv_elf_link_hash_table *htab =
+	riscv_elf_hash_table (link_info);
+      if (htab->compact_relocs)
 	max_alignment = max_alignment > 0x10 ? max_alignment : 0x10;
     }
 
@@ -5001,7 +5032,7 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 		     bool undefined_weak)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
-  bfd_vma gp = riscv_global_pointer_value (link_info);
+  bfd_vma gp = riscv_global_pointer_value (link_info, false);
 
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
 
@@ -5068,7 +5099,10 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 	max_alignment = (bfd_vma) 1 << sym_sec->output_section->alignment_power;
 
       /* Same as the relax_lui, it is a workaround.  */
-      max_alignment = max_alignment > 0x10 ? max_alignment : 0x10;
+      struct riscv_elf_link_hash_table *htab
+		= riscv_elf_hash_table (link_info);
+      if (htab->compact_relocs)
+	max_alignment = max_alignment > 0x10 ? max_alignment : 0x10;
     }
 
   /* Is the reference in range of x0 or gp?
@@ -5180,7 +5214,7 @@ _bfd_riscv_compact_got_transition (bfd *abfd,
 				   bool undefined_weak ATTRIBUTE_UNUSED)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
-  bfd_vma gp = riscv_global_pointer_value (link_info);
+  bfd_vma gp = riscv_global_pointer_value (link_info, false);
 
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
 
@@ -5196,7 +5230,10 @@ _bfd_riscv_compact_got_transition (bfd *abfd,
 	max_alignment = (bfd_vma) 1 << sym_sec->output_section->alignment_power;
 
       /* Same as the relax_lui, it is a workaround.  */
-      max_alignment = max_alignment > 0x10 ? max_alignment : 0x10;
+      struct riscv_elf_link_hash_table *htab =
+	riscv_elf_hash_table (link_info);
+      if (htab->compact_relocs)
+	max_alignment = max_alignment > 0x10 ? max_alignment : 0x10;
     }
 
   /* Is the reference in range of x0 or gp?
