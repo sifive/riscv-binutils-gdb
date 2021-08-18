@@ -1843,6 +1843,10 @@ const struct riscv_opcode riscv_opcodes[] =
 /* SiFive custom bfloat16 matrix arithmetic vector instructions.  */
 {"sf.vfwmacc.4x4x4",  0, INSN_CLASS_V_AND_XSFVFWNACCQQQ, "Vd,Vs,Vt", MATCH_SFVFWMACC4X4X4, MASK_SFVFWMACC4X4X4, match_opcode, 0},
 
+/* SiFive custom bfloat16 requantization vector instructions.  */
+{"sf.vfnrclip.xu.f.qf", 0, INSN_CLASS_V_AND_XSFVFNRCLIPXFQF, "Vd,Vt,S", MATCH_SFVFNRCLIPXUFQF, MASK_SFVFNRCLIPXUFQF, match_opcode, 0},
+{"sf.vfnrclip.x.f.qf",  0, INSN_CLASS_V_AND_XSFVFNRCLIPXFQF, "Vd,Vt,S", MATCH_SFVFNRCLIPXFQF, MASK_SFVFNRCLIPXFQF, match_opcode, 0},
+
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
 };

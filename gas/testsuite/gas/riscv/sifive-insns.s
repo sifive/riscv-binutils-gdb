@@ -43,3 +43,9 @@
 	# xsfvfwmaccqqq
 	sf.vfwmacc.4x4x4 v4, v8, v12
 	#.insn r CUSTOM_2, 0x1, 0x3c, v4, v8, v12
+
+	# xsfvfnrclipxfqf
+	sf.vfnrclip.xu.f.qf v4, v8, f12
+	sf.vfnrclip.x.f.qf  v4, v8, f12
+	#.insn r CUSTOM_2, 0x1, 0x22, v4, f12, v8
+	#.insn r 0x57, 0x1, 0x23, v4, f12, v8

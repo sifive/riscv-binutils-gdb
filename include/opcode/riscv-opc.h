@@ -2136,6 +2136,11 @@
 /* SiFive custom bfloat16 matrix arithmetic vector instructions.  */
 #define MATCH_SFVFWMACC4X4X4 0xf200105b
 #define MASK_SFVFWMACC4X4X4 0xfe00707f
+/* SiFive custom bfloat16 requantization vector instructions.  */
+#define MATCH_SFVFNRCLIPXUFQF 0x8a00505b
+#define MASK_SFVFNRCLIPXUFQF 0xfe00707f
+#define MATCH_SFVFNRCLIPXFQF 0x8e00505b
+#define MASK_SFVFNRCLIPXFQF 0xfe00707f
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01
