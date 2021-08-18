@@ -730,3 +730,9 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+35259073[ 	]+csrw[ 	]+mncause,a1
 [ 	]+[0-9a-f]+:[ 	]+35302573[ 	]+csrr[ 	]+a0,mnstatus
 [ 	]+[0-9a-f]+:[ 	]+35359073[ 	]+csrw[ 	]+mnstatus,a1
+[ 	]+[0-9a-f]+:[ 	]+7e002573[ 	]+csrr[ 	]+a0,mlwid
+[ 	]+[0-9a-f]+:[ 	]+7e059073[ 	]+csrw[ 	]+mlwid,a1
+[ 	]+[0-9a-f]+:[ 	]+9e002573[ 	]+csrr[ 	]+a0,slwid
+[ 	]+[0-9a-f]+:[ 	]+9e059073[ 	]+csrw[ 	]+slwid,a1
+[ 	]+[0-9a-f]+:[ 	]+7e102573[ 	]+csrr[ 	]+a0,mwiddeleg
+[ 	]+[0-9a-f]+:[ 	]+7e159073[ 	]+csrw[ 	]+mwiddeleg,a1

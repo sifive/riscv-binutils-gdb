@@ -420,3 +420,8 @@
 	csr mnepc
 	csr mncause
 	csr mnstatus
+
+	# SiFive WorldGuard
+	csr mlwid
+	csr slwid
+	csr mwiddeleg

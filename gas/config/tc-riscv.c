@@ -70,6 +70,7 @@ enum riscv_csr_class
   CSR_CLASS_DEBUG,	/* debug CSR */
   CSR_CLASS_CLIC,	/* clic CSR */
   CSR_CLASS_RNMI,	/* rnmi CSR */
+  CSR_CLASS_WORLDGUARD, /* world guard CSR */
 };
 
 /* This structure holds all restricted conditions for a CSR.  */
@@ -918,6 +919,7 @@ riscv_csr_address (const char *csr_name,
     case CSR_CLASS_DEBUG:
     case CSR_CLASS_CLIC:
     case CSR_CLASS_RNMI:
+    case CSR_CLASS_WORLDGUARD:
       need_check_version = false;
       break;
     default:
