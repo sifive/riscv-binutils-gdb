@@ -1,4 +1,4 @@
-#as: -march=rv32iv_xsfvfhbfmin_xsfvqmaccdod_xsfvqmaccqoq
+#as: -march=rv32iv_xsfvfhbfmin_xsfvfwmaccqqq_xsfvqmaccdod_xsfvqmaccqoq
 #objdump: -dr
 
 .*:[   ]+file format .*
@@ -27,3 +27,4 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+4a8e9257[ 	]+sf.vfncvt.bf16.f.w[ 	]+v4,v8
 [ 	]+[0-9a-f]+:[ 	]+48869257[ 	]+sf.vfwcvt.f.bf16.v[ 	]+v4,v8,v0.t
 [ 	]+[0-9a-f]+:[ 	]+488e9257[ 	]+sf.vfncvt.bf16.f.w[ 	]+v4,v8,v0.t
+[ 	]+[0-9a-f]+:[ 	]+f2c4125b[ 	]+sf.vfwmacc.4x4x4[ 	]+v4,v8,v12

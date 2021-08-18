@@ -39,3 +39,7 @@
 	#.insn r 0x57, 0x1, 0x25, v4, t4, v8
 	#.insn r 0x57, 0x1, 0x24, v4, a3, v8
 	#.insn r 0x57, 0x1, 0x24, v4, t4, v8
+
+	# xsfvfwmaccqqq
+	sf.vfwmacc.4x4x4 v4, v8, v12
+	#.insn r CUSTOM_2, 0x1, 0x3c, v4, v8, v12
