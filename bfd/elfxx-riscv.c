@@ -1286,6 +1286,7 @@ static struct riscv_supported_ext riscv_supported_std_s_ext[] =
 
 static struct riscv_supported_ext riscv_supported_std_h_ext[] =
 {
+  {"h",			ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {NULL, 0, 0, 0, 0}
 };
 
@@ -2447,6 +2448,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
 	      || riscv_subset_supports (rps, "zve32f"));
     case INSN_CLASS_SVINVAL:
       return riscv_subset_supports (rps, "svinval");
+    case INSN_CLASS_H:
+      return riscv_subset_supports (rps, "h");
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));
