@@ -915,7 +915,9 @@ riscv_csr_address (const char *csr_name,
       need_check_version = false;
       break;
     case CSR_CLASS_V:
-      result = riscv_subset_supports (&riscv_rps_as, "v");
+      result = (riscv_subset_supports (&riscv_rps_as, "v")
+		|| riscv_subset_supports (&riscv_rps_as, "zvamo")
+		|| riscv_subset_supports (&riscv_rps_as, "zvlsseg"));
       need_check_version = false;
       break;
     case CSR_CLASS_SSCOFPMF:

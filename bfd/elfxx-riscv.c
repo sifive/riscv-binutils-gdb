@@ -1102,6 +1102,19 @@ check_implicit_for_i (const char *implicit ATTRIBUTE_UNUSED,
 	      && subset->minor_version < 1));
 }
 
+/* Add the zve and zvl when the version of v is greater 1.0.  Add the
+   zvlsseg when the version of v is less than 1.0.  */
+
+static bool
+check_implicit_for_v (const char *implicit,
+		      riscv_subset_t *subset)
+{
+  if (strcmp (implicit, "zvlsseg") == 0)
+    return (subset->major_version == 0);
+  else
+    return (subset->major_version > 0);
+}
+
 /* Record all implicit information for the subsets.  */
 struct riscv_implicit_subset
 {
@@ -1124,8 +1137,10 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"g", "zifencei",	check_implicit_always},
   {"q", "d",		check_implicit_always},
   {"v", "d",		check_implicit_always},
-  {"v", "zve64d",	check_implicit_always},
-  {"v", "zvl128b",	check_implicit_always},
+  {"v", "zvlsseg",	check_implicit_for_v},
+  {"v", "zve64d",	check_implicit_for_v},
+  {"v", "zvl128b",	check_implicit_for_v},
+  {"zvamo", "a",	check_implicit_always},
   {"zve64d", "d",	check_implicit_always},
   {"zve64d", "zve64f",	check_implicit_always},
   {"zve64f", "zve32f",	check_implicit_always},
@@ -1278,6 +1293,8 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zvl32768b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvl65536b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvfh",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
+  {"zvamo",		ISA_SPEC_CLASS_DRAFT,		0, 10, 0 },
+  {"zvlsseg",		ISA_SPEC_CLASS_DRAFT,		0, 10, 0 },
   {NULL, 0, 0, 0, 0}
 };
 
@@ -1967,7 +1984,8 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
 	  && strncmp (s->name, "zve", 3) == 0)
 	support_zve = true;
       if (!support_zvl
-	  && strncmp (s->name, "zvl", 3) == 0)
+	  && strncmp (s->name, "zvl", 3) == 0
+	  && strcmp (s->name, "zvlsseg") != 0)
 	support_zvl = true;
       if (support_zve && support_zvl)
 	break;
@@ -2462,6 +2480,13 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
 	      || riscv_subset_supports (rps, "zve64d")
 	      || riscv_subset_supports (rps, "zve64f")
 	      || riscv_subset_supports (rps, "zve32f"));
+    case INSN_CLASS_ZVLSSEG:
+      return (riscv_subset_supports (rps, "v")
+	      || riscv_subset_supports (rps, "zvlsseg")
+	      || riscv_subset_supports (rps, "zve64x")
+	      || riscv_subset_supports (rps, "zve32x"));
+    case INSN_CLASS_ZVAMO:
+      return riscv_subset_supports (rps, "zvamo");
     case INSN_CLASS_SVINVAL:
       return riscv_subset_supports (rps, "svinval");
     case INSN_CLASS_H:
