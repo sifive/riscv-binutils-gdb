@@ -1887,6 +1887,36 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sf.vfnrclip.xu.f.qf", 0, INSN_CLASS_V_AND_XSFVFNRCLIPXFQF, "Vd,Vt,S", MATCH_SFVFNRCLIPXUFQF, MASK_SFVFNRCLIPXUFQF, match_opcode, 0},
 {"sf.vfnrclip.x.f.qf",  0, INSN_CLASS_V_AND_XSFVFNRCLIPXFQF, "Vd,Vt,S", MATCH_SFVFNRCLIPXFQF, MASK_SFVFNRCLIPXFQF, match_opcode, 0},
 
+/* Sifive vector coprocessor interface instruction.  */
+{"sf.vc.x",     0, INSN_CLASS_V_AND_XSFVCP, "XO2,Xd,Xt,s",  MATCH_SF_VC_X, MASK_SF_VC_X, match_opcode, 0 },
+{"sf.vc.v.x",   0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Xt,s",  MATCH_SF_VC_V_X, MASK_SF_VC_V_X, match_opcode, 0 },
+{"sf.vc.i",     0, INSN_CLASS_V_AND_XSFVCP, "XO2,Xd,Xt,Vi", MATCH_SF_VC_I, MASK_SF_VC_I, match_opcode, 0 },
+{"sf.vc.v.i",   0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Xt,Vi", MATCH_SF_VC_V_I, MASK_SF_VC_V_I, match_opcode, 0 },
+{"sf.vc.vv",    0, INSN_CLASS_V_AND_XSFVCP, "XO2,Xd,Vt,Vs", MATCH_SF_VC_VV, MASK_SF_VC_VV, match_opcode, 0 },
+{"sf.vc.v.vv",  0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,Vs", MATCH_SF_VC_V_VV, MASK_SF_VC_V_VV, match_opcode, 0 },
+{"sf.vc.xv",    0, INSN_CLASS_V_AND_XSFVCP, "XO2,Xd,Vt,s",  MATCH_SF_VC_XV, MASK_SF_VC_XV, match_opcode, 0 },
+{"sf.vc.v.xv",  0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,s",  MATCH_SF_VC_V_XV, MASK_SF_VC_V_XV, match_opcode, 0 },
+{"sf.vc.iv",    0, INSN_CLASS_V_AND_XSFVCP, "XO2,Xd,Vt,Vi", MATCH_SF_VC_IV, MASK_SF_VC_IV, match_opcode, 0 },
+{"sf.vc.v.iv",  0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,Vi", MATCH_SF_VC_V_IV, MASK_SF_VC_V_IV, match_opcode, 0 },
+{"sf.vc.fv",    0, INSN_CLASS_V_AND_XSFVCP, "XO1,Xd,Vt,S",  MATCH_SF_VC_FV, MASK_SF_VC_FV, match_opcode, 0 },
+{"sf.vc.v.fv",  0, INSN_CLASS_V_AND_XSFVCP, "XO1,Vd,Vt,S",  MATCH_SF_VC_V_FV, MASK_SF_VC_V_FV, match_opcode, 0 },
+{"sf.vc.vvv",   0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,Vs", MATCH_SF_VC_VVV, MASK_SF_VC_VVV, match_opcode, 0 },
+{"sf.vc.v.vvv", 0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,Vs", MATCH_SF_VC_V_VVV, MASK_SF_VC_V_VVV, match_opcode, 0 },
+{"sf.vc.xvv",   0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,s",  MATCH_SF_VC_XVV, MASK_SF_VC_XVV, match_opcode, 0 },
+{"sf.vc.v.xvv", 0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,s",  MATCH_SF_VC_V_XVV, MASK_SF_VC_V_XVV, match_opcode, 0 },
+{"sf.vc.ivv",   0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,Vi", MATCH_SF_VC_IVV, MASK_SF_VC_IVV, match_opcode, 0 },
+{"sf.vc.v.ivv", 0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,Vi", MATCH_SF_VC_V_IVV, MASK_SF_VC_V_IVV, match_opcode, 0 },
+{"sf.vc.fvv",   0, INSN_CLASS_V_AND_XSFVCP, "XO1,Vd,Vt,S",  MATCH_SF_VC_FVV, MASK_SF_VC_FVV, match_opcode, 0 },
+{"sf.vc.v.fvv", 0, INSN_CLASS_V_AND_XSFVCP, "XO1,Vd,Vt,S",  MATCH_SF_VC_V_FVV, MASK_SF_VC_V_FVV, match_opcode, 0 },
+{"sf.vc.vvw",   0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,Vs", MATCH_SF_VC_VVW, MASK_SF_VC_VVW, match_opcode, 0 },
+{"sf.vc.v.vvw", 0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,Vs", MATCH_SF_VC_V_VVW, MASK_SF_VC_V_VVW, match_opcode, 0 },
+{"sf.vc.xvw",   0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,s",  MATCH_SF_VC_XVW, MASK_SF_VC_XVW, match_opcode, 0 },
+{"sf.vc.v.xvw", 0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,s",  MATCH_SF_VC_V_XVW, MASK_SF_VC_V_XVW, match_opcode, 0 },
+{"sf.vc.ivw",   0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,Vi", MATCH_SF_VC_IVW, MASK_SF_VC_IVW, match_opcode, 0 },
+{"sf.vc.v.ivw", 0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,Vi", MATCH_SF_VC_V_IVW, MASK_SF_VC_V_IVW, match_opcode, 0 },
+{"sf.vc.fvw",   0, INSN_CLASS_V_AND_XSFVCP, "XO1,Vd,Vt,S",  MATCH_SF_VC_FVW, MASK_SF_VC_FVW, match_opcode, 0 },
+{"sf.vc.v.fvw", 0, INSN_CLASS_V_AND_XSFVCP, "XO1,Vd,Vt,S",  MATCH_SF_VC_V_FVW, MASK_SF_VC_V_FVW, match_opcode, 0 },
+
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
 };

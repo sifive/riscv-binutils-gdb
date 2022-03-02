@@ -1211,6 +1211,24 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		goto unknown_validate_operand;
 	    }
 	  break;
+	case 'X':
+	  switch (*++oparg)
+	    {
+	    case 'd': USE_BITS (OP_MASK_RD, OP_SH_RD); break;
+	    case 't': USE_BITS (OP_MASK_RS2, OP_SH_RS2); break;
+	    case 'O':
+	      switch (*++oparg)
+		{
+		case '2': USE_BITS (OP_MASK_XO2, OP_SH_XO2); break;
+		case '1': USE_BITS (OP_MASK_XO1, OP_SH_XO1); break;
+		default:
+		  goto unknown_validate_operand;
+		}
+	      break;
+	    default:
+	      goto unknown_validate_operand;
+	    }
+	  break;
 	default:
 	unknown_validate_operand:
 	  as_bad (_("internal: bad RISC-V opcode "
@@ -2221,6 +2239,27 @@ riscv_csr_read_only_check (insn_t insn)
   return true;
 }
 
+#define UIMM_BITFIELD_VAL(S, E) (1 << ((E) - (S) + 1))
+#define EncodeUimmBitField(NAME, IP, EXPR, RELOC, ASARG, PERCENT, \
+			   START, END) \
+  do \
+    { \
+      if (my_getOpcodeExpression (EXPR, RELOC, ASARG, PERCENT) \
+	  || EXPR->X_op != O_constant \
+	  || EXPR->X_add_number < 0 \
+	  || EXPR->X_add_number >= UIMM_BITFIELD_VAL (START, END)) \
+	{ \
+	  as_bad (_("bad value for <bit-%s-%s> " \
+		    "field, value must be 0...%d"), \
+		  #START, #END, UIMM_BITFIELD_VAL (START, END)); \
+	  break; \
+	} \
+      INSERT_OPERAND (NAME, *IP, EXPR->X_add_number); \
+      EXPR->X_op = O_absent; \
+      ASARG = expr_end; \
+    } \
+  while (0);
+
 /* Return true if it is a privileged instruction.  Otherwise, return false.
 
    uret is actually a N-ext instruction.  So it is better to regard it as
@@ -3197,6 +3236,34 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      asarg = expr_end;
 	      imm_expr->X_op = O_absent;
 	      continue;
+
+	    case 'X': /* SiFive */
+	      switch (*++oparg)
+		{
+		case 'd': /* Xd */
+		  EncodeUimmBitField
+		    (RD, ip, imm_expr, imm_reloc, asarg, p, 7, 11);
+		  continue;
+		case 't': /* Xt */
+		  EncodeUimmBitField
+		    (RS2, ip, imm_expr, imm_reloc, asarg, p, 20, 24)
+		  continue;
+		case 'O':
+		  switch (*++oparg)
+		    {
+		    case '2': /* XO2 */
+		      EncodeUimmBitField
+			(XO2, ip, imm_expr, imm_reloc, asarg, p, 26, 27);
+		      continue;
+		    case '1': /* XO1 */
+		      EncodeUimmBitField
+			(XO1, ip, imm_expr, imm_reloc, asarg, p, 26, 26);
+		      continue;
+		    }
+		default:
+		  goto unknown_riscv_ip_operand;
+		}
+	      break;
 
 	    default:
 	    unknown_riscv_ip_operand:

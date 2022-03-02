@@ -521,6 +521,29 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	  print (info->stream, "%d", rs1);
 	  break;
 
+	case 'X': /* SiFive */
+	  switch (*++oparg)
+	    {
+	    case 'd':
+	      print (info->stream, "0x%x", (int) EXTRACT_OPERAND (RD, l));
+	      break;
+	    case 't':
+	      print (info->stream, "0x%x", (int) EXTRACT_OPERAND (RS2, l));
+	      break;
+	    case 'O':
+	      switch (*++oparg)
+		{
+		case '2':
+		  print (info->stream, "0x%x", (int) EXTRACT_OPERAND (XO2, l));
+		  break;
+		case '1':
+		  print (info->stream, "0x%x", (int) EXTRACT_OPERAND (XO1, l));
+		  break;
+		}
+	      break;
+	    }
+	  break;
+
 	default:
 	  /* xgettext:c-format */
 	  print (info->stream, _("# internal error, undefined modifier (%c)"),

@@ -312,6 +312,12 @@ static const char * const riscv_pred_succ[16] =
 #define NVECR 32
 #define NVECM 1
 
+/* SiFive fields.  */
+#define OP_MASK_XO2		0x3
+#define OP_SH_XO2		26
+#define OP_MASK_XO1		0x1
+#define OP_SH_XO1		26
+
 /* ABI names for selected x-registers.  */
 
 #define X_RA 1
@@ -400,6 +406,7 @@ enum riscv_insn_class
   INSN_CLASS_V_AND_XSFVFHBFMIN,
   INSN_CLASS_V_AND_XSFVFWNACCQQQ,
   INSN_CLASS_V_AND_XSFVFNRCLIPXFQF,
+  INSN_CLASS_V_AND_XSFVCP,
 };
 
 /* This structure holds information for a particular instruction.  */
