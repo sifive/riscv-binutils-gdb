@@ -1941,10 +1941,10 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sf.vfnrclip.x.f.qf",  0, INSN_CLASS_V_AND_XSFVFNRCLIPXFQF, "Vd,Vt,S", MATCH_SFVFNRCLIPXFQF, MASK_SFVFNRCLIPXFQF, match_opcode, 0},
 
 /* Sifive vector coprocessor interface instruction.  */
-{"sf.vc.x",     0, INSN_CLASS_V_AND_XSFVCP, "XO2,Xd,Xt,s",  MATCH_SF_VC_X, MASK_SF_VC_X, match_opcode, 0 },
-{"sf.vc.v.x",   0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Xt,s",  MATCH_SF_VC_V_X, MASK_SF_VC_V_X, match_opcode, 0 },
-{"sf.vc.i",     0, INSN_CLASS_V_AND_XSFVCP, "XO2,Xd,Xt,Vi", MATCH_SF_VC_I, MASK_SF_VC_I, match_opcode, 0 },
-{"sf.vc.v.i",   0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Xt,Vi", MATCH_SF_VC_V_I, MASK_SF_VC_V_I, match_opcode, 0 },
+{"sf.vc.x",     0, INSN_CLASS_V_AND_XSFVCP, "XO2,Xt,Xd,s",  MATCH_SF_VC_X, MASK_SF_VC_X, match_opcode, 0 },
+{"sf.vc.v.x",   0, INSN_CLASS_V_AND_XSFVCP, "XO2,Xt,Vd,s",  MATCH_SF_VC_V_X, MASK_SF_VC_V_X, match_opcode, 0 },
+{"sf.vc.i",     0, INSN_CLASS_V_AND_XSFVCP, "XO2,Xt,Xd,Vi", MATCH_SF_VC_I, MASK_SF_VC_I, match_opcode, 0 },
+{"sf.vc.v.i",   0, INSN_CLASS_V_AND_XSFVCP, "XO2,Xt,Vd,Vi", MATCH_SF_VC_V_I, MASK_SF_VC_V_I, match_opcode, 0 },
 {"sf.vc.vv",    0, INSN_CLASS_V_AND_XSFVCP, "XO2,Xd,Vt,Vs", MATCH_SF_VC_VV, MASK_SF_VC_VV, match_opcode, 0 },
 {"sf.vc.v.vv",  0, INSN_CLASS_V_AND_XSFVCP, "XO2,Vd,Vt,Vs", MATCH_SF_VC_V_VV, MASK_SF_VC_V_VV, match_opcode, 0 },
 {"sf.vc.xv",    0, INSN_CLASS_V_AND_XSFVCP, "XO2,Xd,Vt,s",  MATCH_SF_VC_XV, MASK_SF_VC_XV, match_opcode, 0 },
