@@ -131,10 +131,29 @@
 .*Warning: read-only CSR is written `csrw marchid,a1'
 .*Warning: read-only CSR is written `csrw mimpid,a1'
 .*Warning: read-only CSR is written `csrw mhartid,a1'
+.*Warning: read-only CSR is written `csrw mconfigptr,a1'
+.*Warning: invalid CSR `mstatush' for the current ISA
+.*Warning: invalid CSR `mstatush' for the current ISA
+.*Warning: invalid CSR `menvcfgh' for the current ISA
+.*Warning: invalid CSR `menvcfgh' for the current ISA
+.*Warning: invalid CSR `mseccfgh' for the current ISA
+.*Warning: invalid CSR `mseccfgh' for the current ISA
 .*Warning: invalid CSR `pmpcfg1' for the current ISA
 .*Warning: invalid CSR `pmpcfg1' for the current ISA
 .*Warning: invalid CSR `pmpcfg3' for the current ISA
 .*Warning: invalid CSR `pmpcfg3' for the current ISA
+.*Warning: invalid CSR `pmpcfg5' for the current ISA
+.*Warning: invalid CSR `pmpcfg5' for the current ISA
+.*Warning: invalid CSR `pmpcfg7' for the current ISA
+.*Warning: invalid CSR `pmpcfg7' for the current ISA
+.*Warning: invalid CSR `pmpcfg9' for the current ISA
+.*Warning: invalid CSR `pmpcfg9' for the current ISA
+.*Warning: invalid CSR `pmpcfg11' for the current ISA
+.*Warning: invalid CSR `pmpcfg11' for the current ISA
+.*Warning: invalid CSR `pmpcfg13' for the current ISA
+.*Warning: invalid CSR `pmpcfg13' for the current ISA
+.*Warning: invalid CSR `pmpcfg15' for the current ISA
+.*Warning: invalid CSR `pmpcfg15' for the current ISA
 .*Warning: invalid CSR `mcycleh' for the current ISA
 .*Warning: invalid CSR `mcycleh' for the current ISA
 .*Warning: invalid CSR `minstreth' for the current ISA
@@ -228,6 +247,26 @@
 .*Warning: invalid CSR `mscounteren' for the privileged spec `1.12'
 .*Warning: invalid CSR `mhcounteren' for the privileged spec `1.12'
 .*Warning: invalid CSR `mhcounteren' for the privileged spec `1.12'
+.*Warning: invalid CSR `ustatus' for the privileged spec `1.12'
+.*Warning: invalid CSR `ustatus' for the privileged spec `1.12'
+.*Warning: invalid CSR `uie' for the privileged spec `1.12'
+.*Warning: invalid CSR `uie' for the privileged spec `1.12'
+.*Warning: invalid CSR `utvec' for the privileged spec `1.12'
+.*Warning: invalid CSR `utvec' for the privileged spec `1.12'
+.*Warning: invalid CSR `uscratch' for the privileged spec `1.12'
+.*Warning: invalid CSR `uscratch' for the privileged spec `1.12'
+.*Warning: invalid CSR `uepc' for the privileged spec `1.12'
+.*Warning: invalid CSR `uepc' for the privileged spec `1.12'
+.*Warning: invalid CSR `ucause' for the privileged spec `1.12'
+.*Warning: invalid CSR `ucause' for the privileged spec `1.12'
+.*Warning: invalid CSR `utval' for the privileged spec `1.12'
+.*Warning: invalid CSR `utval' for the privileged spec `1.12'
+.*Warning: invalid CSR `uip' for the privileged spec `1.12'
+.*Warning: invalid CSR `uip' for the privileged spec `1.12'
+.*Warning: invalid CSR `sedeleg' for the privileged spec `1.12'
+.*Warning: invalid CSR `sedeleg' for the privileged spec `1.12'
+.*Warning: invalid CSR `sideleg' for the privileged spec `1.12'
+.*Warning: invalid CSR `sideleg' for the privileged spec `1.12'
 .*Warning: invalid CSR `fflags' for the current ISA
 .*Warning: invalid CSR `fflags' for the current ISA
 .*Warning: invalid CSR `frm' for the current ISA
