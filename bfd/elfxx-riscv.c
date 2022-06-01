@@ -1415,6 +1415,14 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"v", "zve64d",	check_implicit_for_v},
   {"v", "zvl128b",	check_implicit_for_v},
   {"zvamo", "a",	check_implicit_always},
+  {"xsfvqmaccqoq", "zve32x", check_implicit_always},
+  {"xsfvqmaccqoq", "zvl256b", check_implicit_always},
+  {"xsfvqmaccdod", "zve32x", check_implicit_always},
+  {"xsfvqmaccdod", "zvl128b", check_implicit_always},
+  {"xsfvfhbfmin", "zve32f", check_implicit_always},
+  {"xsfvfwmaccqqq", "zve32f", check_implicit_always},
+  {"xsfvfwmaccqqq", "zvl256b", check_implicit_always},
+  {"xsfvfnrclipxfqf", "zve32f", check_implicit_always},
   {"zve64d", "d",	check_implicit_always},
   {"zve64d", "zve64f",	check_implicit_always},
   {"zve64f", "zve32f",	check_implicit_always},
@@ -2775,24 +2783,18 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "svinval");
     case INSN_CLASS_H:
       return riscv_subset_supports (rps, "h");
-    case INSN_CLASS_V_AND_XSFVQMACCQOQ:
-      return (riscv_subset_supports (rps, "v")
-	      && riscv_subset_supports (rps, "xsfvqmaccqoq"));
-    case INSN_CLASS_V_AND_XSFVQMACCDOD:
-      return (riscv_subset_supports (rps, "v")
-	      && riscv_subset_supports (rps, "xsfvqmaccdod"));
-    case INSN_CLASS_V_AND_XSFVFHBFMIN:
-      return (riscv_subset_supports (rps, "v")
-	      && riscv_subset_supports (rps, "xsfvfhbfmin"));
-    case INSN_CLASS_V_AND_XSFVFWNACCQQQ:
-      return (riscv_subset_supports (rps, "v")
-	      && riscv_subset_supports (rps, "xsfvfwmaccqqq"));
-    case INSN_CLASS_V_AND_XSFVFNRCLIPXFQF:
-      return (riscv_subset_supports (rps, "v")
-	      && riscv_subset_supports (rps, "xsfvfnrclipxfqf"));
-    case INSN_CLASS_V_AND_XSFVCP:
-      return (riscv_subset_supports (rps, "v")
-              && riscv_subset_supports (rps, "xsfvcp"));
+    case INSN_CLASS_XSFVQMACCQOQ:
+      return riscv_subset_supports (rps, "xsfvqmaccqoq");
+    case INSN_CLASS_XSFVQMACCDOD:
+      return riscv_subset_supports (rps, "xsfvqmaccdod");
+    case INSN_CLASS_XSFVFHBFMIN:
+      return riscv_subset_supports (rps, "xsfvfhbfmin");
+    case INSN_CLASS_XSFVFWNACCQQQ:
+      return riscv_subset_supports (rps, "xsfvfwmaccqqq");
+    case INSN_CLASS_XSFVFNRCLIPXFQF:
+      return riscv_subset_supports (rps, "xsfvfnrclipxfqf");
+    case INSN_CLASS_XSFVCP:
+      return riscv_subset_supports (rps, "xsfvcp");
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));

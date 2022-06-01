@@ -1,4 +1,4 @@
-#as: -march=rv32iv_xsfvfhbfmin_xsfvfnrclipxfqf_xsfvfwmaccqqq_xsfvqmaccdod_xsfvqmaccqoq_xsfvcp
+#as:
 #objdump: -dr
 
 .*:[   ]+file format .*
