@@ -1537,7 +1537,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zifencei",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zifencei",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
   {"zihintpause",	ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
-  {"zfh",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
+  {"zfh",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfhmin",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
   {"zfinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zdinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
