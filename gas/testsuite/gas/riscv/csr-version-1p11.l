@@ -354,61 +354,57 @@
 .*Warning: invalid CSR `mhpmcounter30h' for the current ISA
 .*Warning: invalid CSR `mhpmcounter31h' for the current ISA
 .*Warning: invalid CSR `mhpmcounter31h' for the current ISA
-.*Warning: invalid CSR `hstatus' for the privileged spec `1.11'
-.*Warning: invalid CSR `hstatus' for the privileged spec `1.11'
-.*Warning: invalid CSR `hedeleg' for the privileged spec `1.11'
-.*Warning: invalid CSR `hedeleg' for the privileged spec `1.11'
-.*Warning: invalid CSR `hideleg' for the privileged spec `1.11'
-.*Warning: invalid CSR `hideleg' for the privileged spec `1.11'
-.*Warning: invalid CSR `hie' for the privileged spec `1.11'
-.*Warning: invalid CSR `hie' for the privileged spec `1.11'
-.*Warning: invalid CSR `hcounteren' for the privileged spec `1.11'
-.*Warning: invalid CSR `hcounteren' for the privileged spec `1.11'
-.*Warning: invalid CSR `hgeie' for the privileged spec `1.11'
-.*Warning: invalid CSR `hgeie' for the privileged spec `1.11'
-.*Warning: invalid CSR `htval' for the privileged spec `1.11'
-.*Warning: invalid CSR `htval' for the privileged spec `1.11'
-.*Warning: invalid CSR `hip' for the privileged spec `1.11'
-.*Warning: invalid CSR `hip' for the privileged spec `1.11'
-.*Warning: invalid CSR `hvip' for the privileged spec `1.11'
-.*Warning: invalid CSR `hvip' for the privileged spec `1.11'
-.*Warning: invalid CSR `htinst' for the privileged spec `1.11'
-.*Warning: invalid CSR `htinst' for the privileged spec `1.11'
-.*Warning: invalid CSR `hgeip' for the privileged spec `1.11'
-.*Warning: invalid CSR `hgeip' for the privileged spec `1.11'
+.*Warning: invalid CSR `hstatus' for the current ISA
+.*Warning: invalid CSR `hstatus' for the current ISA
+.*Warning: invalid CSR `hedeleg' for the current ISA
+.*Warning: invalid CSR `hedeleg' for the current ISA
+.*Warning: invalid CSR `hideleg' for the current ISA
+.*Warning: invalid CSR `hideleg' for the current ISA
+.*Warning: invalid CSR `hie' for the current ISA
+.*Warning: invalid CSR `hie' for the current ISA
+.*Warning: invalid CSR `hcounteren' for the current ISA
+.*Warning: invalid CSR `hcounteren' for the current ISA
+.*Warning: invalid CSR `hgeie' for the current ISA
+.*Warning: invalid CSR `hgeie' for the current ISA
+.*Warning: invalid CSR `htval' for the current ISA
+.*Warning: invalid CSR `htval' for the current ISA
+.*Warning: invalid CSR `hip' for the current ISA
+.*Warning: invalid CSR `hip' for the current ISA
+.*Warning: invalid CSR `hvip' for the current ISA
+.*Warning: invalid CSR `hvip' for the current ISA
+.*Warning: invalid CSR `htinst' for the current ISA
+.*Warning: invalid CSR `htinst' for the current ISA
+.*Warning: invalid CSR `hgeip' for the current ISA
+.*Warning: invalid CSR `hgeip' for the current ISA
 .*Warning: read-only CSR is written `csrw hgeip,a1'
-.*Warning: invalid CSR `henvcfg' for the privileged spec `1.11'
-.*Warning: invalid CSR `henvcfg' for the privileged spec `1.11'
+.*Warning: invalid CSR `henvcfg' for the current ISA
+.*Warning: invalid CSR `henvcfg' for the current ISA
 .*Warning: invalid CSR `henvcfgh' for the current ISA
-.*Warning: invalid CSR `henvcfgh' for the privileged spec `1.11'
 .*Warning: invalid CSR `henvcfgh' for the current ISA
-.*Warning: invalid CSR `henvcfgh' for the privileged spec `1.11'
-.*Warning: invalid CSR `hgatp' for the privileged spec `1.11'
-.*Warning: invalid CSR `hgatp' for the privileged spec `1.11'
-.*Warning: invalid CSR `htimedelta' for the privileged spec `1.11'
-.*Warning: invalid CSR `htimedelta' for the privileged spec `1.11'
+.*Warning: invalid CSR `hgatp' for the current ISA
+.*Warning: invalid CSR `hgatp' for the current ISA
+.*Warning: invalid CSR `htimedelta' for the current ISA
+.*Warning: invalid CSR `htimedelta' for the current ISA
 .*Warning: invalid CSR `htimedeltah' for the current ISA
-.*Warning: invalid CSR `htimedeltah' for the privileged spec `1.11'
 .*Warning: invalid CSR `htimedeltah' for the current ISA
-.*Warning: invalid CSR `htimedeltah' for the privileged spec `1.11'
-.*Warning: invalid CSR `vsstatus' for the privileged spec `1.11'
-.*Warning: invalid CSR `vsstatus' for the privileged spec `1.11'
-.*Warning: invalid CSR `vsie' for the privileged spec `1.11'
-.*Warning: invalid CSR `vsie' for the privileged spec `1.11'
-.*Warning: invalid CSR `vstvec' for the privileged spec `1.11'
-.*Warning: invalid CSR `vstvec' for the privileged spec `1.11'
-.*Warning: invalid CSR `vsscratch' for the privileged spec `1.11'
-.*Warning: invalid CSR `vsscratch' for the privileged spec `1.11'
-.*Warning: invalid CSR `vsepc' for the privileged spec `1.11'
-.*Warning: invalid CSR `vsepc' for the privileged spec `1.11'
-.*Warning: invalid CSR `vscause' for the privileged spec `1.11'
-.*Warning: invalid CSR `vscause' for the privileged spec `1.11'
-.*Warning: invalid CSR `vstval' for the privileged spec `1.11'
-.*Warning: invalid CSR `vstval' for the privileged spec `1.11'
-.*Warning: invalid CSR `vsip' for the privileged spec `1.11'
-.*Warning: invalid CSR `vsip' for the privileged spec `1.11'
-.*Warning: invalid CSR `vsatp' for the privileged spec `1.11'
-.*Warning: invalid CSR `vsatp' for the privileged spec `1.11'
+.*Warning: invalid CSR `vsstatus' for the current ISA
+.*Warning: invalid CSR `vsstatus' for the current ISA
+.*Warning: invalid CSR `vsie' for the current ISA
+.*Warning: invalid CSR `vsie' for the current ISA
+.*Warning: invalid CSR `vstvec' for the current ISA
+.*Warning: invalid CSR `vstvec' for the current ISA
+.*Warning: invalid CSR `vsscratch' for the current ISA
+.*Warning: invalid CSR `vsscratch' for the current ISA
+.*Warning: invalid CSR `vsepc' for the current ISA
+.*Warning: invalid CSR `vsepc' for the current ISA
+.*Warning: invalid CSR `vscause' for the current ISA
+.*Warning: invalid CSR `vscause' for the current ISA
+.*Warning: invalid CSR `vstval' for the current ISA
+.*Warning: invalid CSR `vstval' for the current ISA
+.*Warning: invalid CSR `vsip' for the current ISA
+.*Warning: invalid CSR `vsip' for the current ISA
+.*Warning: invalid CSR `vsatp' for the current ISA
+.*Warning: invalid CSR `vsatp' for the current ISA
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.11'
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.11'
 .*Warning: invalid CSR `sbadaddr' for the privileged spec `1.11'

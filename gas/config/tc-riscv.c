@@ -71,6 +71,8 @@ enum riscv_csr_class
   CSR_CLASS_WORLDGUARD, /* world guard CSR */
   CSR_CLASS_SSCOFPMF,	/* sscofpmf CSR */
   CSR_CLASS_SSCOFPMF_32,/* rv32 only sscofpmf CSR */
+  CSR_CLASS_H,		/* hypervisor */
+  CSR_CLASS_H_32,	/* hypervisor, rv32 only */
 };
 
 /* This structure holds all restricted conditions for a CSR.  */
@@ -920,6 +922,14 @@ riscv_csr_address (const char *csr_name,
       break;
     case CSR_CLASS_SSCOFPMF_32:
       result = (xlen == 32 && riscv_subset_supports (&riscv_rps_as, "sscofpmf"));
+      need_check_version = false;
+      break;
+    case CSR_CLASS_H:
+      result = riscv_subset_supports (&riscv_rps_as, "h");
+      need_check_version = false;
+      break;
+    case CSR_CLASS_H_32:
+      result = (xlen == 32 && riscv_subset_supports (&riscv_rps_as, "h"));
       need_check_version = false;
       break;
     case CSR_CLASS_DEBUG:
