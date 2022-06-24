@@ -1,4 +1,4 @@
-#as: -march=rv32ih
+#as: -march=rv32i
 #source: h-ext-32.s
 #objdump: -d
 

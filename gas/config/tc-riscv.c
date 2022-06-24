@@ -62,8 +62,6 @@ enum riscv_csr_class
 
   CSR_CLASS_I,
   CSR_CLASS_I_32,	/* rv32 only */
-  CSR_CLASS_H,		/* hypervisor CSR */
-  CSR_CLASS_H_32,	/* hypervisor CSR, rv32 only.  */
   CSR_CLASS_F,		/* f-ext only */
   CSR_CLASS_ZKR,	/* zkr only */
   CSR_CLASS_V,		/* rvv only */
@@ -905,12 +903,6 @@ riscv_csr_address (const char *csr_name,
     case CSR_CLASS_F:
       result = riscv_subset_supports (&riscv_rps_as, "f");
       need_check_version = false;
-      break;
-    case CSR_CLASS_H:
-      result = riscv_subset_supports (&riscv_rps_as, "h");
-      break;
-    case CSR_CLASS_H_32:
-      result = (xlen == 32 && riscv_subset_supports (&riscv_rps_as, "h"));
       break;
     case CSR_CLASS_ZKR:
       result = riscv_subset_supports (&riscv_rps_as, "zkr");
