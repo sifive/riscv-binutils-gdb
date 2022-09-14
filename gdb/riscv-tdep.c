@@ -3638,6 +3638,9 @@ riscv_gdbarch_init (struct gdbarch_info info,
 
   register_riscv_ravenscar_ops (gdbarch);
 
+  /* Support simple overlay manager.  */
+  set_gdbarch_overlay_update (gdbarch, simple_overlay_update);
+
   return gdbarch;
 }
 
