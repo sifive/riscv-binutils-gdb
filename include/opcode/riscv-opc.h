@@ -2189,6 +2189,23 @@
 #define MASK_CBO_INVAL 0xfff07fff
 #define MATCH_CBO_ZERO 0x40200f
 #define MASK_CBO_ZERO 0xfff07fff
+/* Zihintntl hint instructions.  */
+#define MATCH_NTL_P1 0x200033
+#define MASK_NTL_P1 0xffffffff
+#define MATCH_NTL_PALL 0x300033
+#define MASK_NTL_PALL 0xffffffff
+#define MATCH_NTL_S1 0x400033
+#define MASK_NTL_S1 0xffffffff
+#define MATCH_NTL_ALL 0x500033
+#define MASK_NTL_ALL 0xffffffff
+#define MATCH_C_NTL_P1 0x900a
+#define MASK_C_NTL_P1 0xffff
+#define MATCH_C_NTL_PALL 0x900e
+#define MASK_C_NTL_PALL 0xffff
+#define MATCH_C_NTL_S1 0x9012
+#define MASK_C_NTL_S1 0xffff
+#define MATCH_C_NTL_ALL 0x9016
+#define MASK_C_NTL_ALL 0xffff
 /* SiFive MNRET instruction.  */
 #define MATCH_MNRET 0x70200073
 #define MASK_MNRET 0xffffffff
@@ -3010,6 +3027,16 @@ DECLARE_INSN(mnret, MATCH_MNRET, MASK_MNRET)
 DECLARE_INSN(cflush_d_l1, MATCH_CFLUSH_D_L1, MASK_CFLUSH_D_L1)
 DECLARE_INSN(cdiscard_d_l1, MATCH_CDISCARD_D_L1, MASK_CDISCARD_D_L1)
 DECLARE_INSN(cflush_i_l1, MATCH_CFLUSH_I_L1, MASK_CFLUSH_I_L1)
+
+/* Zihintntl hint instructions.  */
+DECLARE_INSN(ntl_p1, MATCH_NTL_P1, MASK_NTL_P1);
+DECLARE_INSN(ntl_pall, MATCH_NTL_PALL, MASK_NTL_PALL);
+DECLARE_INSN(ntl_s1, MATCH_NTL_S1, MASK_NTL_S1);
+DECLARE_INSN(ntl_all, MATCH_NTL_ALL, MASK_NTL_ALL);
+DECLARE_INSN(c_ntl_p1, MATCH_C_NTL_P1, MASK_C_NTL_P1);
+DECLARE_INSN(c_ntl_pall, MATCH_C_NTL_PALL, MASK_C_NTL_PALL);
+DECLARE_INSN(c_ntl_s1, MATCH_C_NTL_S1, MASK_C_NTL_S1);
+DECLARE_INSN(c_ntl_all, MATCH_C_NTL_ALL, MASK_C_NTL_ALL);
 #endif /* DECLARE_INSN */
 #ifdef DECLARE_CSR
 /* Unprivileged Counter/Timers CSRs.  */
