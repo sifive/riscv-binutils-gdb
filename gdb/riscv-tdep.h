@@ -150,6 +150,11 @@ extern int riscv_abi_flen (struct gdbarch *gdbarch);
    argument registers.  */
 extern bool riscv_abi_embedded (struct gdbarch *gdbarch);
 
+/* Return the width in bytes of the hardware vector registers for
+   GDBARCH.  If this architecture has no vector registers, then
+   return 0.  */
+extern int riscv_isa_vlen (struct gdbarch *gdbarch);
+
 /* Single step based on where the current instruction will take us.  */
 extern std::vector<CORE_ADDR> riscv_software_single_step
   (struct regcache *regcache);

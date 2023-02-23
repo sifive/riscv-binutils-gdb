@@ -32,6 +32,10 @@
 
 #define RISCV_NR_rt_sigreturn 139
 
+/* Magic number written to the head.magic field of struct __sc_riscv_v_state that kernel
+   places in the reserved area of struct sigcontext.  Comes from <asm/sigcontext.h> */
+#define RVV_MAGIC 0x53465457
+
 /* Define the general register mapping.  The kernel puts the PC at offset 0,
    gdb puts it at offset 32.  Register x0 is always 0 and can be ignored.
    Registers x1 to x31 are in the same place.  */
@@ -120,8 +124,122 @@ static const struct tramp_frame riscv_linux_sigframe = {
      mcontext_t uc_mcontext;
    }; */
 
+
+
+/* riscv_linux_vector_sigframe_header_check() returns an answer to the question
+   "is there a RISC-V Vector header at this memory location"? */
+
+static bool
+riscv_linux_vector_sigframe_header_check (frame_info_ptr this_frame,
+					  int vlen, int xlen,
+					  CORE_ADDR regs_base)
+{
+  uint32_t rvv_magic;
+  uint32_t rvv_size;
+  bool info_good = false;
+
+  /* If vector information is available, then we should see this structure at this address:
+     struct __riscv_ctx_hdr {
+     __u32 magic;  (RVV_MAGIC).
+     __u32 size;   (size of struct __sc_riscv_v_state + vector register data size (32*VLENB))
+     } head;
+   */
+
+  rvv_magic =
+    get_frame_memory_unsigned (this_frame, regs_base, sizeof (rvv_magic));
+  regs_base += sizeof (rvv_magic);
+  rvv_size =
+    get_frame_memory_unsigned (this_frame, regs_base, sizeof (rvv_magic));
+  regs_base += sizeof (rvv_size);
+
+
+  info_good = (rvv_magic == RVV_MAGIC);
+  if (!info_good)
+    {
+      /* Not an error, because kernels can be configured without CONFIG_VECTOR, but worth noting if frame debug
+         setting is turned on */
+      if (frame_debug)
+	frame_debug_printf
+	  ("Did not find RISC-V vector information in ucontext (kernel not built with CONFIG_VECTOR?)");
+
+      return false;
+    }
+
+  if (frame_debug)
+    {
+      uint32_t expected_rvv_size;
+
+      frame_debug_printf
+	("Located RISC-V vector information in signal frame ucontext (info size %u)",
+	 rvv_size);
+
+      /* sanity check the reported size; should be sizeof(uint32_t) + sizeof(uint32_t) + 5 * XLENB + 32 * vlen */
+      expected_rvv_size = sizeof (uint32_t) /* magic */  +
+	sizeof (uint32_t) /* size */  +
+	5 * xlen /* vstart, vl, vtype, vcsr, and datap */  +
+	32 * vlen;		/* v0..v31 values */
+
+      if (rvv_size != expected_rvv_size)
+	{
+	  /* It doesn't seem like this should be a hard error, but it'd be good to make it visible if frame debug
+	     setting is turned on */
+	  frame_debug_printf
+	    ("Size in RISC-V vector information header in ucontext differs from the expected %u",
+	     expected_rvv_size);
+	}
+    }
+
+  return info_good;
+}
+
+static CORE_ADDR
+riscv_linux_sigframe_vector_init (frame_info_ptr this_frame,
+				  struct trad_frame_cache *this_cache,
+				  CORE_ADDR regs_base, int xlen, int vlen)
+{
+  int vfieldidx;		/* index of "unsigned long" members in __riscv_v_ext_state */
+  CORE_ADDR p_datap;
+  CORE_ADDR datap;		/* dereferenced value of void *datap that points to v0..v31 */
+
+  /* vstart, vl, vtype, vcsr, and datap are XLEN sized fields (unsigned long) from this point */
+  vfieldidx = 0;
+  trad_frame_set_reg_addr (this_cache, RISCV_CSR_VSTART_REGNUM,
+			   regs_base + (vfieldidx * xlen));
+  vfieldidx++;
+  trad_frame_set_reg_addr (this_cache, RISCV_CSR_VL_REGNUM,
+			   regs_base + (vfieldidx * xlen));
+
+  vfieldidx++;
+  trad_frame_set_reg_addr (this_cache, RISCV_CSR_VTYPE_REGNUM,
+			   regs_base + (vfieldidx * xlen));
+
+  vfieldidx++;
+  trad_frame_set_reg_addr (this_cache, RISCV_CSR_VCSR_REGNUM,
+			   regs_base + (vfieldidx * xlen));
+
+  /* for the datap member, there is one level of memory indirection to get the address of
+     the block of values for v0..v31 */
+  vfieldidx++;
+  p_datap = regs_base + (vfieldidx * xlen);
+  datap = get_frame_memory_unsigned (this_frame, p_datap, xlen);
+  regs_base = datap;
+  for (int i = 0; i < 32; i++)
+    {
+      trad_frame_set_reg_addr (this_cache, RISCV_V0_REGNUM + i,
+			       regs_base + (i * vlen));
+    }
+  regs_base += 32 * vlen;
+
+  return regs_base;
+}
+
+
 #define SIGFRAME_SIGINFO_SIZE		128
 #define UCONTEXT_MCONTEXT_OFFSET	176
+#define MCONTEXT_VECTOR_OFFSET		784	/* offset of struct mcontext's __reserved field,
+						   which is where the struct __sc_riscv_v_state is overlaid */
+#define RISCV_CONTEXT_HEADER_SIZE	8	/* size of struct __riscv_ctx_hdr {__u32 magic;  __u32 size; } */
+
 
 static void
 riscv_linux_sigframe_init (const struct tramp_frame *self,
@@ -132,6 +250,7 @@ riscv_linux_sigframe_init (const struct tramp_frame *self,
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int xlen = riscv_isa_xlen (gdbarch);
   int flen = riscv_isa_flen (gdbarch);
+  int vlen = riscv_isa_vlen (gdbarch);
   CORE_ADDR frame_sp = get_frame_sp (this_frame);
   CORE_ADDR mcontext_base;
   CORE_ADDR regs_base;
@@ -154,6 +273,19 @@ riscv_linux_sigframe_init (const struct tramp_frame *self,
 			     regs_base + (i * flen));
   regs_base += 32 * flen;
   trad_frame_set_reg_addr (this_cache, RISCV_CSR_FCSR_REGNUM, regs_base);
+
+  /* Handle the vector registers, if present. */
+  if (vlen > 0)
+    {
+      regs_base = mcontext_base + MCONTEXT_VECTOR_OFFSET;
+      if (riscv_linux_vector_sigframe_header_check
+	  (this_frame, vlen, xlen, regs_base))
+	{
+	  regs_base += RISCV_CONTEXT_HEADER_SIZE;	/* advance past the header */
+	  riscv_linux_sigframe_vector_init (this_frame, this_cache, regs_base,
+					    xlen, vlen);
+	}
+    }
 
   /* Choice of the bottom of the sigframe is somewhat arbitrary.  */
   trad_frame_set_id (this_cache, frame_id_build (frame_sp, func));

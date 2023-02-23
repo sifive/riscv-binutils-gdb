@@ -158,6 +158,113 @@ riscv_store_fpregset (struct regcache *regcache, const void *buf)
   supply_register_by_name (regcache, "fcsr", regbuf);
 }
 
+/* Collect vector registers from REGCACHE into BUF.  */
+
+static void
+riscv_fill_vregset (struct regcache *regcache, void *buf)
+{
+  const struct target_desc *tdesc = regcache->tdesc;
+  int regno = find_regno (tdesc, "v0");
+  int vlenb = register_size (regcache->tdesc, regno);
+  uint64_t u64_vlenb = vlenb;	/* pad to max XLEN for buffer conversion */
+  uint64_t u64_vxsat = 0;
+  uint64_t u64_vxrm = 0;
+  uint64_t u64_vcsr = 0;
+  gdb_byte *regbuf;
+  int i;
+
+  /* Since vxsat and equivalent bits in vcsr are aliases (and same for vxrm), we have a dilemma.
+     For this gdb -> gdbserver topology, if the aliased pairs have values that disagree, then
+     which value should take precedence?  We don't know which alias was most
+     recently assigned.  We're just getting a block of register values including vxsat, vxrm,
+     and vcsr.  We have to impose some kind of rule for predictable resolution to resolve any inconsistency.
+     For now, let's say that vxsat and vxrm take precedence, and those values will be applied to the
+     corresponding fields in vcsr.  Reconcile these 3 interdependent registers now:
+  */
+  regbuf = (gdb_byte *) & u64_vcsr;
+  collect_register_by_name (regcache, "vcsr", regbuf);
+  regbuf = (gdb_byte *) & u64_vxsat;
+  collect_register_by_name (regcache, "vxsat", regbuf);
+  regbuf = (gdb_byte *) & u64_vxrm;
+  collect_register_by_name (regcache, "vxrm", regbuf);
+  
+  u64_vcsr &= ~((uint64_t)VCSR_MASK_VXSAT << VCSR_POS_VXSAT);
+  u64_vcsr |= ((u64_vxsat & VCSR_MASK_VXSAT) << VCSR_POS_VXSAT);
+  u64_vcsr &= ~((uint64_t)VCSR_MASK_VXRM << VCSR_POS_VXRM);	  
+  u64_vcsr |= ((u64_vxrm & VCSR_MASK_VXRM) << VCSR_POS_VXRM);
+
+  /* Replace the original vcsr value with the "cooked" value */
+  regbuf = (gdb_byte *) & u64_vcsr;  
+  supply_register_by_name (regcache, "vcsr", regbuf);
+
+  /* Now stage the ptrace buffer (it'll receive the cooked vcsr value) */
+
+  regbuf = (gdb_byte *) buf + offsetof (struct __riscv_vregs, vstate.vstart);
+  collect_register_by_name (regcache, "vstart", regbuf);
+  regbuf = (gdb_byte *) buf + offsetof (struct __riscv_vregs, vstate.vl);
+  collect_register_by_name (regcache, "vl", regbuf);
+  regbuf = (gdb_byte *) buf + offsetof (struct __riscv_vregs, vstate.vtype);
+  collect_register_by_name (regcache, "vtype", regbuf);
+  regbuf = (gdb_byte *) buf + offsetof (struct __riscv_vregs, vstate.vcsr);
+  collect_register_by_name (regcache, "vcsr", regbuf);
+  regbuf = (gdb_byte *) & u64_vlenb;
+  collect_register_by_name (regcache, "vlenb", regbuf);
+
+
+  regbuf = (gdb_byte *) buf + offsetof (struct __riscv_vregs, data);
+  for (i = 0; i < 32; i++, regbuf += vlenb)
+    collect_register (regcache, regno + i, regbuf);
+}
+
+/* Supply vector registers from BUF into REGCACHE.  */
+
+static void
+riscv_store_vregset (struct regcache *regcache, const void *buf)
+{
+  const struct target_desc *tdesc = regcache->tdesc;
+  int regno = find_regno (tdesc, "v0");
+  int vlenb = register_size (regcache->tdesc, regno);
+  uint64_t u64_vlenb = vlenb;	/* pad to max XLEN for buffer conversion */
+  uint64_t vcsr;
+  uint64_t vxsat;
+  uint64_t vxrm;  
+  const gdb_byte *regbuf;
+  int i;
+
+  regbuf =
+    (const gdb_byte *) buf + offsetof (struct __riscv_vregs, vstate.vstart);
+  supply_register_by_name (regcache, "vstart", regbuf);
+  regbuf =
+    (const gdb_byte *) buf + offsetof (struct __riscv_vregs, vstate.vl);
+  supply_register_by_name (regcache, "vl", regbuf);
+  regbuf =
+    (const gdb_byte *) buf + offsetof (struct __riscv_vregs, vstate.vtype);
+  supply_register_by_name (regcache, "vtype", regbuf);
+  regbuf =
+    (const gdb_byte *) buf + offsetof (struct __riscv_vregs, vstate.vcsr);
+  supply_register_by_name (regcache, "vcsr", regbuf);
+  /* also store off a non-byte-wise copy of vcsr, to derive values for vxsat and vxrm */
+  vcsr = *(uint64_t*)regbuf;
+  /* vlenb isn't part of vstate, but we have already inferred its value by running code on this
+     hart, and we're assuming homogeneous VLENB if it's an SMP system */
+  regbuf = (gdb_byte *) & u64_vlenb;
+  supply_register_by_name (regcache, "vlenb", regbuf);
+
+  /* vxsat and vxrm, are not part of vstate, so we have to extract from VCSR
+     value */
+  vxsat = ((vcsr >> VCSR_POS_VXSAT) & VCSR_MASK_VXSAT);  
+  regbuf = (gdb_byte *) &vxsat;
+  supply_register_by_name (regcache, "vxsat", regbuf);
+  vxrm = ((vcsr >> VCSR_POS_VXRM) & VCSR_MASK_VXRM);  
+  regbuf = (gdb_byte *) &vxrm;
+  supply_register_by_name (regcache, "vxrm", regbuf);
+
+  /* v0..v31 */
+  regbuf = (const gdb_byte *) buf + offsetof (struct __riscv_vregs, data);
+  for (i = 0; i < 32; i++, regbuf += vlenb)
+    supply_register (regcache, regno + i, regbuf);
+}
+
 /* RISC-V/Linux regsets.  FPRs are optional and come in different sizes,
    so define multiple regsets for them marking them all as OPTIONAL_REGS
    rather than FP_REGS, so that "regsets_fetch_inferior_registers" picks
@@ -175,6 +282,9 @@ static struct regset_info riscv_regsets[] = {
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_FPREGSET,
     sizeof (struct __riscv_mc_f_ext_state), OPTIONAL_REGS,
     riscv_fill_fpregset, riscv_store_fpregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_RISCV_VECTOR,
+    sizeof (struct __riscv_vregs), OPTIONAL_REGS,
+    riscv_fill_vregset, riscv_store_vregset },
   NULL_REGSET
 };
 

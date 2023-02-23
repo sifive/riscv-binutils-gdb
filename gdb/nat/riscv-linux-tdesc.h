@@ -20,9 +20,36 @@
 #define NAT_RISCV_LINUX_TDESC_H
 
 #include "arch/riscv.h"
+#include "asm/ptrace.h"
 
 /* Determine XLEN and FLEN for the LWP identified by TID, and return a
    corresponding features object.  */
 struct riscv_gdbarch_features riscv_linux_read_features (int tid);
+
+#ifndef NT_RISCV_VECTOR
+#define RISCV_MAX_VLENB (8192)
+#define NT_RISCV_VECTOR	0x900	/* RISC-V vector registers */
+#endif
+
+/* Some branches and/or commits of linux kernel named this "struct __riscv_v_state",
+   and later it was changed to "struct __riscv_v_ext_state",
+   so using a macro to stand-in for that struct type to make it easier to modify
+   in a single place, if compiling against one of those older Linux kernel commits */
+#ifndef RISCV_VECTOR_STATE_T
+#define RISCV_VECTOR_STATE_T struct __riscv_v_ext_state
+#endif
+
+/* Struct for use in ptrace() calls for vector CSRs/registers */
+struct __riscv_vregs
+{
+  RISCV_VECTOR_STATE_T vstate;
+  gdb_byte data[RISCV_MAX_VLENB * 32];	/* data will arrive packed, VLENB bytes per element, not necessarily RISCV_MAX_VLENB bytes per element */
+};
+
+#define VCSR_MASK_VXSAT 0x1
+#define VCSR_POS_VXSAT 0
+#define VCSR_MASK_VXRM 0x3
+#define VCSR_POS_VXRM 1
+
 
 #endif /* NAT_RISCV_LINUX_TDESC_H */
