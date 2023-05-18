@@ -1519,6 +1519,8 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {"xsfvfnrclipxfqf",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0},
   {"xsfvfhbfmin",	ISA_SPEC_CLASS_DRAFT,	0, 1, 0},
   {"xsfvfwmaccqqq",	ISA_SPEC_CLASS_DRAFT,	0, 1, 0},
+  {"xsifivecdiscarddlone",	ISA_SPEC_CLASS_DRAFT,	0, 1, 0},
+  {"xsifivecflushdlone",	ISA_SPEC_CLASS_DRAFT,	0, 1, 0},
   {NULL, 0, 0, 0, 0}
 };
 
