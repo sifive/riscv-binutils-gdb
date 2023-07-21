@@ -87,6 +87,14 @@ All available -march extensions for RISC-V:
 	zvksg                                   1.0
 	zvksc                                   1.0
 	zvkt                                    1.0
+	zvkns                                   0.1
+	zvknha                                  0.1
+	zvknhb                                  0.1
+	zvkb                                    0.1
+	zvkg                                    0.1
+	zvksed                                  0.1
+	zvksh                                   0.1
+	zvknf                                   0.1
 	zvl32b                                  1.0
 	zvl64b                                  1.0
 	zvl128b                                 1.0

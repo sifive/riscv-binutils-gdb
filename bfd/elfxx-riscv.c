@@ -1420,6 +1420,16 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zvksg",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvksc",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvkt",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+
+  {"zvkns",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
+  {"zvknha",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
+  {"zvknhb",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
+  {"zvkb",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
+  {"zvkg",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
+  {"zvksed",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
+  {"zvksh",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
+  {"zvknf",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
+
   {"zvl32b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvl64b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvl128b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
