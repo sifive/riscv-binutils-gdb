@@ -2659,6 +2659,11 @@ const struct riscv_opcode riscv_opcodes[] =
 {"cv.sub.div4",           0, INSN_CLASS_XCVSIMD, "d,s,t", MATCH_CV_SUB_DIV4, MASK_CV_SUB_DIV4, match_opcode, 0},
 {"cv.sub.div8",           0, INSN_CLASS_XCVSIMD, "d,s,t", MATCH_CV_SUB_DIV8, MASK_CV_SUB_DIV8, match_opcode, 0},
 
+/* SiFive cache control instruction.  */
+{"cflush.d.l1",   0, INSN_CLASS_I, "s", MATCH_CFLUSH_D_L1, MASK_CFLUSH_D_L1, match_opcode, 0 },
+{"cdiscard.d.l1", 0, INSN_CLASS_I, "s", MATCH_CDISCARD_D_L1, MASK_CDISCARD_D_L1, match_opcode, 0 },
+{"cflush.i.l1",   0, INSN_CLASS_I, "", MATCH_CFLUSH_I_L1, MASK_CFLUSH_I_L1, match_opcode, 0 },
+
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 {"th.addsl",    0, INSN_CLASS_XTHEADBA,    "d,s,t,Xtu2@25",   MATCH_TH_ADDSL,    MASK_TH_ADDSL,    match_opcode, 0},
 

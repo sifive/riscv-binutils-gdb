@@ -3786,6 +3786,13 @@
 #define MASK_SFVFNRCLIPXUFQF 0xfe00707f
 #define MATCH_SFVFNRCLIPXFQF 0x8e00505b
 #define MASK_SFVFNRCLIPXFQF 0xfe00707f
+/* SiFive cache control instruction.  */
+#define MATCH_CFLUSH_D_L1 0xfc000073
+#define MASK_CFLUSH_D_L1 0xfff07fff
+#define MATCH_CDISCARD_D_L1 0xfc200073
+#define MASK_CDISCARD_D_L1 0xfff07fff
+#define MATCH_CFLUSH_I_L1 0xfc100073
+#define MASK_CFLUSH_I_L1 0xffffffff
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01
