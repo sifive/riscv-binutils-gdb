@@ -3793,6 +3793,9 @@
 #define MASK_CDISCARD_D_L1 0xfff07fff
 #define MATCH_CFLUSH_I_L1 0xfc100073
 #define MASK_CFLUSH_I_L1 0xffffffff
+/* SiFive custom bfloat16 matrix arithmetic vector instructions.  */
+#define MATCH_SFVFWMACC4X4X4 0xf200105b
+#define MASK_SFVFWMACC4X4X4 0xfe00707f
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01

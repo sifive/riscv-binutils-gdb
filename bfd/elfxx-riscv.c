@@ -1515,6 +1515,7 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {"xsfvqmaccdod",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0},
   {"xsfvfnrclipxfqf",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0},
   {"xsfvfhbfmin",	ISA_SPEC_CLASS_DRAFT,	0, 1, 0},
+  {"xsfvfwmaccqqq",	ISA_SPEC_CLASS_DRAFT,	0, 1, 0},
   {NULL, 0, 0, 0, 0}
 };
 
@@ -2816,6 +2817,9 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "xsfvfnrclipxfqf");
     case INSN_CLASS_XSFVFHBFMIN:
       return riscv_subset_supports (rps, "xsfvfhbfmin");
+    case INSN_CLASS_V_AND_XSFVFWNACCQQQ:
+      return (riscv_subset_supports (rps, "v")
+             && riscv_subset_supports (rps, "xsfvfwmaccqqq"));
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));

@@ -2668,6 +2668,9 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sf.vfwcvt.f.bf16.v",0, INSN_CLASS_XSFVFHBFMIN, "Vd,VtVm", MATCH_VFWCVTBF16_F_F_V, MASK_VFWCVTBF16_F_F_V, match_opcode, 0},
 {"sf.vfncvt.bf16.f.w",0, INSN_CLASS_XSFVFHBFMIN, "Vd,VtVm", MATCH_VFNCVTBF16_F_F_W, MASK_VFNCVTBF16_F_F_W, match_opcode, 0},
 
+/* SiFive custom bfloat16 matrix arithmetic vector instructions.  */
+{"sf.vfwmacc.4x4x4",  0, INSN_CLASS_V_AND_XSFVFWNACCQQQ, "Vd,Vs,Vt", MATCH_SFVFWMACC4X4X4, MASK_SFVFWMACC4X4X4, match_opcode, 0},
+
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 {"th.addsl",    0, INSN_CLASS_XTHEADBA,    "d,s,t,Xtu2@25",   MATCH_TH_ADDSL,    MASK_TH_ADDSL,    match_opcode, 0},
 

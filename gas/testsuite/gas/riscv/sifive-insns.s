@@ -80,3 +80,10 @@
 	sf.vfwcvt.f.bf16.v v4, v8, v0.t
 	sf.vfncvt.bf16.f.w v4, v8, v0.t
 	.option pop
+
+	# xsfvfwmaccqqq
+	.option push
+	.option arch, +v
+	.option arch, +xsfvfwmaccqqq
+	sf.vfwmacc.4x4x4 v4, v8, v12
+	.option pop
