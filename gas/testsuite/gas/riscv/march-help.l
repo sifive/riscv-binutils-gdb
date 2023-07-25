@@ -139,6 +139,9 @@ All available -march extensions for RISC-V:
 	svinval                                 1.0
 	svnapot                                 1.0
 	svpbmt                                  1.0
+	sswg                                    0.3
+	smwg                                    0.3
+	smwgd                                   0.3
 	xcvalu                                  1.0
 	xcvbi                                   1.0
 	xcvbitmanip                             1.0

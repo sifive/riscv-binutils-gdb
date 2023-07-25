@@ -107,6 +107,9 @@ enum riscv_csr_class
   CSR_CLASS_SSCTR,		/* Ssctr */
   CSR_CLASS_XTHEADVECTOR,	/* xtheadvector only */
   CSR_CLASS_CLIC,	/* clic CSR */
+  CSR_CLASS_SSWG,	/* SSWG, world guard CSR */
+  CSR_CLASS_SMWG,	/* SMWG, world guard CSR */
+  CSR_CLASS_SMWGD,	/* SMWGD, world guard CSR */
 };
 
 /* This structure holds all restricted conditions for a CSR.  */
@@ -1161,6 +1164,18 @@ riscv_csr_address (const char *csr_name,
     case CSR_CLASS_SSCTR: extension = "ssctr"; break;
     case CSR_CLASS_DEBUG:
     case CSR_CLASS_CLIC:
+      need_check_version = false;
+      break;
+    case CSR_CLASS_SSWG:
+      extension = "sswg";
+      need_check_version = false;
+      break;
+    case CSR_CLASS_SMWG:
+      extension = "smwg";
+      need_check_version = false;
+      break;
+    case CSR_CLASS_SMWGD:
+      extension = "smwgd";
       need_check_version = false;
       break;
     case CSR_CLASS_XTHEADVECTOR:

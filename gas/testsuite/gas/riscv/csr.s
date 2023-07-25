@@ -547,3 +547,8 @@
 	csr mnxti
 	csr mintstatus
 	csrrw sp,mscratchcsw,sp
+
+	# SiFive WorldGuard
+	csr mlwid
+	csr slwid
+	csr mwiddeleg

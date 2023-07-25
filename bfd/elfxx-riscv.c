@@ -1477,6 +1477,9 @@ static struct riscv_supported_ext riscv_supported_std_s_ext[] =
   {"svinval",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"svnapot",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"svpbmt",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"sswg",		ISA_SPEC_CLASS_DRAFT,		0, 3, 0 },
+  {"smwg",		ISA_SPEC_CLASS_DRAFT,		0, 3, 0 },
+  {"smwgd",		ISA_SPEC_CLASS_DRAFT,		0, 3, 0 },
   {NULL, 0, 0, 0, 0}
 };
 

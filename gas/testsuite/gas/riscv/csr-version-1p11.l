@@ -1713,3 +1713,15 @@
 .*Info: macro .*
 .*Warning: invalid CSR `jvt', needs `zcmt' extension
 .*Info: macro .*
+.*Warning: invalid CSR `mlwid', needs `smwg' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mlwid', needs `smwg' extension
+.*Info: macro .*
+.*Warning: invalid CSR `slwid', needs `smwg' extension
+.*Info: macro .*
+.*Warning: invalid CSR `slwid', needs `smwg' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mwiddeleg', needs `smwgd' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mwiddeleg', needs `smwgd' extension
+.*Info: macro .*
