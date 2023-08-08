@@ -2252,6 +2252,22 @@
 #define MASK_HSV_W 0xfe007fff
 #define MATCH_HSV_D 0x6e004073
 #define MASK_HSV_D 0xfe007fff
+/* Zicfiss instructions.  */
+#define MATCH_SSPUSH 0x82004073
+#define MASK_SSPUSH 0xfe0fffff
+#define MATCH_SSPOPCHK 0x81c04073
+#define MASK_SSPOPCHK 0xfff07fff
+#define MATCH_SSLOAD 0x81c04073
+#define MASK_SSLOAD 0xfffff07f
+#define MATCH_SSPINC 0x81d04073
+#define MASK_SSPINC 0xfff07fff
+#define MATCH_SSPRR 0x81d04073
+#define MASK_SSPRR 0xfffff07f
+#define MATCH_SSAMOSWAP 0x82004073
+#define MASK_SSAMOSWAP 0xfe00707f
+/* Zicfilp instructions.  */
+#define MATCH_LPAD 0x17
+#define MASK_LPAD  0xfff
 /* Zicbop hint instructions. */
 #define MATCH_PREFETCH_I 0x6013
 #define MASK_PREFETCH_I 0x1f07fff
@@ -3488,6 +3504,16 @@ DECLARE_INSN(th_sync_s, MATCH_TH_SYNC_S, MASK_TH_SYNC_S)
 /* XVentanaCondOps instructions. */
 DECLARE_INSN(vt_maskc, MATCH_VT_MASKC, MASK_VT_MASKC)
 DECLARE_INSN(vt_maskcn, MATCH_VT_MASKCN, MASK_VT_MASKCN)
+
+/* Zicfiss instructions.  */
+DECLARE_INSN(sspush, MATCH_SSPUSH, MASK_SSPUSH)
+DECLARE_INSN(sspopchk, MATCH_SSPOPCHK, MASK_SSPOPCHK)
+DECLARE_INSN(ssload, MATCH_SSLOAD, MASK_SSLOAD)
+DECLARE_INSN(sspinc, MATCH_SSPINC, MASK_SSPINC)
+DECLARE_INSN(ssprr, MATCH_SSPRR, MASK_SSPRR)
+DECLARE_INSN(ssamoswap, MATCH_SSAMOSWAP, MASK_SSAMOSWAP)
+/* Zicfilp instructions.  */
+DECLARE_INSN(lpad, MATCH_LPAD, MASK_LPAD)
 #endif /* DECLARE_INSN */
 #ifdef DECLARE_CSR
 /* Unprivileged Counter/Timers CSRs.  */

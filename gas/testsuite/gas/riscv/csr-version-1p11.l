@@ -1213,6 +1213,10 @@
 .*Info: macro .*
 .*Warning: invalid CSR `vsiph', needs `ssaia' extension
 .*Info: macro .*
+.*Warning: invalid CSR `ssp', needs `zicfiss' extension
+.*Info: macro .*
+.*Warning: invalid CSR `ssp', needs `zicfiss' extension
+.*Info: macro .*
 .*Warning: invalid CSR `scountovf', needs `sscofpmf' extension
 .*Info: macro .*
 .*Warning: invalid CSR `scountovf', needs `sscofpmf' extension

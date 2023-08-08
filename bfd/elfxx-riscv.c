@@ -2555,6 +2555,10 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zifencei";
     case INSN_CLASS_ZIHINTPAUSE:
       return "zihintpause";
+    case INSN_CLASS_ZICFISS:
+      return "zicfiss";
+    case INSN_CLASS_ZICFILP:
+      return "zicfilp";
     case INSN_CLASS_M:
       return "m";
     case INSN_CLASS_ZMMUL:

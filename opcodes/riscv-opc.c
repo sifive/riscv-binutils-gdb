@@ -329,6 +329,38 @@ match_th_load_pair(const struct riscv_opcode *op,
   return rd1 != rd2 && rd1 != rs && rd2 != rs && match_opcode (op, insn);
 }
 
+static int
+match_rs1_x1x5_opcode (const struct riscv_opcode *op,
+                      insn_t insn)
+{
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  return match_opcode (op, insn) && (rs1 == 1 || rs1 == 5);
+}
+
+static int
+match_rs2_x1x5_opcode (const struct riscv_opcode *op,
+                      insn_t insn)
+{
+  int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
+  return match_opcode (op, insn) && (rs2 == 1 || rs2 == 5);
+}
+
+static int
+match_rd_x1x5_opcode (const struct riscv_opcode *op,
+                     insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  return match_opcode (op, insn) && (rd == 1 || rd == 5);
+}
+
+static int
+match_ssamoswap_opcode (const struct riscv_opcode *op,
+                       insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  return match_opcode (op, insn) && rd != 0;
+}
+
 const struct riscv_opcode riscv_opcodes[] =
 {
 /* name, xlen, isa, operands, match, mask, match_func, pinfo.  */
@@ -465,6 +497,10 @@ const struct riscv_opcode riscv_opcodes[] =
 {"or",          0, INSN_CLASS_C, "Cs,Ct,Cw",  MATCH_C_OR, MASK_C_OR, match_opcode, INSN_ALIAS },
 {"or",          0, INSN_CLASS_I, "d,s,t",     MATCH_OR, MASK_OR, match_opcode, 0 },
 {"ori",         0, INSN_CLASS_I, "d,s,j",     MATCH_ORI, MASK_ORI, match_opcode, 0 },
+
+/* Zicfilp instructions.  */
+{"lpad",        0, INSN_CLASS_ZICFILP, "u", MATCH_LPAD, MASK_LPAD, match_opcode, 0 },
+
 {"auipc",       0, INSN_CLASS_I, "d,u",       MATCH_AUIPC, MASK_AUIPC, match_opcode, 0 },
 {"seqz",        0, INSN_CLASS_I, "d,s",       MATCH_SLTIU|ENCODE_ITYPE_IMM (1), MASK_SLTIU | MASK_IMM, match_opcode, INSN_ALIAS },
 {"snez",        0, INSN_CLASS_I, "d,t",       MATCH_SLTU, MASK_SLTU|MASK_RS1, match_opcode, INSN_ALIAS },
@@ -1121,6 +1157,14 @@ const struct riscv_opcode riscv_opcodes[] =
 /* Zksh instructions  */
 {"sm3p0",    0, INSN_CLASS_ZKSH,    "d,s",    MATCH_SM3P0, MASK_SM3P0, match_opcode, 0 },
 {"sm3p1",    0, INSN_CLASS_ZKSH,    "d,s",    MATCH_SM3P1, MASK_SM3P1, match_opcode, 0 },
+
+/* Zicfiss instructions.  */
+{"sspush",    0, INSN_CLASS_ZICFISS, "t", MATCH_SSPUSH, MASK_SSPUSH, match_rs2_x1x5_opcode, 0 },
+{"sspopchk",  0, INSN_CLASS_ZICFISS, "s", MATCH_SSPOPCHK, MASK_SSPOPCHK, match_rs1_x1x5_opcode, 0 },
+{"ssload",    0, INSN_CLASS_ZICFISS, "d", MATCH_SSLOAD, MASK_SSLOAD, match_rd_x1x5_opcode, 0 },
+{"sspinc",    0, INSN_CLASS_ZICFISS, "x5", MATCH_SSPINC, MASK_SSPINC, match_opcode, 0 },
+{"ssprr",     0, INSN_CLASS_ZICFISS, "d", MATCH_SSPRR, MASK_SSPRR, match_opcode, 0 },
+{"ssamoswap", 0, INSN_CLASS_ZICFISS, "d,t,0(s)", MATCH_SSAMOSWAP, MASK_SSAMOSWAP, match_ssamoswap_opcode, 0 },
 
 /* RVV instructions.  */
 {"vsetvl",     0, INSN_CLASS_V,  "d,s,t",  MATCH_VSETVL, MASK_VSETVL, match_opcode, 0},

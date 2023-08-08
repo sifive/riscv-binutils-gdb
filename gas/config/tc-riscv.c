@@ -89,6 +89,7 @@ enum riscv_csr_class
   CSR_CLASS_SSTC_AND_H,		/* Sstc only (with H) */
   CSR_CLASS_SSTC_32,		/* Sstc RV32 only */
   CSR_CLASS_SSTC_AND_H_32,	/* Sstc RV32 only (with H) */
+  CSR_CLASS_ZICFISS,	/* Zicfiss */
 };
 
 /* This structure holds all restricted conditions for a CSR.  */
@@ -1093,6 +1094,10 @@ riscv_csr_address (const char *csr_name,
       extension = "sstc";
       break;
     case CSR_CLASS_DEBUG:
+      break;
+    case CSR_CLASS_ZICFISS:
+      extension = "zicfiss";
+      need_check_version = false;
       break;
     default:
       as_bad (_("internal: bad RISC-V CSR class (0x%x)"), csr_class);

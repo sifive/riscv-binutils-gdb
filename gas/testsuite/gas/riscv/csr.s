@@ -395,6 +395,9 @@
 	csr vsieh
 	csr vsiph
 
+	# Zicfiss
+	csr ssp
+
 	# Sscofpmf extension
 	csr scountovf
 	csr mhpmevent3h
