@@ -102,10 +102,9 @@ riscv_create_target_description (const struct riscv_gdbarch_features features)
 }
 
 
-
 /* Usually, these target_desc instances are static for an architecture, and expressable
    in XML format, but this is a special case where length of a RISC-V vector register
-   is not architecturally fixed to a constant (the maximuim width is a defined constant,
+   is not architecturally fixed to a constant (the maximum width is a defined constant,
    but it's nice to tailor a target description the actual VLENB) */
 static int
 create_feature_riscv_vector_from_features (struct target_desc *result,
@@ -175,26 +174,13 @@ create_feature_riscv_vector_from_features (struct target_desc *result,
   field_type = tdesc_named_type (feature, "bytes");
   tdesc_add_field (type_with_fields, "b", field_type);
 
-  /* Using magic numbers for regnum parameter of these CSRs.  Magic numbers aren't ever ideal,
-     but didn't find a clear alternative that compiles successfully in both the gdb and gdbserver
-     build steps.  A mitigating factor is that these numbers
-     should be stable because they are based on constituent values that should also be stable:
-     RISCV_FIRST_CSR_REGNUM (a fixed constant) added to the respective CSR numbers from RISC-V     
-     specifications.  Also there is some precedent for magic numbers; the *.xml files in features/riscv/
-     use magic numbers to refer to floating point CSRs.
-
-     Also, the init_target_desc function in gdbserver expects all these registers to be ordered
-     in increasing order of "GDB internals" register number, with CSRs before vN registers and in relative numeric order
-     ascending.  DWARF register numbers don't seem to follow that pattern, and it seems to be necessary to use the GDB
-     regnums in order for things to work on both native gdb and gdbserver.
-   */
-  tdesc_create_reg (feature, "vstart", 73, 1, NULL, features.xlen * 8, "int");
-  tdesc_create_reg (feature, "vxsat", 74, 1, NULL, features.xlen * 8, "int");
-  tdesc_create_reg (feature, "vxrm", 75, 1, NULL, features.xlen * 8, "int");  
-  tdesc_create_reg (feature, "vcsr", 80, 1, NULL, features.xlen * 8, "int");
-  tdesc_create_reg (feature, "vl", 3169, 1, NULL, features.xlen * 8, "int");
-  tdesc_create_reg (feature, "vtype", 3170, 1, NULL, features.xlen * 8, "int");
-  tdesc_create_reg (feature, "vlenb", 3171, 1, NULL, features.xlen * 8, "int");
+  tdesc_create_reg (feature, "vstart", RISCV_CSR_VSTART_REGNUM, 1, NULL, features.xlen * 8, "int");
+  tdesc_create_reg (feature, "vxsat", RISCV_CSR_VXSAT_REGNUM, 1, NULL, features.xlen * 8, "int");
+  tdesc_create_reg (feature, "vxrm", RISCV_CSR_VXRM_REGNUM, 1, NULL, features.xlen * 8, "int");  
+  tdesc_create_reg (feature, "vcsr", RISCV_CSR_VCSR_REGNUM, 1, NULL, features.xlen * 8, "int");
+  tdesc_create_reg (feature, "vl", RISCV_CSR_VL_REGNUM, 1, NULL, features.xlen * 8, "int");
+  tdesc_create_reg (feature, "vtype", RISCV_CSR_VTYPE_REGNUM, 1, NULL, features.xlen * 8, "int");
+  tdesc_create_reg (feature, "vlenb", RISCV_CSR_VLENB_REGNUM, 1, NULL, features.xlen * 8, "int");
 
   bitsize = features.vlen * 8;
   tdesc_create_reg (feature, "v0", regnum++, 1, NULL, bitsize,
