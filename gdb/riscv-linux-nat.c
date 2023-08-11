@@ -126,7 +126,7 @@ supply_fpregset_regnum (struct regcache *regcache, const prfpregset_t *fpregs,
     }
 }
 
-#define MEMBER_SIZE(type, member) sizeof(((type *)0)->member)
+#define MEMBER_SIZE(type, member) sizeof(((type *) 0)->member)
 
 static const regcache_map_entry riscv_linux_vregmap[] =
 {
@@ -153,6 +153,9 @@ static const struct regset riscv_linux_vregset =
   regcache_collect_regset
 };
 
+
+/* Copy vector register REGNUM (or all vector regs if REGNUM == -1)
+   from regset RISCV_VECTOR into REGCACHE.  */
 
 static void
 supply_vregset_regnum (struct regcache *regcache,
@@ -187,6 +190,9 @@ supply_vregset_regnum (struct regcache *regcache,
       regcache->raw_supply (RISCV_CSR_VXRM_REGNUM, buf);
     }
 }
+
+/* Copy vector register REGNUM (or all vector regs if REGNUM == -1)
+   from REGCACHE into regset RISCV_VECTOR.  */
 
 static void
 fill_vregset (const struct regcache *regcache, struct __riscv_vregs *vregs,
