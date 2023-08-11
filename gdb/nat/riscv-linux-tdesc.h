@@ -26,11 +26,6 @@
    corresponding features object.  */
 struct riscv_gdbarch_features riscv_linux_read_features (int tid);
 
-#ifndef NT_RISCV_VECTOR
-#define RISCV_MAX_VLENB (8192)
-#define NT_RISCV_VECTOR	0x900	/* RISC-V vector registers */
-#endif
-
 /* Some branches and/or commits of linux kernel named this "struct __riscv_v_state",
    and later it was changed to "struct __riscv_v_ext_state",
    so using a macro to stand-in for that struct type to make it easier to modify
