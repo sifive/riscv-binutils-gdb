@@ -117,5 +117,42 @@ const target_desc *riscv_lookup_target_description
 
 #endif /* GDBSERVER */
 
+/* RiscV register numbers.  */
+enum
+{
+  RISCV_ZERO_REGNUM = 0,	/* Read-only register, always 0.  */
+  RISCV_RA_REGNUM = 1,		/* Return Address.  */
+  RISCV_SP_REGNUM = 2,		/* Stack Pointer.  */
+  RISCV_GP_REGNUM = 3,		/* Global Pointer.  */
+  RISCV_TP_REGNUM = 4,		/* Thread Pointer.  */
+  RISCV_FP_REGNUM = 8,		/* Frame Pointer.  */
+  RISCV_A0_REGNUM = 10,		/* First argument.  */
+  RISCV_A1_REGNUM = 11,		/* Second argument.  */
+  RISCV_A7_REGNUM = 17,		/* Seventh argument.  */
+  RISCV_PC_REGNUM = 32,		/* Program Counter.  */
+
+  RISCV_NUM_INTEGER_REGS = 32,
+
+  RISCV_FIRST_FP_REGNUM = 33,	/* First Floating Point Register */
+  RISCV_FA0_REGNUM = 43,
+  RISCV_FA1_REGNUM = RISCV_FA0_REGNUM + 1,
+  RISCV_LAST_FP_REGNUM = 64,	/* Last Floating Point Register */
+
+  RISCV_FIRST_CSR_REGNUM = 65,  /* First CSR */
+#define DECLARE_CSR(name, num, class, define_version, abort_version) \
+  RISCV_ ## num ## _REGNUM = RISCV_FIRST_CSR_REGNUM + num,
+#include "opcode/riscv-opc.h"
+#undef DECLARE_CSR
+  RISCV_LAST_CSR_REGNUM = 4160,
+  RISCV_CSR_LEGACY_MISA_REGNUM = 0xf10 + RISCV_FIRST_CSR_REGNUM,
+
+  RISCV_PRIV_REGNUM = 4161,
+
+  RISCV_V0_REGNUM,
+
+  RISCV_V31_REGNUM = RISCV_V0_REGNUM + 31,
+
+  RISCV_LAST_REGNUM = RISCV_V31_REGNUM
+};
 
 #endif /* ARCH_RISCV_H */
