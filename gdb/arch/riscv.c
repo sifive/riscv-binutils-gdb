@@ -34,15 +34,6 @@
 #define STATIC_IN_GDB
 #endif
 
-#ifdef GDBSERVER
-/* Work around issue where trying to include riscv-tdep.h (to get access to canonical RISCV_V0_REGNUM declaration
-   from that header) is problamtic for gdbserver build */
-#define RISCV_V0_REGNUM 4162   
-#else
-#include "defs.h"
-#include "riscv-tdep.h"
-#endif
-
 static int
 create_feature_riscv_vector_from_features (struct target_desc *result,
 					   long regnum,
