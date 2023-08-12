@@ -26,19 +26,21 @@
    corresponding features object.  */
 struct riscv_gdbarch_features riscv_linux_read_features (int tid);
 
-/* Some branches and/or commits of linux kernel named this "struct __riscv_v_state",
-   and later it was changed to "struct __riscv_v_ext_state",
-   so using a macro to stand-in for that struct type to make it easier to modify
-   in a single place, if compiling against one of those older Linux kernel commits */
+/* Some branches and/or commits of linux kernel named this "struct
+   __riscv_v_state", and later it was changed to "struct
+   __riscv_v_ext_state", so using a macro to stand-in for that struct
+   type to make it easier to modify in a single place, if compiling
+   against one of those older Linux kernel commits.  */
 #ifndef RISCV_VECTOR_STATE_T
 #define RISCV_VECTOR_STATE_T struct __riscv_v_ext_state
 #endif
 
-/* Struct for use in ptrace() calls for vector CSRs/registers */
+/* Struct for use in ptrace() calls for vector CSRs/registers.  */
 struct __riscv_vregs
 {
   RISCV_VECTOR_STATE_T vstate;
-  gdb_byte data[RISCV_MAX_VLENB * 32];	/* data will arrive packed, VLENB bytes per element, not necessarily RISCV_MAX_VLENB bytes per element */
+  /* Data will arrive packed, VLENB bytes per element, not necessarily RISCV_MAX_VLENB bytes per element.  */
+  gdb_byte data[RISCV_MAX_VLENB * 32];
 };
 
 #define VCSR_MASK_VXSAT 0x1

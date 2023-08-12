@@ -166,21 +166,24 @@ riscv_fill_vregset (struct regcache *regcache, void *buf)
   const struct target_desc *tdesc = regcache->tdesc;
   int regno = find_regno (tdesc, "v0");
   int vlenb = register_size (regcache->tdesc, regno);
-  uint64_t u64_vlenb = vlenb;	/* pad to max XLEN for buffer conversion */
+  /* Pad to max XLEN for buffer conversion.  */
+  uint64_t u64_vlenb = vlenb;
   uint64_t u64_vxsat = 0;
   uint64_t u64_vxrm = 0;
   uint64_t u64_vcsr = 0;
   gdb_byte *regbuf;
   int i;
 
-  /* Since vxsat and equivalent bits in vcsr are aliases (and same for vxrm), we have a dilemma.
-     For this gdb -> gdbserver topology, if the aliased pairs have values that disagree, then
-     which value should take precedence?  We don't know which alias was most
-     recently assigned.  We're just getting a block of register values including vxsat, vxrm,
-     and vcsr.  We have to impose some kind of rule for predictable resolution to resolve any inconsistency.
-     For now, let's say that vxsat and vxrm take precedence, and those values will be applied to the
-     corresponding fields in vcsr.  Reconcile these 3 interdependent registers now:
-  */
+  /* Since vxsat and equivalent bits in vcsr are aliases (and same for
+     vxrm), we have a dilemma.  For this gdb -> gdbserver topology, if
+     the aliased pairs have values that disagree, then which value
+     should take precedence?  We don't know which alias was most
+     recently assigned.  We're just getting a block of register values
+     including vxsat, vxrm, and vcsr.  We have to impose some kind of
+     rule for predictable resolution to resolve any inconsistency.
+     For now, let's say that vxsat and vxrm take precedence, and those
+     values will be applied to the corresponding fields in vcsr.
+     Reconcile these 3 interdependent registers now.  */
   regbuf = (gdb_byte *) & u64_vcsr;
   collect_register_by_name (regcache, "vcsr", regbuf);
   regbuf = (gdb_byte *) & u64_vxsat;
@@ -193,11 +196,11 @@ riscv_fill_vregset (struct regcache *regcache, void *buf)
   u64_vcsr &= ~((uint64_t)VCSR_MASK_VXRM << VCSR_POS_VXRM);	  
   u64_vcsr |= ((u64_vxrm & VCSR_MASK_VXRM) << VCSR_POS_VXRM);
 
-  /* Replace the original vcsr value with the "cooked" value */
+  /* Replace the original vcsr value with the "cooked" value.  */
   regbuf = (gdb_byte *) & u64_vcsr;  
   supply_register_by_name (regcache, "vcsr", regbuf);
 
-  /* Now stage the ptrace buffer (it'll receive the cooked vcsr value) */
+  /* Now stage the ptrace buffer (it'll receive the cooked vcsr value).  */
 
   regbuf = (gdb_byte *) buf + offsetof (struct __riscv_vregs, vstate.vstart);
   collect_register_by_name (regcache, "vstart", regbuf);
@@ -224,7 +227,8 @@ riscv_store_vregset (struct regcache *regcache, const void *buf)
   const struct target_desc *tdesc = regcache->tdesc;
   int regno = find_regno (tdesc, "v0");
   int vlenb = register_size (regcache->tdesc, regno);
-  uint64_t u64_vlenb = vlenb;	/* pad to max XLEN for buffer conversion */
+  /* Pad to max XLEN for buffer conversion.  */  
+  uint64_t u64_vlenb = vlenb;
   uint64_t vcsr;
   uint64_t vxsat;
   uint64_t vxrm;  
@@ -243,15 +247,17 @@ riscv_store_vregset (struct regcache *regcache, const void *buf)
   regbuf =
     (const gdb_byte *) buf + offsetof (struct __riscv_vregs, vstate.vcsr);
   supply_register_by_name (regcache, "vcsr", regbuf);
-  /* also store off a non-byte-wise copy of vcsr, to derive values for vxsat and vxrm */
+  /* Also store off a non-byte-wise copy of vcsr, to derive values for
+  vxsat and vxrm.  */
   vcsr = *(uint64_t*)regbuf;
-  /* vlenb isn't part of vstate, but we have already inferred its value by running code on this
-     hart, and we're assuming homogeneous VLENB if it's an SMP system */
+  /* vlenb isn't part of vstate, but we have already inferred its
+     value by running code on this hart, and we're assuming
+     homogeneous VLENB if it's an SMP system.  */
   regbuf = (gdb_byte *) & u64_vlenb;
   supply_register_by_name (regcache, "vlenb", regbuf);
 
   /* vxsat and vxrm, are not part of vstate, so we have to extract from VCSR
-     value */
+     value.  */
   vxsat = ((vcsr >> VCSR_POS_VXSAT) & VCSR_MASK_VXSAT);  
   regbuf = (gdb_byte *) &vxsat;
   supply_register_by_name (regcache, "vxsat", regbuf);
@@ -259,7 +265,7 @@ riscv_store_vregset (struct regcache *regcache, const void *buf)
   regbuf = (gdb_byte *) &vxrm;
   supply_register_by_name (regcache, "vxrm", regbuf);
 
-  /* v0..v31 */
+  /* v0..v31.  */
   regbuf = (const gdb_byte *) buf + offsetof (struct __riscv_vregs, data);
   for (i = 0; i < 32; i++, regbuf += vlenb)
     supply_register (regcache, regno + i, regbuf);

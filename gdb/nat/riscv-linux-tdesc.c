@@ -93,11 +93,12 @@ static SIGJMP_BUF sigill_guard_jmp_buf;
 static void
 sigill_guard (int sig)
 {
-  /* this will gets us back to caller deeper in the call stack, with an indication that
-     an illegal instruction condition was encountered */
+  /* This will gets us back to caller deeper in the call stack, with
+     an indication that an illegal instruction condition was
+     encountered.  */
   SIGLONGJMP (sigill_guard_jmp_buf, -1);
 
-  /* control won't get here */
+  /* Control won't get here.  */
 }
 
 
@@ -105,10 +106,10 @@ sigill_guard (int sig)
 static unsigned long
 safe_read_vlenb ()
 {
-  /* Surrounding the attempt here to read VLENB CSR to have a signal handler set up
-     to trap illegal instruction condition (SIGILL), and if a trap happens during this call,
-     get control back within this function and return 0 in that case.
-   */
+  /* Surrounding the attempt here to read VLENB CSR to have a signal
+     handler set up to trap illegal instruction condition (SIGILL),
+     and if a trap happens during this call, get control back within
+     this function and return 0 in that case.  */
   unsigned long vlenb = 0;
   struct sigaction our_action = { 0 };
   struct sigaction original_action;
@@ -130,15 +131,15 @@ safe_read_vlenb ()
     }
   else
     {
-      /* Must've generated an illegal instruction condition; we'll figure this means
-         no vector unit is present */
+      /* Must've generated an illegal instruction condition; we'll
+         figure this means no vector unit is present.  */
       vlenb = 0;
     }
 
 
   if (sysresult == 0)
     {
-      /* re-install former handler */
+      /* Re-install former handler.  */
       sysresult = sigaction (SIGILL, &original_action, NULL);
       if (sysresult != 0)
 	{

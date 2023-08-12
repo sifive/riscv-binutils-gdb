@@ -651,7 +651,7 @@ struct riscv_vector_feature : public riscv_register_feature
       { RISCV_V0_REGNUM + 29, { "v29" } },
       { RISCV_V0_REGNUM + 30, { "v30" } },
       { RISCV_V0_REGNUM + 31, { "v31" } },
-      /* vector CSRs */
+      /* Vector CSRs.  */
       { RISCV_CSR_VSTART_REGNUM, { "vstart" } },
       { RISCV_CSR_VXSAT_REGNUM, { "vxsat" } },
       { RISCV_CSR_VXRM_REGNUM, { "vxrm" } },

@@ -134,14 +134,16 @@ static const regcache_map_entry riscv_linux_vregmap[] =
   { 1, RISCV_CSR_VL_REGNUM, MEMBER_SIZE(struct __riscv_vregs, vstate.vl) },
   { 1, RISCV_CSR_VTYPE_REGNUM, MEMBER_SIZE(struct __riscv_vregs, vstate.vtype) },
   { 1, RISCV_CSR_VCSR_REGNUM, MEMBER_SIZE(struct __riscv_vregs, vstate.vcsr) },
-  /* struct __riscv_vregs member "datap" is a pointer that doesn't correspond
-     to a register value.  In the context of ptrace(), member is always zero,
-     with V0..V31 values inline after that.  So, skipping datap */
+  /* struct __riscv_vregs member "datap" is a pointer that doesn't
+     correspond to a register value.  In the context of ptrace(),
+     member is always zero, with V0..V31 values inline after that.
+     So, skipping datap.  */
   { 1, REGCACHE_MAP_SKIP, MEMBER_SIZE(struct __riscv_vregs, vstate.datap) },
-  /* Here's V0..V31.  Specifying 0 as size leads to a call to register_size()
-     for size determination */
+  /* Here's V0..V31.  Specifying 0 as size leads to a call to
+     register_size() for size determination.  */
   { 32, RISCV_V0_REGNUM, 0 },
-  { 0 },  /* count==0 represents termination of entries */
+  /* count==0 represents termination of entries.  */  
+  { 0 },
 };
 
 /* Define the vector register regset.  */
@@ -149,7 +151,9 @@ static const regcache_map_entry riscv_linux_vregmap[] =
 static const struct regset riscv_linux_vregset =
 {
   riscv_linux_vregmap,
-  regcache_supply_regset /* Other RISC-V regsets use riscv_supply_regset here; not sure that'd be correct for this case */,
+  /* Other RISC-V regsets use riscv_supply_regset here; not sure
+  that'd be correct for this case.  */
+  regcache_supply_regset,
   regcache_collect_regset
 };
 
@@ -168,7 +172,8 @@ supply_vregset_regnum (struct regcache *regcache,
 
   if (regnum == -1 || regnum == RISCV_CSR_VLENB_REGNUM)
     {
-      /* we already have a local copy above, use that (widened for XLEN padding) */
+      /* We already have a local copy above, use that (widened for
+      XLEN padding).  */
       uint64_t xlen_safe_vlenb = vlenb;
       buf = (gdb_byte *) & xlen_safe_vlenb;
       regcache->raw_supply (RISCV_CSR_VLENB_REGNUM, buf);
@@ -176,7 +181,8 @@ supply_vregset_regnum (struct regcache *regcache,
 
   if (regnum == -1 || regnum == RISCV_CSR_VXSAT_REGNUM)
     {
-      /*  this CSR is not part of vregs->vstate literally, but we can infer a value from vcsr */
+      /* This CSR is not part of vregs->vstate literally, but we can
+      infer a value from vcsr.  */
       uint64_t vxsat = ((vregs->vstate.vcsr >> VCSR_POS_VXSAT) & VCSR_MASK_VXSAT);
       buf = (gdb_byte *) & vxsat;
       regcache->raw_supply (RISCV_CSR_VXSAT_REGNUM, buf);
@@ -184,7 +190,8 @@ supply_vregset_regnum (struct regcache *regcache,
 
   if (regnum == -1 || regnum == RISCV_CSR_VXRM_REGNUM)
     {
-      /*  this CSR is not part of vregs->vstate literally, but we can infer a value from vcsr */
+      /* This CSR is not part of vregs->vstate literally, but we can
+      infer a value from vcsr.  */
       uint64_t vxrm = ((vregs->vstate.vcsr >> VCSR_POS_VXRM) & VCSR_MASK_VXRM);
       buf = (gdb_byte *) & vxrm;
       regcache->raw_supply (RISCV_CSR_VXRM_REGNUM, buf);
@@ -210,13 +217,14 @@ fill_vregset (const struct regcache *regcache, struct __riscv_vregs *vregs,
 
       if ( ! (regnum == -1 || regnum == RISCV_CSR_VCSR_REGNUM) )
 	{
-	  // we don't already have the VCSR value, from the earlier regcache_collect_regset call, so let's get it now
+	  /* We don't already have the VCSR value, from the earlier
+	  regcache_collect_regset call, so let's get it now. */
 	  regcache_collect_regset (&riscv_linux_vregset, regcache, RISCV_CSR_VCSR_REGNUM, vregs, sizeof(*vregs));    	  
 	}
 
       if (regnum == RISCV_CSR_VXSAT_REGNUM)
 	{
-	  /* Overwrite VCSR with the VXSAT bit here */
+	  /* Overwrite VCSR with the VXSAT bit here.  */
 	  buf = (gdb_byte*)&vxsat_from_regcache;
 	  regcache->raw_collect (RISCV_CSR_VXSAT_REGNUM, buf);
 	  vregs->vstate.vcsr &= ~((uint64_t)VCSR_MASK_VXSAT << VCSR_POS_VXSAT);
@@ -225,7 +233,7 @@ fill_vregset (const struct regcache *regcache, struct __riscv_vregs *vregs,
 
       if (regnum == RISCV_CSR_VXRM_REGNUM)
 	{
-	  /* Overwrite VCSR with the VXRM bit here */
+	  /* Overwrite VCSR with the VXRM bit here.  */
 	  buf = (gdb_byte*)&vxrm_from_regcache;
 	  regcache->raw_collect (RISCV_CSR_VXRM_REGNUM, buf);
 	  vregs->vstate.vcsr &= ~((uint64_t)VCSR_MASK_VXRM << VCSR_POS_VXRM);	  
@@ -234,7 +242,8 @@ fill_vregset (const struct regcache *regcache, struct __riscv_vregs *vregs,
       
     }
 
-  /* VLENB register is not writable, so that's why nothing is collected here for that register */
+  /* VLENB register is not writable, so that's why nothing is
+  collected here for that register.  */
 
 }
 
@@ -366,10 +375,9 @@ riscv_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 	supply_fpregset_regnum (regcache, &regs, regnum);
     }
 
-  /* if Linux kernel was not configured to support RISC-V vectors, then
+  /* If Linux kernel was not configured to support RISC-V vectors, then
      the ptrace call will return -1, and we just won't get vector registers,
-     but in that case it wouldn't be an error that needs user attention.
-   */
+     but in that case it wouldn't be an error that needs user attention.  */
   if ((regnum >= RISCV_V0_REGNUM && regnum <= RISCV_V31_REGNUM)
       || (regnum == RISCV_CSR_VSTART_REGNUM)
       || (regnum == RISCV_CSR_VL_REGNUM)
@@ -461,7 +469,7 @@ riscv_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
     }
 
   /* VLENB isn't writable, so we'll skip considering that one, if it's being
-     specified alone */
+     specified alone.  */
   if ((regnum >= RISCV_V0_REGNUM && regnum <= RISCV_V31_REGNUM)
       || (regnum == RISCV_CSR_VSTART_REGNUM)
       || (regnum == RISCV_CSR_VL_REGNUM)

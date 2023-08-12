@@ -102,10 +102,12 @@ riscv_create_target_description (const struct riscv_gdbarch_features features)
 }
 
 
-/* Usually, these target_desc instances are static for an architecture, and expressable
-   in XML format, but this is a special case where length of a RISC-V vector register
-   is not architecturally fixed to a constant (the maximum width is a defined constant,
-   but it's nice to tailor a target description the actual VLENB) */
+/* Usually, these target_desc instances are static for an
+   architecture, and expressable in XML format, but this is a special
+   case where length of a RISC-V vector register is not
+   architecturally fixed to a constant (the maximum width is a defined
+   constant, but it's nice to tailor a target description the actual
+   VLENB).  */
 static int
 create_feature_riscv_vector_from_features (struct target_desc *result,
 					   long regnum,
@@ -118,8 +120,9 @@ create_feature_riscv_vector_from_features (struct target_desc *result,
   feature = tdesc_create_feature (result, "org.gnu.gdb.riscv.vector");
   tdesc_type *element_type;
 
-  /* if VLENB is present (which we know it is present if execution reaches this function),
-     then we know by definition that it is at least 4 bytes wide */
+  /* If VLENB is present (which we know it is present if execution
+     reaches this function), then we know by definition that it is at
+     least 4 bytes wide.  */
   
   element_type = tdesc_named_type (feature, "uint8");
   tdesc_create_vector (feature, "bytes", element_type, features.vlen);
@@ -130,7 +133,7 @@ create_feature_riscv_vector_from_features (struct target_desc *result,
   element_type = tdesc_named_type (feature, "uint32");
   tdesc_create_vector (feature, "words", element_type, features.vlen / 4);
 
-  /* Need VLENB value checks for element chunks larger than 4 bytes */
+  /* Need VLENB value checks for element chunks larger than 4 bytes.  */
   
   if (features.vlen >= 8)
     {
@@ -138,8 +141,9 @@ create_feature_riscv_vector_from_features (struct target_desc *result,
       tdesc_create_vector (feature, "longs", element_type, features.vlen / 8);
     }
 
-  /* QEMU and OpenOCD include the quads width in their target descriptions, so we're
-     following that precedent, even if it's not particularly useful in practice, yet */
+  /* QEMU and OpenOCD include the quads width in their target
+     descriptions, so we're following that precedent, even if it's not
+     particularly useful in practice, yet.  */
   
   if (features.vlen >= 16)
     {
@@ -163,7 +167,8 @@ create_feature_riscv_vector_from_features (struct target_desc *result,
       tdesc_add_field (type_with_fields, "l", field_type);
     }
 
-  /* Again, we know vlenb is >= 4, so no if guards needed for words/shorts/bytes */
+  /* Again, we know vlenb is >= 4, so no if guards needed for
+  words/shorts/bytes.  */
   
   field_type = tdesc_named_type (feature, "words");
   tdesc_add_field (type_with_fields, "w", field_type);
