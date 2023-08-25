@@ -1372,7 +1372,10 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zalrsc",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zawrs",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfbfmin",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zfbfmin",		ISA_SPEC_CLASS_DRAFT,		0, 8,  0 },
   {"zfa",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zfa",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
+  {"zfa",		ISA_SPEC_CLASS_DRAFT,		0, 2,  0 },
   {"zfh",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfhmin",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -1405,7 +1408,9 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zvbb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvbc",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvfbfmin",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvfbfmin",		ISA_SPEC_CLASS_DRAFT,		0, 8,  0 },
   {"zvfbfwma",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvfbfwma",		ISA_SPEC_CLASS_DRAFT,		0, 8,  0 },
   {"zvfh",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvfhmin",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvkb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -1452,6 +1457,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zcmop",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zcmp",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zcmt",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+
   {NULL, 0, 0, 0, 0}
 };
 
