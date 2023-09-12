@@ -47,6 +47,7 @@ static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
    (as specified by the ELF attributes or the `priv-spec' option).  */
 static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
 
+static riscv_subset_list_t *riscv_default_subset_list;
 static riscv_subset_list_t riscv_subsets;
 static riscv_parse_subset_t riscv_rps_dis =
 {
@@ -168,6 +169,10 @@ parse_riscv_dis_option (const char *option)
     {
       riscv_release_subset_list (&riscv_subsets);
       riscv_parse_subset (&riscv_rps_dis, value);
+      riscv_subsets.arch_str = xstrdup (value);
+
+      riscv_release_subset_list (riscv_default_subset_list);
+      riscv_default_subset_list = riscv_copy_subset_list (riscv_rps_dis.subset_list);
     }
   else
     {
@@ -1129,8 +1134,12 @@ riscv_update_map_state (int n,
     return;
 
   name = bfd_asymbol_name(info->symtab[n]);
-  if (strcmp (name, "$x") == 0)
-    *state = MAP_INSN;
+  if (strcmp (name, "$x") == 0
+      || strncmp (name, "$x.", 3) == 0)
+    {
+      *state = MAP_INSN;
+      riscv_rps_dis.subset_list = riscv_default_subset_list;
+    }
   else if (strcmp (name, "$d") == 0)
     *state = MAP_DATA;
   else if (strncmp (name, "$xrv", 4) == 0)
@@ -1613,7 +1622,9 @@ riscv_get_disassembler (bfd *abfd)
     }
 
   riscv_release_subset_list (&riscv_subsets);
+  riscv_subsets.arch_str = xstrdup (default_arch);
   riscv_parse_subset (&riscv_rps_dis, default_arch);
+  riscv_default_subset_list = riscv_copy_subset_list(riscv_rps_dis.subset_list);
   return print_insn_riscv;
 }
 
