@@ -2737,3 +2737,246 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return NULL;
     }
 }
+
+
+/* Find the first input bfd with GNU property and merge it with GPROP.  If no
+   such input is found, add it to a new section at the last input.  Update
+   GPROP accordingly.  */
+bfd *
+_bfd_riscv_elf_link_setup_gnu_properties (struct bfd_link_info *info,
+                                           uint32_t *and_prop_p, uint32_t *or_prop_p)
+{
+  asection *sec;
+  bfd *pbfd;
+  bfd *ebfd = NULL;
+  elf_property *prop;
+
+  uint32_t and_prop = *and_prop_p;
+  uint32_t or_prop = *or_prop_p;
+
+  /* Find a normal input file with GNU property note.  */
+  for (pbfd = info->input_bfds;
+       pbfd != NULL;
+       pbfd = pbfd->link.next)
+    if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
+       && bfd_count_sections (pbfd) != 0)
+      {
+       ebfd = pbfd;
+
+       if (elf_properties (pbfd) != NULL)
+         break;
+      }
+
+  /* If ebfd != NULL it is either an input with property note or the last
+     input.  Either way if we have and_prop or or_prop, we should add it (by
+     creating a section if needed).  */
+  if (ebfd != NULL && (and_prop || or_prop))
+    {
+      prop = _bfd_elf_get_property (ebfd,
+                                   GNU_PROPERTY_RISCV_FEATURE_1_AND,
+                                   4);
+      prop->u.number |= and_prop;
+      prop->pr_kind = property_number;
+
+      prop = _bfd_elf_get_property (ebfd,
+                                   GNU_PROPERTY_RISCV_FEATURE_2_OR,
+                                   4);
+      prop->u.number |= or_prop;
+      prop->pr_kind = property_number;
+
+      /* pbfd being NULL implies ebfd is the last input.  Create the GNU
+        property note section.  */
+      if (pbfd == NULL)
+       {
+         sec = bfd_make_section_with_flags (ebfd,
+                                            NOTE_GNU_PROPERTY_SECTION_NAME,
+                                            (SEC_ALLOC
+                                             | SEC_LOAD
+                                             | SEC_IN_MEMORY
+                                             | SEC_READONLY
+                                             | SEC_HAS_CONTENTS
+                                             | SEC_DATA));
+         if (sec == NULL)
+           info->callbacks->einfo (
+             _("%F%P: failed to create GNU property section\n"));
+
+         elf_section_type (sec) = SHT_NOTE;
+       }
+    }
+
+  pbfd = _bfd_elf_link_setup_gnu_properties (info);
+
+  if (bfd_link_relocatable (info))
+    return pbfd;
+
+  /* If pbfd has any GNU_PROPERTY_RISCV_FEATURE_1_AND or
+   * GNU_PROPERTY_RISCV_FEATURE_2_OR properties, update
+     and_prop or or_prop accordingly.  */
+  if (pbfd != NULL)
+    {
+      elf_property_list *p;
+
+      /* The property list is sorted in order of type.  */
+      for (p = elf_properties (pbfd); p; p = p->next)
+       {
+         /* Check for all GNU_PROPERTY_RISCV_FEATURE_1_AND.  */
+         if (GNU_PROPERTY_RISCV_FEATURE_1_AND == p->property.pr_type)
+           {
+             and_prop = p->property.u.number
+                         & GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP;
+             break;
+           }
+         else if (GNU_PROPERTY_RISCV_FEATURE_2_OR == p->property.pr_type)
+           {
+             or_prop = p->property.u.number
+                         | GNU_PROPERTY_RISCV_FEATURE_2_ZICFISS;
+             break;
+           }
+         else if (GNU_PROPERTY_RISCV_FEATURE_1_AND < p->property.pr_type
+                   && GNU_PROPERTY_RISCV_FEATURE_2_OR < p->property.pr_type)
+           break;
+       }
+    }
+
+  *and_prop_p = and_prop;
+  *or_prop_p = or_prop;
+  return pbfd;
+}
+
+/* Define elf_backend_parse_gnu_properties for RISC-V.  */
+enum elf_property_kind
+_bfd_riscv_elf_parse_gnu_properties (bfd *abfd, unsigned int type,
+                                      bfd_byte *ptr, unsigned int datasz)
+{
+  elf_property *prop;
+
+  switch (type)
+    {
+    case GNU_PROPERTY_RISCV_FEATURE_1_AND:
+    case GNU_PROPERTY_RISCV_FEATURE_2_OR:
+      if (datasz != 4)
+       {
+         _bfd_error_handler
+           ( _("error: %pB: <corrupt RISC-V used size: 0x%x>"),
+            abfd, datasz);
+         return property_corrupt;
+       }
+      prop = _bfd_elf_get_property (abfd, type, datasz);
+      /* Combine properties of the same type.  */
+      prop->u.number |= bfd_h_get_32 (abfd, ptr);
+      prop->pr_kind = property_number;
+      break;
+
+    default:
+      return property_ignored;
+    }
+
+  return property_number;
+}
+
+/* Merge RISC-V GNU property BPROP with APROP also accounting for PROP.
+   If APROP isn't NULL, merge it with BPROP and/or PROP.  Vice-versa if BROP
+   isn't NULL.  Return TRUE if there is any update to APROP or if BPROP should
+   be merge with ABFD.  */
+bool
+_bfd_riscv_elf_merge_gnu_properties (struct bfd_link_info *info
+                                      ATTRIBUTE_UNUSED,
+                                      bfd *abfd ATTRIBUTE_UNUSED,
+                                      elf_property *aprop,
+                                      elf_property *bprop,
+                                      uint32_t and_prop,
+                                      uint32_t or_prop)
+{
+  unsigned int orig_number;
+  bool updated = false;
+  unsigned int pr_type = aprop != NULL ? aprop->pr_type : bprop->pr_type;
+
+  switch (pr_type)
+    {
+    case GNU_PROPERTY_RISCV_FEATURE_1_AND:
+      {
+       if (aprop != NULL && bprop != NULL)
+         {
+           orig_number = aprop->u.number;
+           aprop->u.number = (orig_number & bprop->u.number) | and_prop;
+           updated = orig_number != aprop->u.number;
+           /* Remove the property if all feature bits are cleared.  */
+           if (aprop->u.number == 0)
+             aprop->pr_kind = property_remove;
+           break;
+         }
+       /* If either is NULL, the AND would be 0 so, if there is
+          any PROP, asign it to the input that is not NULL.  */
+       if (and_prop)
+         {
+           if (aprop != NULL)
+             {
+               orig_number = aprop->u.number;
+               aprop->u.number = and_prop;
+               updated = orig_number != aprop->u.number;
+             }
+           else if (bprop != NULL)
+             {
+               bprop->u.number = and_prop;
+               updated = true;
+             }
+           /* Shouldn't happen because we checked one of APROP or BPROP != NULL. */
+           else
+           {
+             abort();
+           }
+         }
+       /* No PROP and BPROP is NULL, so remove APROP.  */
+       else if (!and_prop && bprop == NULL && aprop != NULL)
+         {
+           aprop->pr_kind = property_remove;
+           updated = true;
+         }
+      }
+      break;
+    case GNU_PROPERTY_RISCV_FEATURE_2_OR:
+      {
+       if (aprop != NULL && bprop != NULL)
+         {
+           orig_number = aprop->u.number;
+           aprop->u.number = orig_number | bprop->u.number | or_prop;
+           updated = orig_number != aprop->u.number;
+           break;
+         }
+
+       /* If PROP is not zero, update the PROPA and PROPB if they are not NULL*/ 
+       if (or_prop)
+         {
+           if (aprop != NULL)
+             {
+               orig_number = aprop->u.number;
+               aprop->u.number = or_prop;
+               updated = orig_number != aprop->u.number;
+             }
+           else if (bprop != NULL)
+             {
+               bprop->u.number = or_prop;
+               updated = true;
+             }
+           /* Shouldn't happen because we checked one of APROP or BPROP != NULL. */
+           else
+           {
+             abort();
+           }
+         }
+       if (aprop == NULL && bprop == NULL && !or_prop)
+         {
+           updated = false;
+           break;
+         }
+      }
+      break;
+
+
+    default:
+      abort ();
+    }
+
+  return updated;
+}
+
