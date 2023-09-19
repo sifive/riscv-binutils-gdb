@@ -21296,6 +21296,33 @@ decode_aarch64_feature_1_and (unsigned int bitmask)
 }
 
 static void
+decode_riscv_feature_1_and (unsigned int bitmask)
+{
+  while (bitmask)
+    {
+      unsigned int bit = bitmask & (- bitmask);
+
+      bitmask &= ~ bit;
+      switch (bit)
+	{
+	case GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP:
+	  printf ("ZICFILP");
+	  break;
+
+	case GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS:
+	  printf ("ZICFISS");
+	  break;
+
+	default:
+	  printf (_("<unknown: %x>"), bit);
+	  break;
+	}
+      if (bitmask)
+	printf (", ");
+    }
+}
+
+static void
 decode_1_needed (unsigned int bitmask)
 {
   while (bitmask)
@@ -21482,6 +21509,18 @@ print_gnu_property_note (Filedata * filedata, Elf_Internal_Note * pnote)
 		    printf (_("<corrupt length: %#x> "), datasz);
 		  else
 		    decode_aarch64_feature_1_and (byte_get (ptr, 4));
+		  goto next;
+		}
+	    }
+	  else if (filedata->file_header.e_machine == EM_RISCV)
+	    {
+	      if (type == GNU_PROPERTY_RISCV_FEATURE_1_AND)
+		{
+		  printf ("RISC-V AND feature: ");
+		  if (datasz != 4)
+		    printf (_("<corrupt length: %#x> "), datasz);
+		  else
+		    decode_riscv_feature_1_and (byte_get (ptr, 4));
 		  goto next;
 		}
 	    }

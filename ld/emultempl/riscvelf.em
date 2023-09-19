@@ -27,7 +27,10 @@ fragment <<EOF
 
 static struct riscv_elf_params params = { .relax_gp = 1,
 					  .check_uleb128 = 0,
-					  .relax_zcmt = 0};
+					  .relax_zcmt = 0,
+					  .plt_type = PLT_NORMAL,
+					  .zicfilp_type = ZICFILP_NONE,
+					  .zicfiss_type = ZICFISS_NONE };
 EOF
 
 # Define some shell vars to insert bits of code into the standard elf
@@ -48,7 +51,22 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   fprintf (file, _("  --no-check-uleb128          Don'\''t check if SUB_ULEB128 has non-zero addend\n"));
   fprintf (file, _("  --relax-zcmt                Perform Zcmt relaxation\n"));
   fprintf (file, _("  --no-relax-zcmt             Don'\''t perform Zcmt relaxation (default)\n"));
+  fprintf (file, _("  -z force-zicfilp            Turn on Zicfilp mechanism and generate PLTs with landing pad. Generate warnings for missing Zicfilp on inputs\n\n"));
+  fprintf (file, _("  -z force-zicfiss            Turn on Zicfiss. Generate warnings for missing Zicfilp on inputs\n\n"));
 '
+
+PARSE_AND_LIST_ARGS_CASE_Z_RISCV='
+      else if (strcmp (optarg, "force-zicfilp") == 0)
+	{
+          params.plt_type |= PLT_ZICFILP;
+          params.zicfilp_type = ZICFILP_WARN;
+	}
+      else if (strcmp (optarg, "force-zicfiss") == 0)
+       {
+          params.zicfiss_type = ZICFISS_WARN;
+       }
+'
+PARSE_AND_LIST_ARGS_CASE_Z="$PARSE_AND_LIST_ARGS_CASE_Z $PARSE_AND_LIST_ARGS_CASE_Z_RISCV"
 
 PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
     case OPTION_RELAX_GP:

@@ -27,6 +27,26 @@
 
 #define RISCV_UNKNOWN_VERSION -1
 
+typedef enum
+{
+    PLT_NORMAL    = 0x0,  /* Normal plts.  */
+    PLT_ZICFILP   = 0x1   /* Landing pad plts.  */
+} riscv_plt_type;
+
+/* To indicate if LP is enabled with/without warning.  */
+typedef enum
+{
+  ZICFILP_NONE  = 0,  /* LP is not enabled.  */
+  ZICFILP_WARN  = 1,  /* LP is enabled with -z force-zicfilp.  */
+} riscv_enable_zicfilp_type;
+
+/* To indicate if SS is enabled with/without warning.  */
+typedef enum
+{
+  ZICFISS_NONE  = 0,  /* SS is not enabled.  */
+  ZICFISS_WARN  = 1,  /* SS is enabled with -z force-zicfiss.  */
+} riscv_enable_zicfiss_type;
+
 struct riscv_elf_params
 {
   /* Whether to relax code sequences to GP-relative addressing.  */
@@ -35,6 +55,10 @@ struct riscv_elf_params
   bool check_uleb128;
   /* Whether to relax code sequences for zcmt.  */
   bool relax_zcmt;
+  /* Zicfilp requires diffrent PLT header and entries.  */
+  riscv_plt_type plt_type;
+  riscv_enable_zicfilp_type zicfilp_type;
+  riscv_enable_zicfiss_type zicfiss_type;
 };
 
 extern void riscv_elf32_set_options (struct bfd_link_info *,
@@ -149,3 +173,17 @@ extern void
 bfd_elf32_riscv_set_data_segment_info (struct bfd_link_info *, int *);
 extern void
 bfd_elf64_riscv_set_data_segment_info (struct bfd_link_info *, int *);
+
+extern bfd *_bfd_riscv_elf_link_setup_gnu_properties (struct bfd_link_info *,
+						      uint32_t *);
+
+extern enum elf_property_kind
+_bfd_riscv_elf_parse_gnu_properties (bfd *, unsigned int,
+				     bfd_byte *, unsigned int);
+
+extern bool _bfd_riscv_elf_merge_gnu_properties (struct bfd_link_info *, bfd *,
+						 elf_property *,
+						 elf_property *, uint32_t);
+
+#define elf_backend_parse_gnu_properties       \
+  _bfd_riscv_elf_parse_gnu_properties
