@@ -1162,7 +1162,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sspush",    0, INSN_CLASS_ZICFISS, "t", MATCH_SSPUSH, MASK_SSPUSH, match_rs2_x1x5_opcode, 0 },
 {"sspopchk",  0, INSN_CLASS_ZICFISS, "s", MATCH_SSPOPCHK, MASK_SSPOPCHK, match_rs1_x1x5_opcode, 0 },
 {"ssload",    0, INSN_CLASS_ZICFISS, "d", MATCH_SSLOAD, MASK_SSLOAD, match_rd_x1x5_opcode, 0 },
-{"sspinc",    0, INSN_CLASS_ZICFISS, "x5", MATCH_SSPINC, MASK_SSPINC, match_opcode, 0 },
+{"sspinc",    0, INSN_CLASS_ZICFISS, "Z", MATCH_SSPINC, MASK_SSPINC, match_opcode, 0 },
 {"ssprr",     0, INSN_CLASS_ZICFISS, "d", MATCH_SSPRR, MASK_SSPRR, match_opcode, 0 },
 {"ssamoswap", 0, INSN_CLASS_ZICFISS, "d,t,0(s)", MATCH_SSAMOSWAP, MASK_SSAMOSWAP, match_ssamoswap_opcode, 0 },
 

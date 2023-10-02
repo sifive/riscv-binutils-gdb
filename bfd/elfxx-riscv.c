@@ -2525,6 +2525,10 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "xtheadsync");
     case INSN_CLASS_XVENTANACONDOPS:
       return riscv_subset_supports (rps, "xventanacondops");
+    case INSN_CLASS_ZICFISS:
+      return riscv_subset_supports (rps,"zicfiss");
+    case INSN_CLASS_ZICFILP:
+      return riscv_subset_supports (rps,"zicfilp");
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));
