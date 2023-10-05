@@ -399,7 +399,7 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4445 \(stimecmph\) at cfa\+1396
   DW_CFA_offset_extended_sf: r4685 \(vstimecmp\) at cfa\+2356
   DW_CFA_offset_extended_sf: r4701 \(vstimecmph\) at cfa\+2420
-  DW_CFA_offset_extended_sf: r4177 \(ssp\) at cfa\+324
+  DW_CFA_offset_extended_sf: r4113 \(ssp\) at cfa\+324
   DW_CFA_offset_extended_sf: r4163 \(utval\) at cfa\+268
   DW_CFA_offset_extended_sf: r4419 \(stval\) at cfa\+1292
   DW_CFA_offset_extended_sf: r4480 \(satp\) at cfa\+1536
