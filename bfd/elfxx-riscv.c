@@ -1490,6 +1490,13 @@ static struct riscv_supported_ext riscv_supported_std_s_ext[] =
   {"sswg",		ISA_SPEC_CLASS_DRAFT,		0, 3, 0 },
   {"smwg",		ISA_SPEC_CLASS_DRAFT,		0, 3, 0 },
   {"smwgd",		ISA_SPEC_CLASS_DRAFT,		0, 3, 0 },
+  {"sv39",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"sv48",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"sv57",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"ss",		ISA_SPEC_CLASS_DRAFT,		1, 12, 0 },
+  {"ss",		ISA_SPEC_CLASS_DRAFT,		1, 13, 0 },
+  {"sdext",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"sdtrig",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {NULL, 0, 0, 0, 0}
 };
 
