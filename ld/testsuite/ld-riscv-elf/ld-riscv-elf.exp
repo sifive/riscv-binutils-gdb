@@ -232,6 +232,8 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "property-zicfilp"
     run_dump_test "property-zicfiss"
     run_dump_test "property-combine-and-1"
+    run_dump_test "property-force-zicfilp"
+    run_dump_test "property-force-zicfilp-all-missing"
 
     # IFUNC testcases.
     # Check IFUNC by single type relocs.
