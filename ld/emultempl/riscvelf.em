@@ -46,7 +46,18 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
 PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   fprintf (file, _("  --relax-gp                  Perform GP relaxation\n"));
   fprintf (file, _("  --no-relax-gp               Don'\''t perform GP relaxation\n"));
+  fprintf (file, _("  -z force-zicfilp            Turn on Zicfilp  mechanism and generate PLTs with landing pad. Generate warnings for missing Zicfilp on inputs\n\n"));
 '
+
+PARSE_AND_LIST_ARGS_CASE_Z_RISCV='
+      else if (strcmp (optarg, "force-zicfilp") == 0)
+	{
+          params.plt_type |= PLT_ZICFILP;
+          params.zicfilp_type = ZICFILP_WARN;
+	}
+'
+PARSE_AND_LIST_ARGS_CASE_Z="$PARSE_AND_LIST_ARGS_CASE_Z $PARSE_AND_LIST_ARGS_CASE_Z_RISCV"
+
 
 PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
     case OPTION_RELAX_GP:

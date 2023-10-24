@@ -184,6 +184,13 @@ struct _bfd_riscv_elf_obj_tdata
 
   /* All GNU_PROPERTY_RISCV_FEATURE_2_OR properties. */
   uint32_t gnu_or_prop;
+
+  /* True to warn when linking objects with incompatible
+     GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP.  */
+  bool zicfilp_warn;
+
+  /* PLT type based on security.  */
+  riscv_plt_type plt_type;
 };
 
 #define _bfd_riscv_elf_tdata(abfd) \
@@ -265,8 +272,21 @@ void
 riscv_elfNN_set_options (struct bfd_link_info *link_info,
 			 struct riscv_elf_params *params)
 {
+  struct bfd *output_bfd = link_info->output_bfd;
   riscv_elf_hash_table (link_info)->params = params;
+  switch (params->plt_type)
+    {
+    case PLT_ZICFILP:
+      _bfd_riscv_elf_tdata (output_bfd)->zicfilp_warn = true;
+      _bfd_riscv_elf_tdata (output_bfd)->gnu_and_prop
+        |= GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP;
+      break;
+
+    default:
+      break;
+    }
 }
+
 
 static bool
 riscv_info_to_howto_rela (bfd *abfd,
@@ -5544,6 +5564,21 @@ elfNN_riscv_link_setup_gnu_properties (struct bfd_link_info *info)
   return pbfd;
 }
 
+/* Warn Zicfilp when -z force-zicfilp is enabled but the bfd doesn't have
+   the property in NOTE. */
+static void
+riscv_warn_zicfilp_if_necessary(const elf_property* prop, const bfd *abfd)
+{
+  if ((prop && !(prop->u.number & GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP))
+       || !prop)
+    {
+      _bfd_error_handler (_("%pB: warning: Zicfilp turned on by -z force-zicfilp when "
+                            "all inputs do not have ZICFILP in NOTE section."),
+                          abfd);
+    }
+}
+
+
 /* Implement elf_backend_merge_gnu_properties for RISC-V.  It serves as a
    wrapper function for _bfd_riscv_elf_merge_gnu_properties to account
    for the effect of GNU properties of the output_bfd.  */
@@ -5555,6 +5590,20 @@ elfNN_riscv_merge_gnu_properties (struct bfd_link_info *info,
 {
   uint32_t and_prop
     = _bfd_riscv_elf_tdata (info->output_bfd)->gnu_and_prop;
+
+  /* If output has been marked with CFILP using command line argument, give out
+     warning if necessary.  */
+  /* Properties are merged per type, hence only check for warnings when merging
+     GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP.  */
+  if (((aprop && aprop->pr_type == GNU_PROPERTY_RISCV_FEATURE_1_AND)
+	|| (bprop && bprop->pr_type == GNU_PROPERTY_RISCV_FEATURE_1_AND))
+      && (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP)
+      && (_bfd_riscv_elf_tdata (info->output_bfd)->zicfilp_warn))
+    {
+      riscv_warn_zicfilp_if_necessary(aprop, abfd);
+      riscv_warn_zicfilp_if_necessary(bprop, bbfd);
+    }
+
   uint32_t or_prop
     = _bfd_riscv_elf_tdata (info->output_bfd)->gnu_or_prop;
   return  _bfd_riscv_elf_merge_gnu_properties (info, abfd, aprop,

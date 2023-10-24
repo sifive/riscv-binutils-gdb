@@ -2777,11 +2777,19 @@ _bfd_riscv_elf_link_setup_gnu_properties (struct bfd_link_info *info,
   if (ebfd != NULL && (and_prop || or_prop))
     {
       prop = _bfd_elf_get_property (ebfd,
-                                   GNU_PROPERTY_RISCV_FEATURE_1_AND,
-                                   4);
+                                    GNU_PROPERTY_RISCV_FEATURE_1_AND,
+                                    4);
+
+      if (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP
+          && !(prop->u.number & GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP))
+      {
+            _bfd_error_handler (_("%pB: warning: Zicfilp turned on by -z force-zicfilp "
+                                  "when all inputs do not have ZICFILP in NOTE "
+                                  "section."), ebfd);
+      }
+
       prop->u.number |= and_prop;
       prop->pr_kind = property_number;
-
       prop = _bfd_elf_get_property (ebfd,
                                    GNU_PROPERTY_RISCV_FEATURE_2_OR,
                                    4);

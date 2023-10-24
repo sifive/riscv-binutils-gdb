@@ -27,10 +27,25 @@
 
 #define RISCV_UNKNOWN_VERSION -1
 
+typedef enum
+{
+    PLT_NORMAL    = 0x0,  /* Normal plts.  */
+    PLT_ZICFILP   = 0x1   /* Landing pad plts.  */
+} riscv_plt_type;
+
+/* To indicate if LP is enabled with/without warning.  */
+typedef enum
+{
+  ZICFILP_NONE  = 0,  /* LP is not enabled.  */
+  ZICFILP_WARN  = 1,  /* LP is enabled with -z force-zicfilp.  */
+} riscv_enable_zicfilp_type;
+
 struct riscv_elf_params
 {
   /* Whether to relax code sequences to GP-relative addressing.  */
   bool relax_gp;
+  riscv_plt_type plt_type;
+  riscv_enable_zicfilp_type zicfilp_type;
 };
 
 extern void riscv_elf32_set_options (struct bfd_link_info *,
