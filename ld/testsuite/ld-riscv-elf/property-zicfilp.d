@@ -1,6 +1,6 @@
 #name: GNU Property (single input)
 #source: property-zicfilp.s
-#as: -march=rv64g
+#as: -march=rv64g -defsym __property_zicfilp__=1
 #ld: -shared
 #readelf: -n
 
