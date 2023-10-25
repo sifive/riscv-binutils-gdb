@@ -4,6 +4,7 @@
 _start:
     ret	
 
+.ifdef __property_zicfilp__
 	.section ".note.gnu.property", "a"
 	.p2align 3
 	.long 1f - 0f		/* name length */
@@ -19,6 +20,9 @@ _start:
 4:
 	.p2align 3
 5:
+.endif
+
+.ifdef __property_zicfiss__
 	.p2align 3
 	.long 1f - 0f		/* name length */
 	.long 5f - 2f		/* data length */
@@ -33,3 +37,4 @@ _start:
 4:
 	.p2align 3
 5:
+.endif
