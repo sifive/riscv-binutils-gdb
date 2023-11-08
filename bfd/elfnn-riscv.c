@@ -5411,6 +5411,11 @@ _bfd_riscv_get_max_alignment (asection *sec, bfd_vma gp)
   for (o = sec->output_section->owner->sections; o != NULL; o = o->next)
     {
       bool valid = true;
+      /* Exclude table jump section because it is not affecting the
+	 alignment.   */
+      if (strcmp (o->name, TABLE_JUMP_SEC_NAME) == 0)
+	continue;
+
       if (gp
 	  && !(VALID_ITYPE_IMM (sec_addr (o) - gp)
 	       || VALID_ITYPE_IMM (sec_addr (o) + o->size - gp)))
