@@ -3,10 +3,15 @@
 	sspush x5
 	sspopchk x1
 	sspopchk x5
-	sslw x1
-	sslw x5
-	ssincp
 	ssrdp a0
+        ssamoswap.w     a0,a0,(a0)
+        ssamoswap.w     a0,a0,(a0)
+        ssamoswap.w.aq  a0,a0,(a0)
+        ssamoswap.w.aq  a0,a0,(a0)
+        ssamoswap.w.rl  a0,a0,(a0)
+        ssamoswap.w.rl  a0,a0,(a0)
+        ssamoswap.w.aqrl        a0,a0,(a0)
+        ssamoswap.w.aqrl        a0,a0,(a0)
 
 	# Zicfilp
 	lpad 0x111

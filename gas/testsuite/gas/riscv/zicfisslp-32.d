@@ -7,12 +7,17 @@
 Disassembly of section .text:
 
 0+000 <.text>:
-[ 	]+[0-9a-f]+:[ 	]+82104073[ 	]+sspush[ 	]+ra
-[ 	]+[0-9a-f]+:[ 	]+82504073[ 	]+sspush[ 	]+t0
-[ 	]+[0-9a-f]+:[ 	]+81c0c073[ 	]+sspopchk[ 	]+ra
-[ 	]+[0-9a-f]+:[ 	]+81c2c073[ 	]+sspopchk[ 	]+t0
-[ 	]+[0-9a-f]+:[ 	]+81c040f3[ 	]+sslw[ 	]+ra
-[ 	]+[0-9a-f]+:[ 	]+81c042f3[ 	]+sslw[ 	]+t0
-[ 	]+[0-9a-f]+:[ 	]+81c04073[ 	]+ssincp
-[ 	]+[0-9a-f]+:[ 	]+81d04573[ 	]+ssrdp[ 	]+a0
+[ 	]+[0-9a-f]+:[ 	]+ce104073[ 	]+sspush[ 	]+ra
+[ 	]+[0-9a-f]+:[ 	]+ce504073[ 	]+sspush[ 	]+t0
+[ 	]+[0-9a-f]+:[ 	]+cdc0c073[ 	]+sspopchk[ 	]+ra
+[ 	]+[0-9a-f]+:[ 	]+cdc2c073[ 	]+sspopchk[ 	]+t0
+[ 	]+[0-9a-f]+:[ 	]+cdc04573[ 	]+ssrdp[ 	]+a0
+[ 	]+[0-9a-f]+:[ 	]+28a5252f[ 	]+ssamoswap.w[ 	]+a0,a0,\(a0\)
+[ 	]+[0-9a-f]+:[ 	]+28a5252f[ 	]+ssamoswap.w[ 	]+a0,a0,\(a0\)
+[ 	]+[0-9a-f]+:[ 	]+2ca5252f[ 	]+ssamoswap.w.aq[ 	]+a0,a0,\(a0\)
+[ 	]+[0-9a-f]+:[ 	]+2ca5252f[ 	]+ssamoswap.w.aq[ 	]+a0,a0,\(a0\)
+[ 	]+[0-9a-f]+:[ 	]+2aa5252f[ 	]+ssamoswap.w.rl[ 	]+a0,a0,\(a0\)
+[ 	]+[0-9a-f]+:[ 	]+2aa5252f[ 	]+ssamoswap.w.rl[ 	]+a0,a0,\(a0\)
+[ 	]+[0-9a-f]+:[ 	]+2ea5252f[ 	]+ssamoswap.w.aqrl[ 	]+a0,a0,\(a0\)
+[ 	]+[0-9a-f]+:[ 	]+2ea5252f[ 	]+ssamoswap.w.aqrl[ 	]+a0,a0,\(a0\)
 [ 	]+[0-9a-f]+:[ 	]+00111017[ 	]+lpad[ 	]+0x111

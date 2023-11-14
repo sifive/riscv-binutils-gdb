@@ -108,8 +108,6 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   (RV_X(x, 20, 10))
 #define EXTRACT_RVV_VC_IMM(x) \
   (RV_X(x, 20, 11))
-#define EXTRACT_ZICFISS_UIMM5(x) \
-  (RV_X(x, 15, 5))
 
 #define ENCODE_ITYPE_IMM(x) \
   (RV_X(x, 0, 12) << 20)
@@ -157,8 +155,6 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   (RV_X(x, 0, 11) << 20)
 #define ENCODE_RVV_VI_UIMM6(x) \
   (RV_X(x, 0, 5) << 15 | RV_X(x, 5, 1) << 26)
-#define ENCODE_ZICFISS_UIMM5(x) \
-  (RV_X(x, 0, 5) << 15)
 
 #define VALID_ITYPE_IMM(x) (EXTRACT_ITYPE_IMM(ENCODE_ITYPE_IMM(x)) == (x))
 #define VALID_STYPE_IMM(x) (EXTRACT_STYPE_IMM(ENCODE_STYPE_IMM(x)) == (x))
@@ -184,9 +180,6 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define VALID_CJTYPE_IMM(x) (EXTRACT_CJTYPE_IMM(ENCODE_CJTYPE_IMM(x)) == (x))
 #define VALID_RVV_VB_IMM(x) (EXTRACT_RVV_VB_IMM(ENCODE_RVV_VB_IMM(x)) == (x))
 #define VALID_RVV_VC_IMM(x) (EXTRACT_RVV_VC_IMM(ENCODE_RVV_VC_IMM(x)) == (x))
-/* Zicfiss extension.  */
-#define VALID_ZICFISS_UIMM5(x) (EXTRACT_ZICFISS_UIMM5(ENCODE_ZICFISS_UIMM5(x)) != 0 \
-                               && EXTRACT_ZICFISS_UIMM5(ENCODE_ZICFISS_UIMM5(x)) == (x))
 
 #define RISCV_RTYPE(insn, rd, rs1, rs2) \
   ((MATCH_ ## insn) | ((rd) << OP_SH_RD) | ((rs1) << OP_SH_RS1) | ((rs2) << OP_SH_RS2))
@@ -314,10 +307,6 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define OP_SH_VMA		7
 #define OP_MASK_VWD		0x1
 #define OP_SH_VWD		26
-
-/* Zicfiss fields.  */
-#define OP_MASK_ZICFISS_UIMM5 0x1f
-#define OP_SH_ZICFISS_UIMM5 15
 
 #define NVECR 32
 #define NVECM 1

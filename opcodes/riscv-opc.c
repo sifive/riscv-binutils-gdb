@@ -345,14 +345,6 @@ match_rs2_x1x5_opcode (const struct riscv_opcode *op,
   return match_opcode (op, insn) && (rs2 == 1 || rs2 == 5);
 }
 
-static int
-match_rd_x1x5_opcode (const struct riscv_opcode *op,
-                     insn_t insn)
-{
-  int rd = (insn & MASK_RD) >> OP_SH_RD;
-  return match_opcode (op, insn) && (rd == 1 || rd == 5);
-}
-
 const struct riscv_opcode riscv_opcodes[] =
 {
 /* name, xlen, isa, operands, match, mask, match_func, pinfo.  */
@@ -1153,10 +1145,15 @@ const struct riscv_opcode riscv_opcodes[] =
 /* Zicfiss instructions.  */
 {"sspush",    0, INSN_CLASS_ZICFISS, "t", MATCH_SSPUSH, MASK_SSPUSH, match_rs2_x1x5_opcode, 0 },
 {"sspopchk",  0, INSN_CLASS_ZICFISS, "s", MATCH_SSPOPCHK, MASK_SSPOPCHK, match_rs1_x1x5_opcode, 0 },
-{"sslw",     32, INSN_CLASS_ZICFISS, "d", MATCH_SSLOAD, MASK_SSLOAD, match_rd_x1x5_opcode, 0 },
-{"ssld",     64, INSN_CLASS_ZICFISS, "d", MATCH_SSLOAD, MASK_SSLOAD, match_rd_x1x5_opcode, 0 },
-{"ssincp",    0, INSN_CLASS_ZICFISS,  "", MATCH_SSINCP, MASK_SSINCP, match_opcode, 0 },
 {"ssrdp",     0, INSN_CLASS_ZICFISS, "d", MATCH_SSRDP, MASK_SSRDP, match_opcode, 0 },
+{"ssamoswap.w",      32, INSN_CLASS_ZICFISS, "d,t,0(s)", MATCH_SSAMOSWAP_W, MASK_SSAMOSWAP_W|MASK_AQRL, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"ssamoswap.w.aq",   32, INSN_CLASS_ZICFISS, "d,t,0(s)", MATCH_SSAMOSWAP_W|MASK_AQ, MASK_SSAMOSWAP_W|MASK_AQRL, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"ssamoswap.w.rl",   32, INSN_CLASS_ZICFISS, "d,t,0(s)", MATCH_SSAMOSWAP_W|MASK_RL, MASK_SSAMOSWAP_W|MASK_AQRL, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"ssamoswap.w.aqrl", 32, INSN_CLASS_ZICFISS, "d,t,0(s)", MATCH_SSAMOSWAP_W|MASK_AQRL, MASK_SSAMOSWAP_W|MASK_AQRL, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"ssamoswap.d",      64, INSN_CLASS_ZICFISS, "d,t,0(s)", MATCH_SSAMOSWAP_D, MASK_SSAMOSWAP_D|MASK_AQRL, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"ssamoswap.d.aq",   64, INSN_CLASS_ZICFISS, "d,t,0(s)", MATCH_SSAMOSWAP_D|MASK_AQ, MASK_SSAMOSWAP_D|MASK_AQRL, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"ssamoswap.d.rl",   64, INSN_CLASS_ZICFISS, "d,t,0(s)", MATCH_SSAMOSWAP_D|MASK_RL, MASK_SSAMOSWAP_D|MASK_AQRL, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"ssamoswap.d.aqrl", 64, INSN_CLASS_ZICFISS, "d,t,0(s)", MATCH_SSAMOSWAP_D|MASK_AQRL, MASK_SSAMOSWAP_D|MASK_AQRL, match_opcode, INSN_DREF|INSN_8_BYTE },
 
 /* RVV instructions.  */
 {"vsetvl",     0, INSN_CLASS_V,  "d,s,t",  MATCH_VSETVL, MASK_VSETVL, match_opcode, 0},
