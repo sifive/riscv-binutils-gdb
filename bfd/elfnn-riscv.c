@@ -340,15 +340,9 @@ riscv_is_insn_reloc (const reloc_howto_type *howto)
 # define MATCH_LREG MATCH_LD
 #endif
 
-/* Generate a PLT header.  */
-
 static bool
-riscv_make_plt_header (bfd *output_bfd, bfd_vma gotplt_addr, bfd_vma addr,
-		       uint32_t *entry)
+riscv_support_plt (bfd *output_bfd)
 {
-  bfd_vma gotplt_offset_high = RISCV_PCREL_HIGH_PART (gotplt_addr, addr);
-  bfd_vma gotplt_offset_low = RISCV_PCREL_LOW_PART (gotplt_addr, addr);
-
   /* RVE has no t3 register, so this won't work, and is not supported.  */
   if (elf_elfheader (output_bfd)->e_flags & EF_RISCV_RVE)
     {
@@ -356,6 +350,22 @@ riscv_make_plt_header (bfd *output_bfd, bfd_vma gotplt_addr, bfd_vma addr,
 			  output_bfd);
       return false;
     }
+  return true;
+}
+
+/* Generate a PLT header.  */
+
+static bool
+riscv_make_plt_header (bfd *output_bfd,
+                       bfd_vma gotplt_addr,
+                       bfd_vma plt_header_addr,
+		       uint32_t *entry)
+{
+  if (!riscv_support_plt (output_bfd))
+    return false;
+
+  bfd_vma gotplt_offset_high = RISCV_PCREL_HIGH_PART (gotplt_addr, plt_header_addr);
+  bfd_vma gotplt_offset_low = RISCV_PCREL_LOW_PART (gotplt_addr, plt_header_addr);
 
   /* auipc  t2, %hi(.got.plt)
      sub    t1, t1, t3		     # shifted .got.plt offset + hdr size + 12
@@ -381,24 +391,21 @@ riscv_make_plt_header (bfd *output_bfd, bfd_vma gotplt_addr, bfd_vma addr,
 /* Generate a PLT entry.  */
 
 static bool
-riscv_make_plt_entry (bfd *output_bfd, bfd_vma got, bfd_vma addr,
+riscv_make_plt_entry (bfd *output_bfd,
+                      bfd_vma got_entry_addr,
+                      bfd_vma plt_entry_addr,
 		      uint32_t *entry)
 {
-  /* RVE has no t3 register, so this won't work, and is not supported.  */
-  if (elf_elfheader (output_bfd)->e_flags & EF_RISCV_RVE)
-    {
-      _bfd_error_handler (_("%pB: warning: RVE PLT generation not supported"),
-			  output_bfd);
-      return false;
-    }
+  if (!riscv_support_plt (output_bfd))
+    return false;
 
   /* auipc  t3, %hi(.got.plt entry)
      l[w|d] t3, %lo(.got.plt entry)(t3)
      jalr   t1, t3
      nop  */
 
-  entry[0] = RISCV_UTYPE (AUIPC, X_T3, RISCV_PCREL_HIGH_PART (got, addr));
-  entry[1] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART (got, addr));
+  entry[0] = RISCV_UTYPE (AUIPC, X_T3, RISCV_PCREL_HIGH_PART (got_entry_addr, plt_entry_addr));
+  entry[1] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART (got_entry_addr, plt_entry_addr));
   entry[2] = RISCV_ITYPE (JALR, X_T1, X_T3, 0);
   entry[3] = RISCV_NOP;
 
