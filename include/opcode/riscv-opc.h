@@ -2259,9 +2259,9 @@
 #define MASK_SSPOPCHK 0xfff07fff
 #define MATCH_SSRDP 0xcdc04073
 #define MASK_SSRDP 0xfffff07f
-#define MATCH_SSAMOSWAP_W 0x2800202f
+#define MATCH_SSAMOSWAP_W 0x4800202f
 #define MASK_SSAMOSWAP_W 0xf800707f
-#define MATCH_SSAMOSWAP_D 0x2800302f
+#define MATCH_SSAMOSWAP_D 0x4800302f
 #define MASK_SSAMOSWAP_D 0xf800707f
 /* Zicfilp instructions.  */
 #define MATCH_LPAD 0x17
