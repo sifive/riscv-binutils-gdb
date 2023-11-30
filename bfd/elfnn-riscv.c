@@ -248,6 +248,21 @@ struct riscv_elf_link_hash_table
 
   /* Relocations for variant CC symbols may be present.  */
   int variant_cc;
+
+  /* The number of bytes in the initial entry in the PLT.  */
+  bfd_size_type plt_header_size;
+
+  /* The number of bytes in the subsequent PLT entries.  */
+  bfd_size_type plt_entry_size;
+
+  /* Make PLT header function.  */
+  bool (*make_plt_header) (asection *got, asection *plt);
+
+  /* Make PLT header function.  */
+  bool (*make_plt_entry) (bfd_vma got_entry_addr,
+                          bfd_vma plt_entry_addr,
+                          bfd_byte *out,
+                          void *param);
 };
 
 /* Instruction access functions. */
@@ -267,25 +282,6 @@ struct riscv_elf_link_hash_table
   ((is_elf_hash_table ((p)->hash)					\
     && elf_hash_table_id (elf_hash_table (p)) == RISCV_ELF_DATA)	\
    ? (struct riscv_elf_link_hash_table *) (p)->hash : NULL)
-
-void
-riscv_elfNN_set_options (struct bfd_link_info *link_info,
-			 struct riscv_elf_params *params)
-{
-  struct bfd *output_bfd = link_info->output_bfd;
-  riscv_elf_hash_table (link_info)->params = params;
-  switch (params->plt_type)
-    {
-    case PLT_ZICFILP:
-      _bfd_riscv_elf_tdata (output_bfd)->zicfilp_warn = true;
-      _bfd_riscv_elf_tdata (output_bfd)->gnu_and_prop
-        |= GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP;
-      break;
-
-    default:
-      break;
-    }
-}
 
 
 static bool
@@ -322,11 +318,38 @@ riscv_is_insn_reloc (const reloc_howto_type *howto)
 }
 
 /* PLT/GOT stuff.  */
+#define INSN_WIDTH 4
 #define PLT_HEADER_INSNS 8
 #define PLT_ENTRY_INSNS 4
-#define PLT_HEADER_SIZE (PLT_HEADER_INSNS * 4)
-#define PLT_ENTRY_SIZE (PLT_ENTRY_INSNS * 4)
+#define PLT_HEADER_SIZE (PLT_HEADER_INSNS * INSN_WIDTH)
+#define PLT_ENTRY_SIZE (PLT_ENTRY_INSNS * INSN_WIDTH)
+
+#define PLT_ZICFILP_HEADER_INSNS 12
+#define PLT_ZICFILP_ENTRY_INSNS 8
+#define PLT_ZICFILP_HEADER_SIZE (PLT_ZICFILP_HEADER_INSNS * INSN_WIDTH)
+#define PLT_ZICFILP_ENTRY_SIZE (PLT_ZICFILP_ENTRY_INSNS * INSN_WIDTH)
+
 #define GOT_ENTRY_SIZE RISCV_ELF_WORD_BYTES
+
+/* Foward declaration.  */
+static bool
+riscv_make_zicfilp_plt_header (asection *gotplt, asection *splt);
+
+static bool
+riscv_make_zicfilp_plt_entry (bfd_vma got_entry_addr,
+                              bfd_vma plt_entry_addr,
+                              bfd_byte *out,
+                              void *param);
+
+static bool
+riscv_make_plt_header (asection *gotplt, asection *splt);
+
+static bool
+riscv_make_plt_entry (bfd_vma got_entry_addr,
+                      bfd_vma plt_entry_addr,
+                      bfd_byte *out,
+                      void* param);
+
 /* Reserve two entries of GOTPLT for ld.so, one is used for PLT resolver,
    the other is used for link map.  Other targets also reserve one more
    entry used for runtime profile?  */
@@ -339,6 +362,37 @@ riscv_is_insn_reloc (const reloc_howto_type *howto)
 #else
 # define MATCH_LREG MATCH_LD
 #endif
+
+void
+riscv_elfNN_set_options (struct bfd_link_info *link_info,
+			 struct riscv_elf_params *params)
+{
+  struct bfd *output_bfd = link_info->output_bfd;
+  struct riscv_elf_link_hash_table *htab;
+
+  htab = riscv_elf_hash_table (link_info);
+  htab->params = params;
+  _bfd_riscv_elf_tdata (output_bfd)->plt_type = params->plt_type;
+  switch (params->plt_type)
+    {
+    case PLT_ZICFILP:
+      _bfd_riscv_elf_tdata (output_bfd)->zicfilp_warn = true;
+      _bfd_riscv_elf_tdata (output_bfd)->gnu_and_prop
+        |= GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP;
+      htab->plt_header_size = PLT_ZICFILP_HEADER_SIZE;
+      htab->plt_entry_size = PLT_ZICFILP_ENTRY_SIZE;
+      htab->make_plt_header = riscv_make_zicfilp_plt_header;
+      htab->make_plt_entry = riscv_make_zicfilp_plt_entry;
+      break;
+
+    default:
+      htab->plt_header_size = PLT_HEADER_SIZE;
+      htab->plt_entry_size = PLT_ENTRY_SIZE;
+      htab->make_plt_header = riscv_make_plt_header;
+      htab->make_plt_entry = riscv_make_plt_entry;
+      break;
+    }
+}
 
 static bool
 riscv_support_plt (bfd *output_bfd)
@@ -356,14 +410,10 @@ riscv_support_plt (bfd *output_bfd)
 /* Generate a PLT header.  */
 
 static bool
-riscv_make_plt_header (bfd *output_bfd,
-                       bfd_vma gotplt_addr,
-                       bfd_vma plt_header_addr,
-		       uint32_t *entry)
+riscv_make_plt_header (asection *gotplt, asection *splt)
 {
-  if (!riscv_support_plt (output_bfd))
-    return false;
-
+  bfd_vma gotplt_addr = sec_addr (gotplt);
+  bfd_vma plt_header_addr = sec_addr (splt);
   bfd_vma gotplt_offset_high = RISCV_PCREL_HIGH_PART (gotplt_addr, plt_header_addr);
   bfd_vma gotplt_offset_low = RISCV_PCREL_LOW_PART (gotplt_addr, plt_header_addr);
 
@@ -376,14 +426,18 @@ riscv_make_plt_header (bfd *output_bfd,
      l[w|d] t0, PTRSIZE(t0)	     # link map
      jr	    t3  */
 
-  entry[0] = RISCV_UTYPE (AUIPC, X_T2, gotplt_offset_high);
-  entry[1] = RISCV_RTYPE (SUB, X_T1, X_T1, X_T3);
-  entry[2] = RISCV_ITYPE (LREG, X_T3, X_T2, gotplt_offset_low);
-  entry[3] = RISCV_ITYPE (ADDI, X_T1, X_T1, (uint32_t) -(PLT_HEADER_SIZE + 12));
-  entry[4] = RISCV_ITYPE (ADDI, X_T0, X_T2, gotplt_offset_low);
-  entry[5] = RISCV_ITYPE (SRLI, X_T1, X_T1, 4 - RISCV_ELF_LOG_WORD_BYTES);
-  entry[6] = RISCV_ITYPE (LREG, X_T0, X_T0, RISCV_ELF_WORD_BYTES);
-  entry[7] = RISCV_ITYPE (JALR, 0, X_T3, 0);
+  uint32_t header[PLT_HEADER_INSNS];
+  header[0] = RISCV_UTYPE (AUIPC, X_T2, gotplt_offset_high);
+  header[1] = RISCV_RTYPE (SUB, X_T1, X_T1, X_T3);
+  header[2] = RISCV_ITYPE (LREG, X_T3, X_T2, gotplt_offset_low);
+  header[3] = RISCV_ITYPE (ADDI, X_T1, X_T1, (uint32_t) -(PLT_HEADER_SIZE + 12));
+  header[4] = RISCV_ITYPE (ADDI, X_T0, X_T2, gotplt_offset_low);
+  header[5] = RISCV_ITYPE (SRLI, X_T1, X_T1, 4 - RISCV_ELF_LOG_WORD_BYTES);
+  header[6] = RISCV_ITYPE (LREG, X_T0, X_T0, RISCV_ELF_WORD_BYTES);
+  header[7] = RISCV_ITYPE (JALR, 0, X_T3, 0);
+
+  for (int i = 0; i < PLT_HEADER_INSNS; i++)
+    bfd_putl32 (header[i], splt->contents + INSN_WIDTH*i);
 
   return true;
 }
@@ -391,23 +445,117 @@ riscv_make_plt_header (bfd *output_bfd,
 /* Generate a PLT entry.  */
 
 static bool
-riscv_make_plt_entry (bfd *output_bfd,
-                      bfd_vma got_entry_addr,
+riscv_make_plt_entry (bfd_vma got_entry_addr,
                       bfd_vma plt_entry_addr,
-		      uint32_t *entry)
+                      bfd_byte *out,
+                      void *param ATTRIBUTE_UNUSED)
 {
-  if (!riscv_support_plt (output_bfd))
-    return false;
-
   /* auipc  t3, %hi(.got.plt entry)
      l[w|d] t3, %lo(.got.plt entry)(t3)
      jalr   t1, t3
      nop  */
 
+  uint32_t entry[PLT_ENTRY_INSNS];
   entry[0] = RISCV_UTYPE (AUIPC, X_T3, RISCV_PCREL_HIGH_PART (got_entry_addr, plt_entry_addr));
   entry[1] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART (got_entry_addr, plt_entry_addr));
   entry[2] = RISCV_ITYPE (JALR, X_T1, X_T3, 0);
   entry[3] = RISCV_NOP;
+
+  for (int i = 0; i < PLT_ENTRY_INSNS; i++)
+    bfd_putl32 (entry[i], out + INSN_WIDTH*i);
+
+  return true;
+}
+
+/* Generate a landing pad PLT header.  */
+
+static bool
+riscv_make_zicfilp_plt_header (asection *gotplt, asection *splt)
+{
+  /*
+      lpad   0  # disable label checking 
+      auipc  t4, %hi(.got.plt)          # Rewrite this to using 
+      sub    t1, t1, t3                 # shifted .got.plt offset + hdr size + 12
+      l[w|d] t3, %lo(1b)(t4)            # _dl_runtime_resolve
+      addi   t1, t1, -(hdr size + 12)   # shifted .got.plt offset
+      addi   t0, t4, %pcrel_lo(1b)      # &.got.plt
+      srli   t1, t1, log2(16/PTRSIZE)   # .got.plt offset
+      l[w|d] t0, PTRSIZE(t0)            # link map
+      jr     t3
+      nop
+      nop
+      nop
+      nop
+      nop
+      nop
+      nop  */
+
+  bfd_vma gotplt_addr = sec_addr (gotplt);
+  bfd_vma plt_header_addr = sec_addr (splt);
+
+  /* Add INSN_WIDTH to skip the lpad instruction.  */
+  bfd_vma gotplt_offset_high = RISCV_PCREL_HIGH_PART (gotplt_addr, plt_header_addr + INSN_WIDTH);
+  bfd_vma gotplt_offset_low = RISCV_PCREL_LOW_PART (gotplt_addr, plt_header_addr + INSN_WIDTH);
+
+  uint32_t header[PLT_ZICFILP_HEADER_INSNS];
+  header[0] = RISCV_UTYPE (LPAD, X_ZERO, 0);
+  header[1] = RISCV_UTYPE (AUIPC, X_T4, gotplt_offset_high);
+  header[2] = RISCV_RTYPE (SUB, X_T1, X_T1, X_T3);
+  header[3] = RISCV_ITYPE (LREG, X_T3, X_T4, gotplt_offset_low);
+  header[4] = RISCV_ITYPE (ADDI, X_T1, X_T1, (uint32_t) -(PLT_ZICFILP_HEADER_SIZE + 12));
+  header[5] = RISCV_ITYPE (ADDI, X_T0, X_T4, gotplt_offset_low);
+  header[6] = RISCV_ITYPE (SRLI, X_T1, X_T1, 4 - RISCV_ELF_LOG_WORD_BYTES);
+  header[7] = RISCV_ITYPE (LREG, X_T0, X_T0, RISCV_ELF_WORD_BYTES);
+  header[8] = RISCV_ITYPE (JALR, 0, X_T3, 0);
+  header[9] = RISCV_NOP;
+  header[10] = RISCV_NOP;
+  header[11] = RISCV_NOP;
+
+  for (int i = 0; i < PLT_ZICFILP_HEADER_INSNS; i++)
+    bfd_putl32 (header[i], splt->contents + INSN_WIDTH*i);
+
+  return true;
+}
+
+/* Generate a landing pad PLT entry.  */
+
+static bool
+riscv_make_zicfilp_plt_entry (bfd_vma got_entry_addr,
+                              bfd_vma plt_entry_addr,
+                              bfd_byte *out,
+                              void *param)
+{
+
+  int64_t lpl = *((int64_t*)(param));
+  if (!VALID_UTYPE_IMM(lpl))
+    {
+       _bfd_error_handler (_("error: invalid landing pad label: %ld\n"),
+                              lpl);
+       return false;
+    }
+
+
+  /*  lpad <value> # t2/x7 is valid
+      auipc   t3, %hi(function@.got.plt)
+      l[w|d]  t3, %lo(1b)(t3)
+      lui t2, <value>
+      jalr    t1, t3
+      nop
+      nop
+      nop  */
+
+  uint32_t entry[PLT_ZICFILP_ENTRY_INSNS];
+  entry[0] = RISCV_UTYPE (LPAD, X_ZERO, lpl);
+  entry[1] = RISCV_UTYPE (AUIPC, X_T3, RISCV_PCREL_HIGH_PART (got_entry_addr, plt_entry_addr + 4));
+  entry[2] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART (got_entry_addr, plt_entry_addr + 4));
+  entry[3] = RISCV_UTYPE (LUI, X_T2, lpl);
+  entry[4] = RISCV_ITYPE (JALR, X_T1, X_T3, 0);
+  entry[5] = RISCV_NOP;
+  entry[6] = RISCV_NOP;
+  entry[7] = RISCV_NOP;
+
+  for (int i = 0; i < PLT_ZICFILP_ENTRY_INSNS; i++)
+    bfd_putl32 (entry[i], out + INSN_WIDTH*i);
 
   return true;
 }
@@ -1287,12 +1435,12 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  asection *s = htab->elf.splt;
 
 	  if (s->size == 0)
-	    s->size = PLT_HEADER_SIZE;
+	    s->size = htab->plt_header_size;
 
 	  h->plt.offset = s->size;
 
 	  /* Make room for this entry.  */
-	  s->size += PLT_ENTRY_SIZE;
+	  s->size += htab->plt_entry_size;
 
 	  /* We also need to make an entry in the .got.plt section.  */
 	  htab->elf.sgotplt->size += GOT_ENTRY_SIZE;
@@ -1476,6 +1624,7 @@ allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
 			  void *inf)
 {
   struct bfd_link_info *info;
+  struct riscv_elf_link_hash_table *htab;
 
   if (h->root.type == bfd_link_hash_indirect)
     return true;
@@ -1484,6 +1633,7 @@ allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   info = (struct bfd_link_info *) inf;
+  htab = riscv_elf_hash_table (info);
 
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle it
      here if it is defined and referenced in a non-shared object.  */
@@ -1491,8 +1641,8 @@ allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
       && h->def_regular)
     return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
 					       &h->dyn_relocs,
-					       PLT_ENTRY_SIZE,
-					       PLT_HEADER_SIZE,
+					       htab->plt_entry_size,
+					       htab->plt_header_size,
 					       GOT_ENTRY_SIZE,
 					       true);
   return true;
@@ -1714,6 +1864,10 @@ riscv_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
       if (htab->variant_cc
 	  && !_bfd_elf_add_dynamic_entry (info, DT_RISCV_VARIANT_CC, 0))
        return false;
+
+      if ((_bfd_riscv_elf_tdata (output_bfd)->plt_type == PLT_ZICFILP)
+          && !_bfd_elf_add_dynamic_entry (info, DT_RISCV_ZICFILP_PLT, 0))
+        return false;
     }
 
   return true;
@@ -2416,14 +2570,14 @@ riscv_elf_relocate_section (bfd *output_bfd,
 
 		    if (htab->elf.splt != NULL)
 		      {
-			plt_idx = (h->plt.offset - PLT_HEADER_SIZE)
-				  / PLT_ENTRY_SIZE;
+			plt_idx = (h->plt.offset - htab->plt_header_size)
+				  / htab->plt_entry_size;
 			off = GOTPLT_HEADER_SIZE + (plt_idx * GOT_ENTRY_SIZE);
 			base_got = htab->elf.sgotplt;
 		      }
 		    else
 		      {
-			plt_idx = h->plt.offset / PLT_ENTRY_SIZE;
+			plt_idx = h->plt.offset / htab->plt_entry_size;
 			off = plt_idx * GOT_ENTRY_SIZE;
 			base_got = htab->elf.igotplt;
 		      }
@@ -3117,8 +3271,7 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
     {
       /* We've decided to create a PLT entry for this symbol.  */
       bfd_byte *loc;
-      bfd_vma i, header_address, plt_idx, got_offset, got_address;
-      uint32_t plt_entry[PLT_ENTRY_INSNS];
+      bfd_vma header_address, plt_idx, got_offset, got_address;
       Elf_Internal_Rela rela;
       asection *plt, *gotplt, *relplt;
 
@@ -3155,12 +3308,12 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
 	 For static executables, we don't reserve anything.  */
       if (plt == htab->elf.splt)
 	{
-	  plt_idx = (h->plt.offset - PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
+	  plt_idx = (h->plt.offset - htab->plt_header_size) / htab->plt_entry_size;
 	  got_offset = GOTPLT_HEADER_SIZE + (plt_idx * GOT_ENTRY_SIZE);
 	}
       else
 	{
-	  plt_idx = h->plt.offset / PLT_ENTRY_SIZE;
+	  plt_idx = h->plt.offset / htab->plt_entry_size;
 	  got_offset = plt_idx * GOT_ENTRY_SIZE;
 	}
 
@@ -3170,14 +3323,15 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
       /* Find out where the .plt entry should go.  */
       loc = plt->contents + h->plt.offset;
 
-      /* Fill in the PLT entry itself.  */
-      if (! riscv_make_plt_entry (output_bfd, got_address,
-				  header_address + h->plt.offset,
-				  plt_entry))
-	return false;
+      /* FIXME: how to find landing pad label?  */
+      int64_t lbl = 1 << 12;
 
-      for (i = 0; i < PLT_ENTRY_INSNS; i++)
-	bfd_putl32 (plt_entry[i], loc + 4*i);
+      /* Fill in the PLT entry itself.  */
+      if (! htab->make_plt_entry (got_address,
+				  header_address + h->plt.offset,
+                                  loc,
+                                  &lbl))
+	return false;
 
       /* Fill in the initial value of the .got.plt entry.  */
       loc = gotplt->contents + (got_address - sec_addr (gotplt));
@@ -3462,23 +3616,18 @@ riscv_elf_finish_dynamic_sections (bfd *output_bfd,
       if (!ret)
 	return ret;
 
-      /* Fill in the head and tail entries in the procedure linkage table.  */
+      /* Fill in the head entries in the procedure linkage table.  */
       if (splt->size > 0)
 	{
-	  int i;
-	  uint32_t plt_header[PLT_HEADER_INSNS];
-	  ret = riscv_make_plt_header (output_bfd,
-				       sec_addr (htab->elf.sgotplt),
-				       sec_addr (splt), plt_header);
-	  if (!ret)
-	    return ret;
+          if (!riscv_support_plt (output_bfd))
+            return false;
 
-	  for (i = 0; i < PLT_HEADER_INSNS; i++)
-	    bfd_putl32 (plt_header[i], splt->contents + 4*i);
-
-	  elf_section_data (splt->output_section)->this_hdr.sh_entsize
-	    = PLT_ENTRY_SIZE;
+          ret = htab->make_plt_header(htab->elf.sgotplt, splt);
+          elf_section_data (splt->output_section)->this_hdr.sh_entsize
+            = htab->plt_header_size;
 	}
+      if (!ret)
+        return ret;
     }
 
   if (htab->elf.sgotplt)
@@ -3527,6 +3676,53 @@ riscv_elf_finish_dynamic_sections (bfd *output_bfd,
   return true;
 }
 
+/* Check if BTI enabled PLTs are needed.  Returns the type needed.  */
+static riscv_plt_type
+get_plt_type (bfd *abfd)
+{
+  riscv_plt_type ret = PLT_NORMAL;
+  bfd_byte *contents, *extdyn, *extdynend;
+  asection *sec = bfd_get_section_by_name (abfd, ".dynamic");
+  if (!sec || !bfd_malloc_and_get_section (abfd, sec, &contents))
+    return ret;
+  extdyn = contents;
+  extdynend = contents + sec->size;
+  for (; extdyn < extdynend; extdyn += sizeof (ElfNN_External_Dyn))
+    {
+      Elf_Internal_Dyn dyn;
+      bfd_elfNN_swap_dyn_in (abfd, extdyn, &dyn);
+
+      /* Let's check the processor specific dynamic array tags.  */
+      bfd_vma tag = dyn.d_tag;
+      if (tag < DT_LOPROC || tag > DT_HIPROC)
+	continue;
+
+      switch (tag)
+	{
+	case DT_RISCV_ZICFILP_PLT:
+	  ret = PLT_ZICFILP;
+	  break;
+
+	default: break;
+	}
+    }
+  free (contents);
+  return ret;
+}
+
+static long
+elfNN_riscv_get_synthetic_symtab (bfd *abfd,
+				  long symcount,
+				  asymbol **syms,
+				  long dynsymcount,
+				  asymbol **dynsyms,
+				  asymbol **ret)
+{
+  _bfd_riscv_elf_tdata (abfd)->plt_type = get_plt_type (abfd);
+  return _bfd_elf_get_synthetic_symtab (abfd, symcount, syms,
+					dynsymcount, dynsyms, ret);
+}
+
 /* Return address for Ith PLT stub in section PLT, for relocation REL
    or (bfd_vma) -1 if it should not be included.  */
 
@@ -3534,7 +3730,19 @@ static bfd_vma
 riscv_elf_plt_sym_val (bfd_vma i, const asection *plt,
 		       const arelent *rel ATTRIBUTE_UNUSED)
 {
-  return plt->vma + PLT_HEADER_SIZE + i * PLT_ENTRY_SIZE;
+  bfd_size_type plt_header_size, plt_entry_size;
+  if (_bfd_riscv_elf_tdata (plt->owner)->plt_type == PLT_ZICFILP)
+    {
+      plt_header_size = PLT_ZICFILP_HEADER_SIZE;
+      plt_entry_size = PLT_ZICFILP_ENTRY_SIZE;
+    }
+  else
+    {
+      plt_header_size = PLT_HEADER_SIZE;
+      plt_entry_size = PLT_ENTRY_SIZE;
+    }
+
+  return plt->vma + plt_header_size + i * plt_entry_size;
 }
 
 static enum elf_reloc_type_class
@@ -5649,6 +5857,7 @@ elfNN_riscv_merge_gnu_properties (struct bfd_link_info *info,
 #define elf_info_to_howto_rel			NULL
 #define elf_info_to_howto			riscv_info_to_howto_rela
 #define bfd_elfNN_bfd_relax_section		_bfd_riscv_relax_section
+#define bfd_elfNN_get_synthetic_symtab		elfNN_riscv_get_synthetic_symtab
 #define bfd_elfNN_mkobject			elfNN_riscv_mkobject
 #define elf_backend_additional_program_headers \
   riscv_elf_additional_program_headers

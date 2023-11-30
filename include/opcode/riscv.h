@@ -313,6 +313,7 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 
 /* ABI names for selected x-registers.  */
 
+#define X_ZERO 1
 #define X_RA 1
 #define X_SP 2
 #define X_GP 3
@@ -321,6 +322,7 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define X_T1 6
 #define X_T2 7
 #define X_T3 28
+#define X_T4 29
 
 #define NGPR 32
 #define NFPR 32

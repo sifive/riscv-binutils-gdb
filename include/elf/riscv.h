@@ -120,6 +120,7 @@ END_RELOC_NUMBERS (R_RISCV_max)
 
 /* Processor specific dynamic array tags.  */
 #define DT_RISCV_VARIANT_CC (DT_LOPROC + 1)
+#define DT_RISCV_ZICFILP_PLT (DT_LOPROC + 2)
 
 /* RISC-V specific values for st_other.  */
 #define STO_RISCV_VARIANT_CC 0x80
