@@ -235,6 +235,8 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "property-force-zicfilp"
     run_dump_test "property-force-zicfilp-all-missing"
 
+    run_dump_test "zicfilp-plt"
+
     # IFUNC testcases.
     # Check IFUNC by single type relocs.
     run_dump_test_ifunc "ifunc-reloc-call-01" rv32 exe
@@ -323,4 +325,5 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "pcrel-reloc-rel-pie"
     run_dump_test "pcrel-reloc-abs-nopie"
     run_dump_test "pcrel-reloc-abs-pie"
+
 }
