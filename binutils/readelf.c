@@ -2438,6 +2438,7 @@ get_riscv_dynamic_type (unsigned long type)
   switch (type)
     {
     case DT_RISCV_VARIANT_CC:	return "RISCV_VARIANT_CC";
+    case DT_RISCV_ZICFILP_PLT:  return "RISCV_ZICFILP_PLT";
     default:
       return NULL;
     }
@@ -10727,6 +10728,20 @@ dynamic_section_mips_val (Filedata * filedata, Elf_Internal_Dyn * entry)
 }
 
 static void
+dynamic_section_riscv_val (Elf_Internal_Dyn * entry)
+{
+  switch (entry->d_tag)
+    {
+    case DT_RISCV_ZICFILP_PLT:
+      break;
+    default:
+      print_vma (entry->d_un.d_ptr, PREFIX_HEX);
+      break;
+    }
+  putchar ('\n');
+}
+
+static void
 dynamic_section_parisc_val (Elf_Internal_Dyn * entry)
 {
   switch (entry->d_tag)
@@ -12065,6 +12080,9 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 		  break;
 		case EM_IA_64:
 		  dynamic_section_ia64_val (entry);
+		  break;
+		case EM_RISCV:
+		  dynamic_section_riscv_val (entry);
 		  break;
 		default:
 		  print_vma (entry->d_un.d_val, PREFIX_HEX);
