@@ -363,22 +363,16 @@ riscv_make_plt_entry (bfd_vma got_entry_addr,
 # define MATCH_LREG MATCH_LD
 #endif
 
-void
-riscv_elfNN_set_options (struct bfd_link_info *link_info,
-			 struct riscv_elf_params *params)
+static void
+setup_plt_values (struct bfd_link_info *link_info,
+		  riscv_plt_type plt_type)
 {
-  struct bfd *output_bfd = link_info->output_bfd;
   struct riscv_elf_link_hash_table *htab;
 
   htab = riscv_elf_hash_table (link_info);
-  htab->params = params;
-  _bfd_riscv_elf_tdata (output_bfd)->plt_type = params->plt_type;
-  switch (params->plt_type)
+  switch (plt_type)
     {
     case PLT_ZICFILP:
-      _bfd_riscv_elf_tdata (output_bfd)->zicfilp_warn = true;
-      _bfd_riscv_elf_tdata (output_bfd)->gnu_and_prop
-        |= GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP;
       htab->plt_header_size = PLT_ZICFILP_HEADER_SIZE;
       htab->plt_entry_size = PLT_ZICFILP_ENTRY_SIZE;
       htab->make_plt_header = riscv_make_zicfilp_plt_header;
@@ -392,6 +386,25 @@ riscv_elfNN_set_options (struct bfd_link_info *link_info,
       htab->make_plt_entry = riscv_make_plt_entry;
       break;
     }
+}
+
+void
+riscv_elfNN_set_options (struct bfd_link_info *link_info,
+			 struct riscv_elf_params *params)
+{
+  struct bfd *output_bfd = link_info->output_bfd;
+  struct riscv_elf_link_hash_table *htab;
+
+  htab = riscv_elf_hash_table (link_info);
+  htab->params = params;
+  _bfd_riscv_elf_tdata (output_bfd)->plt_type = params->plt_type;
+  if (params->plt_type == PLT_ZICFILP)
+    {
+      _bfd_riscv_elf_tdata (output_bfd)->zicfilp_warn = true;
+      _bfd_riscv_elf_tdata (output_bfd)->gnu_and_prop
+	|= GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP;
+    }
+  setup_plt_values (link_info, params->plt_type);
 }
 
 static bool
@@ -5776,6 +5789,9 @@ elfNN_riscv_link_setup_gnu_properties (struct bfd_link_info *info)
 
   _bfd_riscv_elf_tdata (info->output_bfd)->gnu_and_prop = and_prop;
   _bfd_riscv_elf_tdata (info->output_bfd)->gnu_or_prop = or_prop;
+  _bfd_riscv_elf_tdata (info->output_bfd)->plt_type
+      |= (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP) ? PLT_ZICFILP : 0;
+  setup_plt_values (info, _bfd_riscv_elf_tdata (info->output_bfd)->plt_type);
   return pbfd;
 }
 
