@@ -511,7 +511,7 @@ riscv_make_zicfilp_plt_header (asection *gotplt, asection *splt)
   bfd_vma gotplt_offset_low = RISCV_PCREL_LOW_PART (gotplt_addr, plt_header_addr + INSN_WIDTH);
 
   uint32_t header[PLT_ZICFILP_HEADER_INSNS];
-  header[0] = RISCV_UTYPE (LPAD, X_ZERO, 0);
+  header[0] = MATCH_LPAD;
   header[1] = RISCV_UTYPE (AUIPC, X_T4, gotplt_offset_high);
   header[2] = RISCV_RTYPE (SUB, X_T1, X_T1, X_T3);
   header[3] = RISCV_ITYPE (LREG, X_T3, X_T4, gotplt_offset_low);
@@ -558,7 +558,7 @@ riscv_make_zicfilp_plt_entry (bfd_vma got_entry_addr,
       nop  */
 
   uint32_t entry[PLT_ZICFILP_ENTRY_INSNS];
-  entry[0] = RISCV_UTYPE (LPAD, X_ZERO, lpl);
+  entry[0] = MATCH_LPAD | ENCODE_UTYPE_IMM (lpl);
   entry[1] = RISCV_UTYPE (AUIPC, X_T3, RISCV_PCREL_HIGH_PART (got_entry_addr, plt_entry_addr + 4));
   entry[2] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART (got_entry_addr, plt_entry_addr + 4));
   entry[3] = RISCV_UTYPE (LUI, X_T2, lpl);
