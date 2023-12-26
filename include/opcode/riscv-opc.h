@@ -3799,6 +3799,21 @@
 /* SiFive PGFLUSH custom instruction.  */
 #define MATCH_SF_PGFLUSH_D_L1 0xfc300073
 #define MASK_SF_PGFLUSH_D_L1 0xffffffff
+/* SiFive custom Xsfvqdotq instructions.  */
+#define MATCH_SF_VQDOT_VV 0xb0002057
+#define MASK_SF_VQDOT_VV 0xfc00707f
+#define MATCH_SF_VQDOT_VX 0xb0006057
+#define MASK_SF_VQDOT_VX 0xfc00707f
+#define MATCH_SF_VQDOTU_VV 0xa0002057
+#define MASK_SF_VQDOTU_VV 0xfc00707f
+#define MATCH_SF_VQDOTU_VX 0xa0006057
+#define MASK_SF_VQDOTU_VX 0xfc00707f
+#define MATCH_SF_VQDOTSU_VV 0xa8002057
+#define MASK_SF_VQDOTSU_VV 0xfc00707f
+#define MATCH_SF_VQDOTSU_VX 0xa8006057
+#define MASK_SF_VQDOTSU_VX 0xfc00707f
+#define MATCH_SF_VQDOTUS_VX 0xb8006057
+#define MASK_SF_VQDOTUS_VX 0xfc00707f
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01
@@ -4937,6 +4952,15 @@ DECLARE_INSN(vt_maskcn, MATCH_VT_MASKCN, MASK_VT_MASKCN)
 
 /* SiFive Xsfpgflushdlone instructions.  */
 DECLARE_INSN(sf_pgflush_d_l1, MATCH_SF_PGFLUSH_D_L1, MASK_SF_PGFLUSH_D_L1)
+
+/* SiFive Xsfvqdotq instructions.  */
+DECLARE_INSN(sf_vqdot_vv, MATCH_SF_VQDOT_VV, MASK_SF_VQDOT_VV)
+DECLARE_INSN(sf_vqdot_vx, MATCH_SF_VQDOT_VX, MASK_SF_VQDOT_VX)
+DECLARE_INSN(sf_vqdotu_vv, MATCH_SF_VQDOTU_VV, MASK_SF_VQDOTU_VV)
+DECLARE_INSN(sf_vqdotu_vx, MATCH_SF_VQDOTU_VX, MASK_SF_VQDOTU_VX)
+DECLARE_INSN(sf_vqdotsu_vv, MATCH_SF_VQDOTSU_VV, MASK_SF_VQDOTSU_VV)
+DECLARE_INSN(sf_vqdotsu_vx, MATCH_SF_VQDOTSU_VX, MASK_SF_VQDOTSU_VX)
+DECLARE_INSN(sf_vqdotus_vx, MATCH_SF_VQDOTUS_VX, MASK_SF_VQDOTUS_VX)
 
 /* Zicfiss instructions.  */
 DECLARE_INSN(sspush, MATCH_SSPUSH, MASK_SSPUSH)

@@ -182,3 +182,4 @@ All available -march extensions for RISC-V:
 	xsifivecdiscarddlone                    0.1
 	xsifivecflushdlone                      0.1
 	xsfpgflushdlone                         0.1
+	xsfvqdotq                               0.1

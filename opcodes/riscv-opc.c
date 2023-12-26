@@ -2674,6 +2674,15 @@ const struct riscv_opcode riscv_opcodes[] =
 /* SiFive Xsfpgflushdlone instructions.  */
 {"sf.pgflush.d.l1", 0, INSN_CLASS_XSFPGFLUSHDLONE, "", MATCH_SF_PGFLUSH_D_L1, MASK_SF_PGFLUSH_D_L1, match_opcode, 0 },
 
+/* SiFive Xsfvqdotq instructions.  */
+{"sf.vqdot.vv", 0, INSN_CLASS_XSFVQDOTQ, "Vd,Vt,VsVm", MATCH_SF_VQDOT_VV, MASK_SF_VQDOT_VV, match_opcode, 0},
+{"sf.vqdot.vx", 0, INSN_CLASS_XSFVQDOTQ, "Vd,Vt,sVm", MATCH_SF_VQDOT_VX, MASK_SF_VQDOT_VX, match_opcode, 0},
+{"sf.vqdotu.vv", 0, INSN_CLASS_XSFVQDOTQ, "Vd,Vt,VsVm", MATCH_SF_VQDOTU_VV, MASK_SF_VQDOTU_VV, match_opcode, 0},
+{"sf.vqdotu.vx", 0, INSN_CLASS_XSFVQDOTQ, "Vd,Vt,sVm", MATCH_SF_VQDOTU_VX, MASK_SF_VQDOTU_VX, match_opcode, 0},
+{"sf.vqdotsu.vv", 0, INSN_CLASS_XSFVQDOTQ, "Vd,Vt,VsVm", MATCH_SF_VQDOTSU_VV, MASK_SF_VQDOTSU_VV, match_opcode, 0},
+{"sf.vqdotsu.vx", 0, INSN_CLASS_XSFVQDOTQ, "Vd,Vt,sVm", MATCH_SF_VQDOTSU_VX, MASK_SF_VQDOTSU_VX, match_opcode, 0},
+{"sf.vqdotus.vx", 0, INSN_CLASS_XSFVQDOTQ, "Vd,Vt,sVm", MATCH_SF_VQDOTUS_VX, MASK_SF_VQDOTUS_VX, match_opcode, 0},
+
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 {"th.addsl",    0, INSN_CLASS_XTHEADBA,    "d,s,t,Xtu2@25",   MATCH_TH_ADDSL,    MASK_TH_ADDSL,    match_opcode, 0},
 

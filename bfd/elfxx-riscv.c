@@ -1532,6 +1532,7 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {"xsifivecdiscarddlone",	ISA_SPEC_CLASS_DRAFT,	0, 1, 0},
   {"xsifivecflushdlone",	ISA_SPEC_CLASS_DRAFT,	0, 1, 0},
   {"xsfpgflushdlone", ISA_SPEC_CLASS_DRAFT, 0, 1, 0},
+  {"xsfvqdotq",		ISA_SPEC_CLASS_DRAFT,	0, 1, 0},
   {NULL, 0, 0, 0, 0}
 };
 
@@ -2838,6 +2839,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
              && riscv_subset_supports (rps, "xsfvfwmaccqqq"));
     case INSN_CLASS_XSFPGFLUSHDLONE:
       return riscv_subset_supports (rps, "xsfpgflushdlone");
+    case INSN_CLASS_XSFVQDOTQ:
+      return riscv_subset_supports (rps, "xsfvqdotq");
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));
