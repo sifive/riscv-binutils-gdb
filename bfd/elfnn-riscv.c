@@ -515,9 +515,9 @@ riscv_make_zicfilp_plt_header (asection *gotplt, asection *splt)
   header[1] = RISCV_UTYPE (AUIPC, X_T4, gotplt_offset_high);
   header[2] = RISCV_RTYPE (SUB, X_T1, X_T1, X_T3);
   header[3] = RISCV_ITYPE (LREG, X_T3, X_T4, gotplt_offset_low);
-  header[4] = RISCV_ITYPE (ADDI, X_T1, X_T1, (uint32_t) -(PLT_ZICFILP_HEADER_SIZE + 12));
+  header[4] = RISCV_ITYPE (ADDI, X_T1, X_T1, (uint32_t) -(PLT_ZICFILP_HEADER_SIZE + 20));
   header[5] = RISCV_ITYPE (ADDI, X_T0, X_T4, gotplt_offset_low);
-  header[6] = RISCV_ITYPE (SRLI, X_T1, X_T1, 4 - RISCV_ELF_LOG_WORD_BYTES);
+  header[6] = RISCV_ITYPE (SRLI, X_T1, X_T1, 5 - RISCV_ELF_LOG_WORD_BYTES);
   header[7] = RISCV_ITYPE (LREG, X_T0, X_T0, RISCV_ELF_WORD_BYTES);
   header[8] = RISCV_ITYPE (JALR, 0, X_T3, 0);
   header[9] = RISCV_NOP;
