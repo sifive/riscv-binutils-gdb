@@ -2671,6 +2671,9 @@ const struct riscv_opcode riscv_opcodes[] =
 /* SiFive custom bfloat16 matrix arithmetic vector instructions.  */
 {"sf.vfwmacc.4x4x4",  0, INSN_CLASS_V_AND_XSFVFWNACCQQQ, "Vd,Vs,Vt", MATCH_SFVFWMACC4X4X4, MASK_SFVFWMACC4X4X4, match_opcode, 0},
 
+/* SiFive Xsfpgflushdlone instructions.  */
+{"sf.pgflush.d.l1", 0, INSN_CLASS_XSFPGFLUSHDLONE, "", MATCH_SF_PGFLUSH_D_L1, MASK_SF_PGFLUSH_D_L1, match_opcode, 0 },
+
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 {"th.addsl",    0, INSN_CLASS_XTHEADBA,    "d,s,t,Xtu2@25",   MATCH_TH_ADDSL,    MASK_TH_ADDSL,    match_opcode, 0},
 
