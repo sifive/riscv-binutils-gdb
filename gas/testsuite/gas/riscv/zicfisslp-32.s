@@ -3,6 +3,8 @@
 	sspush x5
 	sspopchk x1
 	sspopchk x5
+	c.sspush x1
+	c.sspopchk x5
 	ssrdp a0
         ssamoswap.w     a0,a0,(a0)
         ssamoswap.w     a0,a0,(a0)
