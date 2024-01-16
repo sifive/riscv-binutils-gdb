@@ -345,6 +345,23 @@ match_rs2_x1x5_opcode (const struct riscv_opcode *op,
   return match_opcode (op, insn) && (rs2 == 1 || rs2 == 5);
 }
 
+static int
+match_c_mop_1 (const struct riscv_opcode *op,
+               insn_t insn)
+{
+  int n = EXTRACT_C_MOP_N (insn) ;
+  return match_opcode (op, insn) && n == 5;
+}
+
+static int
+match_c_mop_5 (const struct riscv_opcode *op,
+               insn_t insn)
+{
+  int n = EXTRACT_C_MOP_N (insn) ;
+  return match_opcode (op, insn) && n == 5;
+}
+
+
 const struct riscv_opcode riscv_opcodes[] =
 {
 /* name, xlen, isa, operands, match, mask, match_func, pinfo.  */
@@ -1145,6 +1162,8 @@ const struct riscv_opcode riscv_opcodes[] =
 /* Zicfiss instructions.  */
 {"sspush",    0, INSN_CLASS_ZICFISS, "t", MATCH_SSPUSH, MASK_SSPUSH, match_rs2_x1x5_opcode, 0 },
 {"sspopchk",  0, INSN_CLASS_ZICFISS, "s", MATCH_SSPOPCHK, MASK_SSPOPCHK, match_rs1_x1x5_opcode, 0 },
+{"c.sspush",    0, INSN_CLASS_ZICFISS, "d", MATCH_C_SSPUSH, MASK_C_SSPUSH, match_c_mop_1, 0 },
+{"c.sspopchk",  0, INSN_CLASS_ZICFISS, "d", MATCH_C_SSPOPCHK, MASK_C_SSPOPCHK, match_c_mop_5, 0 },
 {"ssrdp",     0, INSN_CLASS_ZICFISS, "d", MATCH_SSRDP, MASK_SSRDP, match_opcode, 0 },
 {"ssamoswap.w",      32, INSN_CLASS_ZICFISS, "d,t,0(s)", MATCH_SSAMOSWAP_W, MASK_SSAMOSWAP_W|MASK_AQRL, match_opcode, INSN_DREF|INSN_4_BYTE },
 {"ssamoswap.w.aq",   32, INSN_CLASS_ZICFISS, "d,t,0(s)", MATCH_SSAMOSWAP_W|MASK_AQ, MASK_SSAMOSWAP_W|MASK_AQRL, match_opcode, INSN_DREF|INSN_4_BYTE },

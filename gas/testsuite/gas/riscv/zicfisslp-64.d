@@ -11,6 +11,8 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+ce504073[ 	]+sspush[ 	]+t0
 [ 	]+[0-9a-f]+:[ 	]+cdc0c073[ 	]+sspopchk[ 	]+ra
 [ 	]+[0-9a-f]+:[ 	]+cdc2c073[ 	]+sspopchk[ 	]+t0
+[ 	]+[0-9a-f]+:[ 	]+6081[ 	]+c.sspush[ 	]+ra
+[ 	]+[0-9a-f]+:[ 	]+6281[ 	]+c.sspopchk[ 	]+t0
 [ 	]+[0-9a-f]+:[ 	]+cdc04573[ 	]+ssrdp[ 	]+a0
 [ 	]+[0-9a-f]+:[ 	]+48a5352f[ 	]+ssamoswap.d[ 	]+a0,a0,\(a0\)
 [ 	]+[0-9a-f]+:[ 	]+48a5352f[ 	]+ssamoswap.d[ 	]+a0,a0,\(a0\)
