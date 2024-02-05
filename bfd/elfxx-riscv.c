@@ -2788,12 +2788,15 @@ _bfd_riscv_elf_link_setup_gnu_properties (struct bfd_link_info *info,
                                   "section."), ebfd);
       }
 
+      if (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS
+          && !(prop->u.number & GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS))
+      {
+            _bfd_error_handler (_("%pB: warning: Zicfiss turned on by -z force-zicfiss "
+                                  "when all inputs do not have ZICFISS in NOTE "
+                                  "section."), ebfd);
+      }
+
       prop->u.number |= and_prop;
-      prop->pr_kind = property_number;
-      prop = _bfd_elf_get_property (ebfd,
-                                   GNU_PROPERTY_RISCV_FEATURE_2_OR,
-                                   4);
-      prop->u.number |= or_prop;
       prop->pr_kind = property_number;
 
       /* pbfd being NULL implies ebfd is the last input.  Create the GNU
@@ -2830,24 +2833,18 @@ _bfd_riscv_elf_link_setup_gnu_properties (struct bfd_link_info *info,
 
       /* The property list is sorted in order of type.  */
       for (p = elf_properties (pbfd); p; p = p->next)
-       {
-         /* Check for all GNU_PROPERTY_RISCV_FEATURE_1_AND.  */
-         if (GNU_PROPERTY_RISCV_FEATURE_1_AND == p->property.pr_type)
-           {
-             and_prop = p->property.u.number
-                         & GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP;
-             break;
-           }
-         else if (GNU_PROPERTY_RISCV_FEATURE_2_OR == p->property.pr_type)
-           {
-             or_prop = p->property.u.number
-                         | GNU_PROPERTY_RISCV_FEATURE_2_ZICFISS;
-             break;
-           }
-         else if (GNU_PROPERTY_RISCV_FEATURE_1_AND < p->property.pr_type
-                   && GNU_PROPERTY_RISCV_FEATURE_2_OR < p->property.pr_type)
-           break;
-       }
+	{
+	  /* Check for all GNU_PROPERTY_RISCV_FEATURE_1_AND.  */
+	  if (GNU_PROPERTY_RISCV_FEATURE_1_AND == p->property.pr_type)
+	    {
+	      and_prop = p->property.u.number
+			 & (GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP
+			    | GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS);
+	      break;
+	    }
+	  else
+	    break;
+	}
     }
 
   *and_prop_p = and_prop;
@@ -2865,7 +2862,6 @@ _bfd_riscv_elf_parse_gnu_properties (bfd *abfd, unsigned int type,
   switch (type)
     {
     case GNU_PROPERTY_RISCV_FEATURE_1_AND:
-    case GNU_PROPERTY_RISCV_FEATURE_2_OR:
       if (datasz != 4)
        {
          _bfd_error_handler
@@ -2946,45 +2942,6 @@ _bfd_riscv_elf_merge_gnu_properties (struct bfd_link_info *info
          }
       }
       break;
-    case GNU_PROPERTY_RISCV_FEATURE_2_OR:
-      {
-       if (aprop != NULL && bprop != NULL)
-         {
-           orig_number = aprop->u.number;
-           aprop->u.number = orig_number | bprop->u.number | or_prop;
-           updated = orig_number != aprop->u.number;
-           break;
-         }
-
-       /* If PROP is not zero, update the PROPA and PROPB if they are not NULL*/ 
-       if (or_prop)
-         {
-           if (aprop != NULL)
-             {
-               orig_number = aprop->u.number;
-               aprop->u.number = or_prop;
-               updated = orig_number != aprop->u.number;
-             }
-           else if (bprop != NULL)
-             {
-               bprop->u.number = or_prop;
-               updated = true;
-             }
-           /* Shouldn't happen because we checked one of APROP or BPROP != NULL. */
-           else
-           {
-             abort();
-           }
-         }
-       if (aprop == NULL && bprop == NULL && !or_prop)
-         {
-           updated = false;
-           break;
-         }
-      }
-      break;
-
-
     default:
       abort ();
     }

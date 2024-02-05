@@ -189,6 +189,10 @@ struct _bfd_riscv_elf_obj_tdata
      GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP.  */
   bool zicfilp_warn;
 
+  /* True to warn when linking objects with incompatible
+     GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS.  */
+  bool zicfiss_warn;
+
   /* PLT type based on security.  */
   riscv_plt_type plt_type;
 };
@@ -398,11 +402,17 @@ riscv_elfNN_set_options (struct bfd_link_info *link_info,
   htab = riscv_elf_hash_table (link_info);
   htab->params = params;
   _bfd_riscv_elf_tdata (output_bfd)->plt_type = params->plt_type;
+  _bfd_riscv_elf_tdata (output_bfd)->zicfiss_warn = params->zicfiss_type;
   if (params->plt_type == PLT_ZICFILP)
     {
       _bfd_riscv_elf_tdata (output_bfd)->zicfilp_warn = true;
       _bfd_riscv_elf_tdata (output_bfd)->gnu_and_prop
 	|= GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP;
+    }
+  if (params->zicfiss_type == ZICFISS_WARN)
+    {
+      _bfd_riscv_elf_tdata (output_bfd)->gnu_and_prop
+	|= GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS;
     }
   setup_plt_values (link_info, params->plt_type);
 }
@@ -486,8 +496,8 @@ static bool
 riscv_make_zicfilp_plt_header (asection *gotplt, asection *splt)
 {
   /*
-      lpad   0  # disable label checking 
-      auipc  t4, %hi(.got.plt)          # Rewrite this to using 
+      lpad   0  # disable label checking
+      auipc  t4, %hi(.got.plt)          # Rewrite this to using
       sub    t1, t1, t3                 # shifted .got.plt offset + hdr size + 12
       l[w|d] t3, %lo(1b)(t4)            # _dl_runtime_resolve
       addi   t1, t1, -(hdr size + 12)   # shifted .got.plt offset
@@ -4912,7 +4922,7 @@ _bfd_riscv_relax_lui (bfd *abfd,
     }
 
   /* Can we relax LUI to C.LUI?  Alignment might move the section forward;
-     account for this assuming page alignment at worst. In the presence of 
+     account for this assuming page alignment at worst. In the presence of
      RELRO segment the linker aligns it by one page size, therefore sections
      after the segment can be moved more than one page. */
 
@@ -5809,6 +5819,20 @@ riscv_warn_zicfilp_if_necessary(const elf_property* prop, const bfd *abfd)
     }
 }
 
+/* Warn Zicfiss when -z force-zicfiss is enabled but the bfd doesn't have
+   the property in NOTE. */
+static void
+riscv_warn_zicfiss_if_necessary (const elf_property* prop, const bfd *abfd)
+{
+  if ((prop && !(prop->u.number & GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS))
+       || !prop)
+    {
+      _bfd_error_handler (_("%pB: warning: Zicfilp turned on by -z force-zicfiss when "
+                            "all inputs do not have ZICFISS in NOTE section."),
+                          abfd);
+    }
+}
+
 
 /* Implement elf_backend_merge_gnu_properties for RISC-V.  It serves as a
    wrapper function for _bfd_riscv_elf_merge_gnu_properties to account
@@ -5828,12 +5852,22 @@ elfNN_riscv_merge_gnu_properties (struct bfd_link_info *info,
      GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP.  */
   if (((aprop && aprop->pr_type == GNU_PROPERTY_RISCV_FEATURE_1_AND)
 	|| (bprop && bprop->pr_type == GNU_PROPERTY_RISCV_FEATURE_1_AND))
+      && (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS)
+      && (_bfd_riscv_elf_tdata (info->output_bfd)->zicfiss_warn))
+    {
+      riscv_warn_zicfiss_if_necessary(aprop, abfd);
+      riscv_warn_zicfiss_if_necessary(bprop, bbfd);
+    }
+
+  if (((aprop && aprop->pr_type == GNU_PROPERTY_RISCV_FEATURE_1_AND)
+	|| (bprop && bprop->pr_type == GNU_PROPERTY_RISCV_FEATURE_1_AND))
       && (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP)
       && (_bfd_riscv_elf_tdata (info->output_bfd)->zicfilp_warn))
     {
       riscv_warn_zicfilp_if_necessary(aprop, abfd);
       riscv_warn_zicfilp_if_necessary(bprop, bbfd);
     }
+
 
   uint32_t or_prop
     = _bfd_riscv_elf_tdata (info->output_bfd)->gnu_or_prop;

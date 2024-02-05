@@ -20197,30 +20197,9 @@ decode_riscv_feature_1_and (unsigned int bitmask)
 	case GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP:
 	  printf ("ZICFILP");
 	  break;
-
-	default:
-	  printf (_("<unknown: %x>"), bit);
-	  break;
-	}
-      if (bitmask)
-	printf (", ");
-    }
-}
-
-static void
-decode_riscv_feature_2_or (unsigned int bitmask)
-{
-  while (bitmask)
-    {
-      unsigned int bit = bitmask & (- bitmask);
-
-      bitmask &= ~ bit;
-      switch (bit)
-	{
-	case GNU_PROPERTY_RISCV_FEATURE_2_ZICFISS:
+	case GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS:
 	  printf ("ZICFISS");
 	  break;
-
 	default:
 	  printf (_("<unknown: %x>"), bit);
 	  break;
@@ -20229,7 +20208,6 @@ decode_riscv_feature_2_or (unsigned int bitmask)
 	printf (", ");
     }
 }
-
 
 static void
 decode_1_needed (unsigned int bitmask)
@@ -20430,15 +20408,6 @@ print_gnu_property_note (Filedata * filedata, Elf_Internal_Note * pnote)
 		    printf (_("<corrupt length: %#x> "), datasz);
 		  else
 		    decode_riscv_feature_1_and (byte_get (ptr, 4));
-		  goto next;
-		}
-              else if (type == GNU_PROPERTY_RISCV_FEATURE_2_OR)
-		{
-		  printf ("RISC-V OR feature: ");
-		  if (datasz != 4)
-		    printf (_("<corrupt length: %#x> "), datasz);
-		  else
-		    decode_riscv_feature_2_or (byte_get (ptr, 4));
 		  goto next;
 		}
 	    }

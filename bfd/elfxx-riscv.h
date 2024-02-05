@@ -40,12 +40,21 @@ typedef enum
   ZICFILP_WARN  = 1,  /* LP is enabled with -z force-zicfilp.  */
 } riscv_enable_zicfilp_type;
 
+/* To indicate if SS is enabled with/without warning.  */
+typedef enum
+{
+  ZICFISS_NONE  = 0,  /* SS is not enabled.  */
+  ZICFISS_WARN  = 1,  /* SS is enabled with -z force-zicfiss.  */
+} riscv_enable_zicfiss_type;
+
+
 struct riscv_elf_params
 {
   /* Whether to relax code sequences to GP-relative addressing.  */
   bool relax_gp;
   riscv_plt_type plt_type;
   riscv_enable_zicfilp_type zicfilp_type;
+  riscv_enable_zicfiss_type zicfiss_type;
 };
 
 extern void riscv_elf32_set_options (struct bfd_link_info *,

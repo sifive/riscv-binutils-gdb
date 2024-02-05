@@ -47,6 +47,7 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   fprintf (file, _("  --relax-gp                  Perform GP relaxation\n"));
   fprintf (file, _("  --no-relax-gp               Don'\''t perform GP relaxation\n"));
   fprintf (file, _("  -z force-zicfilp            Turn on Zicfilp  mechanism and generate PLTs with landing pad. Generate warnings for missing Zicfilp on inputs\n\n"));
+  fprintf (file, _("  -z force-zicfiss            Turn on Zicfiss  Generate warnings for missing Zicfiss on inputs\n\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASE_Z_RISCV='
@@ -54,6 +55,10 @@ PARSE_AND_LIST_ARGS_CASE_Z_RISCV='
 	{
           params.plt_type |= PLT_ZICFILP;
           params.zicfilp_type = ZICFILP_WARN;
+	}
+      else if (strcmp (optarg, "force-zicfiss") == 0)
+	{
+          params.zicfiss_type = ZICFISS_WARN;
 	}
 '
 PARSE_AND_LIST_ARGS_CASE_Z="$PARSE_AND_LIST_ARGS_CASE_Z $PARSE_AND_LIST_ARGS_CASE_Z_RISCV"
