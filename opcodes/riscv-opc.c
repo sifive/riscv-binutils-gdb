@@ -350,7 +350,7 @@ match_c_mop_1 (const struct riscv_opcode *op,
                insn_t insn)
 {
   int n = EXTRACT_C_MOP_N (insn) ;
-  return match_opcode (op, insn) && n == 5;
+  return match_opcode (op, insn) && n == 1;
 }
 
 static int
