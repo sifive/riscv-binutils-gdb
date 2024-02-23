@@ -1160,7 +1160,10 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sm3p1",    0, INSN_CLASS_ZKSH,    "d,s",    MATCH_SM3P1, MASK_SM3P1, match_opcode, 0 },
 
 /* Zicfiss instructions.  */
+
+{"sspush",    0, INSN_CLASS_ZICFISS, "d", MATCH_C_SSPUSH, MASK_C_SSPUSH, match_c_mop_1, INSN_ALIAS },
 {"sspush",    0, INSN_CLASS_ZICFISS, "t", MATCH_SSPUSH, MASK_SSPUSH, match_rs2_x1x5_opcode, 0 },
+{"sspopchk",  0, INSN_CLASS_ZICFISS, "d", MATCH_C_SSPOPCHK, MASK_C_SSPOPCHK, match_c_mop_5, INSN_ALIAS },
 {"sspopchk",  0, INSN_CLASS_ZICFISS, "s", MATCH_SSPOPCHK, MASK_SSPOPCHK, match_rs1_x1x5_opcode, 0 },
 {"c.sspush",    0, INSN_CLASS_ZICFISS, "d", MATCH_C_SSPUSH, MASK_C_SSPUSH, match_c_mop_1, 0 },
 {"c.sspopchk",  0, INSN_CLASS_ZICFISS, "d", MATCH_C_SSPOPCHK, MASK_C_SSPOPCHK, match_c_mop_5, 0 },
