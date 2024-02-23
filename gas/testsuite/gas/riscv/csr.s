@@ -552,3 +552,6 @@
 	csr mlwid
 	csr slwid
 	csr mwiddeleg
+
+        # Ssqosid
+	csr srmcfg

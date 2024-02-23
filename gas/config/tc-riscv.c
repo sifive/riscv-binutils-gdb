@@ -110,6 +110,7 @@ enum riscv_csr_class
   CSR_CLASS_SSWG,	/* SSWG, world guard CSR */
   CSR_CLASS_SMWG,	/* SMWG, world guard CSR */
   CSR_CLASS_SMWGD,	/* SMWGD, world guard CSR */
+  CSR_CLASS_SSQOSID,	/* Ssqosid */
 };
 
 /* This structure holds all restricted conditions for a CSR.  */
@@ -1181,6 +1182,11 @@ riscv_csr_address (const char *csr_name,
     case CSR_CLASS_XTHEADVECTOR:
       extension = "xtheadvector";
       break;
+    case CSR_CLASS_SSQOSID:
+      extension = "ssqosid";
+      need_check_version = false;
+      break;
+
     default:
       as_bad (_("internal: bad RISC-V CSR class (0x%x)"), csr_class);
     }

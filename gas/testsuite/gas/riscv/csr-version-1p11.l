@@ -1725,3 +1725,7 @@
 .*Info: macro .*
 .*Warning: invalid CSR `mwiddeleg', needs `smwgd' extension
 .*Info: macro .*
+.*Warning: invalid CSR `srmcfg', needs `ssqosid' extension
+.*Info: macro .*
+.*Warning: invalid CSR `srmcfg', needs `ssqosid' extension
+.*Info: macro .*
