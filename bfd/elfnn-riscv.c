@@ -3647,7 +3647,7 @@ riscv_elf_finish_dynamic_sections (bfd *output_bfd,
 
           ret = htab->make_plt_header(htab->elf.sgotplt, splt);
           elf_section_data (splt->output_section)->this_hdr.sh_entsize
-            = htab->plt_header_size;
+            = htab->plt_entry_size;
 	}
       if (!ret)
         return ret;
