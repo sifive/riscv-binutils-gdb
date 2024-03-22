@@ -397,7 +397,6 @@ const struct riscv_opcode riscv_opcodes[] =
 {"jal",        32, INSN_CLASS_C, "Ca",        MATCH_C_JAL, MASK_C_JAL, match_opcode, INSN_ALIAS|INSN_JSR },
 {"jal",         0, INSN_CLASS_I, "a",         MATCH_JAL|(X_RA << OP_SH_RD), MASK_JAL|MASK_RD, match_opcode, INSN_ALIAS|INSN_JSR },
 {"jal",         0, INSN_CLASS_I, "d,a",       MATCH_JAL, MASK_JAL, match_opcode, INSN_JSR },
-{"call",        0, INSN_CLASS_ZICFILP, "d,c", (X_T2 << OP_SH_RS1), (int) M_CALL, match_never, INSN_MACRO },
 {"call",        0, INSN_CLASS_I, "d,c",       (X_T1 << OP_SH_RS1), (int) M_CALL, match_never, INSN_MACRO },
 {"call",        0, INSN_CLASS_I, "c",         (X_RA << OP_SH_RS1)|(X_RA << OP_SH_RD), (int) M_CALL, match_never, INSN_MACRO },
 {"tail",        0, INSN_CLASS_ZICFILP, "c",   (X_T2 << OP_SH_RS1), (int) M_CALL, match_never, INSN_MACRO },
