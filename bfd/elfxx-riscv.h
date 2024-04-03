@@ -62,6 +62,8 @@ struct riscv_elf_params
   riscv_enable_zicfilp_type zicfilp_type;
   riscv_enable_zicfilp_type zicfilp_func_sig_type;
   riscv_enable_zicfiss_type zicfiss_type;
+  /* Verbose mode for linker relaxation.  */
+  bool relax_verbose;
 };
 
 extern void riscv_elf32_set_options (struct bfd_link_info *,

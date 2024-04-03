@@ -364,6 +364,9 @@ struct riscv_elf_link_hash_table
 /* Generate the compact PLT header.  */
 static bool compact_plt = false;
 
+/* Print verbose info when linker relaxation.  */
+static bool relax_verbose = false;
+
 /* Forward declaration PLT related functions.  */
 static bool
 riscv_make_plt_header (bfd *, struct riscv_elf_link_hash_table *);
@@ -446,6 +449,7 @@ riscv_elfNN_set_options (struct bfd_link_info *link_info,
   struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (link_info);
   struct _bfd_riscv_elf_obj_tdata *tdata = _bfd_riscv_elf_tdata (output_bfd);
   htab->params = params;
+  relax_verbose = params->relax_verbose;
 
   tdata->plt_type = params->plt_type;
   tdata->zicfiss_warn = params->zicfiss_type;
@@ -522,6 +526,38 @@ riscv_is_local_symbol (Elf_Internal_Shdr *symtab_hdr, unsigned long symndx)
      > a symbol table section's sh_info section header member holds the
      > symbol table index for the first non-local symbol.  */
   return symndx < symtab_hdr->sh_info;
+}
+
+static size_t
+riscv_get_symbol_size (bfd *abfd, unsigned long symndx)
+{
+  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (abfd);
+
+  if (!symtab_hdr->contents)
+    return 0;
+
+  if (symndx < symtab_hdr->sh_info)
+    {
+      /* A local symbol.  */
+      Elf_Internal_Sym *sym
+	= ((Elf_Internal_Sym *) symtab_hdr->contents + symndx);
+      return sym->st_size;
+    }
+  else
+    {
+      struct elf_link_hash_entry *h;
+      unsigned indx = symndx - symtab_hdr->sh_info;
+      h = elf_sym_hashes (abfd)[indx];
+      while (h->root.type == bfd_link_hash_indirect
+	     || h->root.type == bfd_link_hash_warning)
+	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+      if (h != NULL && h->type != STT_GNU_IFUNC)
+       return h->size;
+      else
+       /* We do not handle STT_GNU_IFUNC currently.  */
+       return 0;
+    }
 }
 
 static const char *
@@ -5395,6 +5431,24 @@ riscv_elf_obj_attrs_handle_unknown (bfd *abfd, int tag)
   return true;
 }
 
+/* Relax verbose function.  */
+static void
+_riscv_verbose_relax (bfd *abfd, asection *sec, const char *fmt, ...)
+{
+  if (!relax_verbose)
+    return;
+
+  va_list args;
+  va_start (args, fmt);
+  fprintf (stderr, "relax verbose: %s: %s ", bfd_get_filename (abfd),
+	   bfd_section_name (sec));
+
+  vfprintf (stderr, fmt, args);
+
+  fprintf (stderr, "\n");
+  va_end (args);
+}
+
 /* A second format for recording PC-relative hi relocations.  This stores the
    information required to relax them to GP-relative addresses.  */
 
@@ -6091,12 +6145,19 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
   auipc = bfd_getl32 (contents + rel->r_offset);
   jalr = bfd_getl32 (contents + rel->r_offset + 4);
 
+  unsigned symidx = ELFNN_R_SYM (rel->r_info);
+  const char *sym_str = riscv_get_symbol_name (abfd, symidx);
+  uint64_t pc = sec_addr (sec) + rel->r_offset;
   /* Relax a table jump instruction that is marked.  */
   if (((auipc ^ MATCH_CM_JALT) & MASK_CM_JALT) == 0)
     {
       rel->r_info
 	  = ELFNN_R_INFO (ELFNN_R_SYM (rel->r_info), R_RISCV_TABLE_JUMP);
       *again = true;
+      _riscv_verbose_relax (abfd, sec,
+			    "Function call relaxation success to c.j[al]t"
+			    "(pc: %" PRIx64 " target: %s (%" PRIx64 ").",
+			    (uint64_t) pc, sym_str, (uint64_t) symval);
       return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + 2, 6,
 				       link_info, pcgp_relocs, rel);
     }
@@ -6116,7 +6177,14 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
   /* See if this function call can be shortened.  */
   if (!VALID_JTYPE_IMM (foff) && !(!bfd_link_pic (link_info) && near_zero)
       && link_info->relax_pass != RELAX_PASS_TABLE_JUMP_PROFILING)
-    return true;
+    {
+      _riscv_verbose_relax (
+	  abfd, sec,
+	  "Function call relaxation fail due to range too far "
+	  "(pc: %" PRIx64 " target: %s (%" PRIx64 "), offset: %" PRId64 ").",
+	  (uint64_t) pc, sym_str, (uint64_t) symval, (int64_t) foff);
+      return true;
+    }
 
   /* Shorten the function call.  */
   BFD_ASSERT (rel->r_offset + 8 <= sec->size);
@@ -6127,24 +6195,28 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
   /* C.J exists on RV32 and RV64, but C.JAL is RV32-only.  */
   rvc = rvc && (rd == 0 || (rd == X_RA && ARCH_SIZE == 32));
 
+  const char *relax_type;
   if (rvc)
     {
       /* Relax to C.J[AL] rd, addr.  */
       r_type = R_RISCV_RVC_JUMP;
       auipc = rd == 0 ? MATCH_C_J : MATCH_C_JAL;
       len = 2;
+      relax_type = "c.j[al]";
     }
   else if (VALID_JTYPE_IMM (foff))
     {
       /* Relax to JAL rd, addr.  */
       r_type = R_RISCV_JAL;
       auipc = MATCH_JAL | (rd << OP_SH_RD);
+      relax_type = "j[al]";
     }
   else
     {
       /* Near zero, relax to JALR rd, x0, addr.  */
       r_type = R_RISCV_LO12_I;
       auipc = MATCH_JALR | (rd << OP_SH_RD);
+      relax_type = "zero page relaxation";
     }
 
   /* Replace the R_RISCV_CALL reloc.  */
@@ -6154,6 +6226,12 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
 
   /* Delete unnecessary JALR and reuse the R_RISCV_RELAX reloc.  */
   *again = true;
+
+  _riscv_verbose_relax (abfd, sec,
+			"Function call relaxation success, relax to %s "
+			"(target: %s, offset: %" PRId64 ").",
+			relax_type, sym_str, (int64_t) foff);
+
   return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + len, 8 - len,
 				   link_info, pcgp_relocs, rel + 1);
 }
@@ -6252,6 +6330,8 @@ _bfd_riscv_relax_lui (bfd *abfd,
 	max_alignment = max_alignment > 0x10 ? max_alignment : 0x10;
     }
 
+  unsigned symidx = ELFNN_R_SYM (rel->r_info);
+  const char *sym_str = riscv_get_symbol_name (abfd, symidx);
   /* Is the reference in range of x0 or gp?
      Valid gp range conservatively because of alignment issue.
 
@@ -6277,6 +6357,10 @@ _bfd_riscv_relax_lui (bfd *abfd,
 	case R_RISCV_HI20:
 	  /* Delete unnecessary LUI and reuse the reloc.  */
 	  *again = true;
+	  _riscv_verbose_relax (abfd, sec,
+				"GP relaxation success"
+				"(target: %s).",
+				sym_str);
 	  return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4,
 					   link_info, pcgp_relocs, rel);
 
@@ -6310,6 +6394,10 @@ _bfd_riscv_relax_lui (bfd *abfd,
 
       /* Delete extra bytes and reuse the R_RISCV_RELAX reloc.  */
       *again = true;
+      _riscv_verbose_relax (abfd, sec,
+			    "GP relaxation success"
+			    "(target: %s).",
+			    sym_str);
       return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + 2, 2,
 				       link_info, pcgp_relocs, rel + 1);
     }
@@ -6445,6 +6533,8 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
 
+  unsigned symidx = ELFNN_R_SYM (rel->r_info);
+  const char *sym_str = riscv_get_symbol_name (abfd, symidx);
   /* Chain the _LO relocs to their cooresponding _HI reloc to compute the
      actual target address.  */
   riscv_pcgp_hi_reloc hi_reloc;
@@ -6483,12 +6573,31 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
       /* Mergeable symbols and code might later move out of range.  */
       if (! undefined_weak
 	  && sym_sec->flags & (SEC_MERGE | SEC_CODE))
-	return true;
+	{
+	  if (sym_sec->flags & SEC_MERGE)
+	    _riscv_verbose_relax (
+		abfd, sec, "GP relaxation failed due to `%s` is SEC_MERGE.",
+		sym_str);
+	  if (sym_sec->flags & SEC_CODE)
+	    _riscv_verbose_relax (
+		abfd, sec,
+		"GP relaxation failed due to `%s` the symbol is SEC_CODE.",
+		sym_str);
+
+	  return true;
+	}
 
       /* If the cooresponding lo relocation has already been seen then it's not
          safe to relax this relocation.  */
       if (riscv_find_pcgp_lo_reloc (pcgp_relocs, rel->r_offset))
-	return true;
+	{
+	  _riscv_verbose_relax (
+	      abfd, sec,
+	      "GP relaxation failed due to R_RISCV_PCREL_LO12_* "
+	      "before R_RISCV_PCREL_HI20");
+
+	  return true;
+	}
 
       break;
 
@@ -6566,12 +6675,40 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 	  *again = true;
 	  riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4, link_info,
 				    pcgp_relocs, rel);
+	  _riscv_verbose_relax (abfd, sec,
+				"GP relaxation success"
+				"(target: %s, offset: %" PRId64 ").",
+				sym_str, 0);
+
 	  return true;
 
 	default:
 	  abort ();
 	}
     }
+
+  if (gp && VALID_ITYPE_IMM (symval - gp))
+    {
+      _riscv_verbose_relax (
+	  abfd, sec,
+	  "GP relaxation failed due to max_alignment or reserve_size"
+	  "(target: %s, gp: 0x%" PRIx64 " sym addr: 0x%" PRIx64 ", "
+	  "distance: %" PRId64 ", max_alignment: %" PRId64
+	  ", reserve_size: %" PRId64 ").",
+	  sym_str, gp, symval, gp - symval, max_alignment, reserve_size);
+    }
+  else if (gp && !VALID_ITYPE_IMM (symval - gp))
+    _riscv_verbose_relax (abfd, sec,
+			  "GP relaxation failed due to far from GP"
+			  "(target: %s, gp: 0x%" PRIx64 " sym addr: 0x%" PRIx64
+			  ", distance: %" PRId64 ").",
+			  sym_str, gp, symval, gp - symval);
+  else
+    _riscv_verbose_relax (abfd, sec,
+			  "GP relaxation failed due to unknwon reason"
+			  "(target: %s, gp: 0x%" PRIx64 " sym addr: 0x%" PRIx64
+			  ", distance: %" PRId64 ").",
+			  sym_str, gp, symval, gp - symval);
 
   return true;
 }
@@ -7056,6 +7193,15 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	symval += rel->r_addend;
 
       symval += sec_addr (sym_sec);
+      unsigned symidx = ELFNN_R_SYM (rel->r_info);
+      const char *sym_str = riscv_get_symbol_name (abfd, symidx);
+      size_t *sym_size = riscv_get_symbol_size (abfd, symidx);
+
+      _riscv_verbose_relax (abfd, sec,
+			    "Symbol %s "
+			    "reserve_size is %" PRId64
+			    ", symbol size is %" PRId64 ".",
+			    sym_str, reserve_size, sym_size);
 
       if (!relax_func (abfd, sec, sym_sec, info, rel, symval,
 		       max_alignment, reserve_size, again,

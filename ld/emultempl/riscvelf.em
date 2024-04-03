@@ -33,7 +33,8 @@ static struct riscv_elf_params params = { .relax_gp = 1,
 					  .plt_type = PLT_NORMAL,
 					  .zicfilp_type = ZICFILP_NONE,
 					  .zicfilp_func_sig_type = ZICFILP_NONE,
-					  .zicfiss_type = ZICFISS_NONE };
+					  .zicfiss_type = ZICFISS_NONE,
+					  .relax_verbose = 0 };
 EOF
 
 # Define some shell vars to insert bits of code into the standard elf
@@ -45,6 +46,7 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
     { "no-check-uleb128", no_argument, NULL, OPTION_NO_CHECK_ULEB128 },
     { "relax-zcmt", no_argument, NULL, OPTION_RELAX_ZCMT },
     { "no-relax-zcmt", no_argument, NULL, OPTION_NO_RELAX_ZCMT },
+    { "relax-verbose", no_argument, NULL, OPTION_RELAX_VERBOSE },
 '
 
 PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
@@ -53,6 +55,7 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   fprintf (file, _("  --check-uleb128             Check if SUB_ULEB128 has non-zero addend\n"));
   fprintf (file, _("  --no-check-uleb128          Don'\''t check if SUB_ULEB128 has non-zero addend\n"));
   fprintf (file, _("  --relax-zcmt                Perform Zcmt relaxation\n"));
+  fprintf (file, _("  --relax-verbose             Verbose output for linker relaxation\n"));
   fprintf (file, _("  --no-relax-zcmt             Don'\''t perform Zcmt relaxation (default)\n"));
   fprintf (file, _("  -z force-zicfilp            Turn on Zicfilp mechanism and generate PLTs with landing pad. Generate warnings for missing Zicfilp on inputs\n\n"));
   fprintf (file, _("  -z force-zicfilp-func-sig   Turn on Zicfilp mechanism with function signature-based and generate PLTs with landing pad. Generate warnings for missing Zicfilp on inputs\n\n"));
@@ -100,6 +103,10 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 
     case OPTION_NO_RELAX_ZCMT:
       params.relax_zcmt = 0;
+      break;
+
+    case OPTION_RELAX_VERBOSE:
+      params.relax_verbose = 1;
       break;
 '
 
