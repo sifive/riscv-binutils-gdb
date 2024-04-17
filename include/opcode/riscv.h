@@ -46,6 +46,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   return 2;
 }
 
+#define CHAR_TO_INT(x) ((int)x - '0')
+
 #define RVC_JUMP_BITS 11
 #define RVC_JUMP_REACH ((1ULL << RVC_JUMP_BITS) * RISCV_JUMP_ALIGN)
 
@@ -133,6 +135,20 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define EXTRACT_CV_SIMD_UIMM6(x) \
   ((RV_X(x, 25, 1)) | (RV_X(x, 20, 5) << 1))
 
+/* SiFive Mammoth */
+#define EXTRACT_VSETVL_IMM(x) \
+  (RV_X(x, 25, 6))
+
+/* MTD uses upper n bits of inst[11:8].  */
+#define MAX_MTD_BITS 4
+
+/* A mask that sets lower MTD bits to 1. Used to check those bits are not set.  */
+#define MTD_MASK(bits)  (~(~0U << (MAX_MTD_BITS - bits)))
+
+/* Extract upper n bits of MTD (inst[11:8]). */
+#define EXTRACT_MM_MTD(x, n) \
+  (RV_X(x, 12 - n, n))
+
 #define ENCODE_ITYPE_IMM(x) \
   (RV_X(x, 0, 12) << 20)
 #define ENCODE_STYPE_IMM(x) \
@@ -200,6 +216,10 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   ((RV_X(x, 0, 1) << 25) | (RV_X(x, 1, 5) << 20))
 #define ENCODE_CV_SIMD_UIMM6(x) \
   ((RV_X(x, 0, 1) << 25) | (RV_X(x, 1, 5) << 20))
+
+/* SiFive Mammoth vsettnt (use vsetvli instruction format) */
+#define ENCODE_VSETTNT_IMM(x) \
+  (RV_X(x, 0, 11) << 20)
 
 #define VALID_ITYPE_IMM(x) (EXTRACT_ITYPE_IMM(ENCODE_ITYPE_IMM(x)) == (x))
 #define VALID_STYPE_IMM(x) (EXTRACT_STYPE_IMM(ENCODE_STYPE_IMM(x)) == (x))
@@ -384,6 +404,12 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define OP_SH_XSO2              26
 #define OP_MASK_XSO1            0x1
 #define OP_SH_XSO1              26
+
+/* SiFive Monnath fields.  */
+#define OP_MASK_TWIDEN		0x3
+#define OP_SH_TWIDEN		9
+#define OP_MASK_ALTFMT		0x1
+#define OP_SH_ALTFMT		8
 
 /* ABI names for selected x-registers.  */
 
@@ -570,6 +596,13 @@ enum riscv_insn_class
   INSN_CLASS_XSFVFBFA,
   INSN_CLASS_XSFVFEXPA,
   INSN_CLASS_XSFVFEXP32E_OR_XSFVFEXP16E_OR_XSFVFBFEXP16E,
+  /* SiFive Mammoth extension */
+  INSN_CLASS_XSFMMBASE,
+  INSN_CLASS_XSFMM32A4I,
+  INSN_CLASS_XSFMM32A8F,
+  INSN_CLASS_XSFMMBASE_OR_XSFMM32EA,
+  INSN_CLASS_XSFMM32A8I_OR_XSFMM32A,
+  INSN_CLASS_XSFMM32A16F_OR_XSFMM32A32F_XSFMM64A64F_OR_XSFMM32A_OR_XSFMM32EA,
 };
 
 /* This structure holds information for a particular instruction.  */
@@ -690,6 +723,10 @@ extern const char * const riscv_th_vlen[4];
 extern const char * const riscv_th_vediv[4];
 extern const char * const riscv_fli_symval[32];
 extern const float riscv_fli_numval[32];
+extern const char * const riscv_tsew[8];
+extern const char * const riscv_twiden[4];
+extern const char * const riscv_altfmt[2];
+extern const char * const riscv_mtd[16];
 
 extern const struct riscv_opcode riscv_opcodes[];
 extern const struct riscv_opcode riscv_insn_types[];

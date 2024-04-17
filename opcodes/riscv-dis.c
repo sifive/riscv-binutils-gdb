@@ -508,6 +508,34 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	    }
 	  break;
 
+	case 'M': /* SiFive Mammoth */
+	  switch (*++oparg)
+	    {
+	    case 'a':
+	      {
+		int imm = EXTRACT_RVV_VC_IMM (l);
+		unsigned int vsew = EXTRACT_OPERAND (VSEW, imm);
+		bool altfmt = EXTRACT_OPERAND (ALTFMT, imm);
+		unsigned int twiden = EXTRACT_OPERAND (TWIDEN, imm);
+                if (altfmt)
+                  print (info->stream, dis_style_text, "%salt,%s",
+                         riscv_vsew[vsew], riscv_twiden[twiden]);
+                else
+                  print (info->stream, dis_style_text, "%s,%s",
+                         riscv_vsew[vsew], riscv_twiden[twiden]);
+	      }
+	      break;
+	    case 's':
+	      {
+		int bits = CHAR_TO_INT(*++oparg);
+		/* We only use the upper BITS of MAX_MTD_BITS bits in mtd encoding.
+		   Sets the lower (MAX_MTD_BITS - BITS) to zero.*/
+		int mtd = EXTRACT_MM_MTD (l, bits) << (MAX_MTD_BITS - bits);
+		print (info->stream, dis_style_text, "%s", riscv_mtd[mtd]);
+	      }
+	      break;
+            }
+          break; /* end SiFive Mammoth */
 	case ',':
 	case '(':
 	case ')':

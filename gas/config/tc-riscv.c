@@ -1594,6 +1594,16 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	      goto unknown_validate_operand;
 	    }
 	  break; /* end RVV */
+	case 'M': /* SiFive Mammoth */
+	  switch (*++oparg)
+	    {
+	    case 'a': used_bits |= ENCODE_RVV_VC_IMM (-1U); break;;
+	    case 's': USE_BITS (OP_MASK_VD, OP_SH_VD);
+		      oparg++; /* Skip the following mtd encoding digit. */
+		      break;
+	    default:
+	      goto unknown_validate_operand;
+	    }
 	case ',': break;
 	case '(': break;
 	case ')': break;
@@ -2785,6 +2795,97 @@ my_getThVsetvliExpression (expressionS *ep, char *str)
     }
 }
 
+/* Parse string STR as a vsettnt operand (vsew and twiden).  Store the
+   expression in *EP.
+   On exit, EXPR_PARSE_END points to the first character after the expression.
+ */
+
+static void
+riscv_get_vsettnt_expression (expressionS *ep, char *str)
+{
+  unsigned int vsew_value = 0, altfmt_value = 0, twiden_value = 0;
+  bfd_boolean vsew_found = FALSE, twiden_found = FALSE;
+
+  /* Mammoth use altfmt in vtype for bf16:
+
+     vsew  altfmt  assembler syntax
+     00     0        e8
+     01     0        e16
+     01     1        e16alt
+     10     0        e32
+     11     0        e64   */
+  if (arg_lookup (&str, riscv_vsew, ARRAY_SIZE (riscv_vsew), &vsew_value))
+    {
+      /* For syntaxes other than e16alt, use originary arg_lookup() to parse vsew. */
+      if (*str == ',')
+	++str;
+      if (vsew_found)
+	as_bad (_("multiple vsew constants"));
+      vsew_found = TRUE;
+    }
+  else 
+    {
+     /* For e16alt, parse it as a special case because it doesn't fit into the
+        convension that use an array index as the encoding. If we got more
+        special cases, consider using a new mechanism.  */
+      const char *e16alt = "e16alt";
+      size_t len = strlen (e16alt);
+      if (strncmp(str, e16alt, len) == 0)
+        {
+          vsew_value = 1;
+          altfmt_value = 1;
+          if (vsew_found)
+            as_bad (_("multiple vsew constants"));
+          vsew_found = TRUE;
+          str += len + 1;
+        }
+    }
+
+  if (arg_lookup (&str, riscv_twiden, ARRAY_SIZE (riscv_twiden), &twiden_value))
+    {
+      if (*str == ',')
+	++str;
+      if (twiden_found)
+	as_bad (_("multiple twiden constants"));
+      twiden_found = TRUE;
+    }
+
+  if (!vsew_found)
+    {
+      as_bad (_("no vsew found"));
+    }
+  else if (!twiden_found)
+    {
+      as_bad (_("no twiden found"));
+    }
+  else
+    {
+      ep->X_op = O_constant;
+      ep->X_add_number = (vsew_value << OP_SH_VSEW)
+                          | (altfmt_value << OP_SH_ALTFMT)
+			  | (twiden_value << OP_SH_TWIDEN);
+      expr_parse_end = str;
+    }
+}
+
+/* Parse string STR and return the matrix tile specifier (mtd) operand.
+   On exit, EXPR_PARSE_END points to the first character after the
+   operand.  */
+static unsigned int
+riscv_get_tile_specifier (char *str)
+{
+  unsigned int mtd = 0;
+
+  if (!arg_lookup (&str, riscv_mtd, ARRAY_SIZE (riscv_mtd), &mtd))
+    {
+      as_bad (_("no matrix tile specifier found."));
+    }
+  expr_parse_end = str;
+
+  return mtd;
+}
+
+
 /* Detect and handle implicitly zero load-store offsets.  For example,
    "lw t0, (t1)" is shorthand for "lw t0, 0(t1)".  Return true if such
    an implicit offset was detected.  */
@@ -2881,6 +2982,48 @@ static symbolS *deferred_sym_lastP;
    committed.  */
 static symbolS *orphan_sym_rootP;
 static symbolS *orphan_sym_lastP;
+
+static void
+riscv_validate_mammoth_vsettnt_imm(unsigned int imm)
+{
+  /* From spec:
+     // vsetvli rd, rs1, (vsew << 3) + (alt << 8) + (twiden << 9)
+     sf.vsettnt rd, rs1, eX, wY
+
+     The valid `wY` and `eX` options are as follows.
+
+     twiden    assembler syntax
+     01        w1
+     10        w2
+     11        w4
+
+     vsew alt  assembler syntax
+     00     0  e8
+     01     0  e16
+     01     1  e16alt
+     10     0  e32
+     11     0  e64  */
+
+  unsigned int twiden = EXTRACT_OPERAND (TWIDEN, imm);
+  unsigned int vsew = EXTRACT_OPERAND (VSEW, imm);
+  bool altfmt = EXTRACT_OPERAND (ALTFMT, imm);
+
+  if (!(1 <= twiden && twiden <= 3))
+    {
+      as_bad (_("bad value for vsettnt immediate twiden field: %#x"),
+        twiden);
+    }
+  if (vsew >= 4)
+    {
+      as_bad (_("bad value for vsettnt immediate vsew field: %#x"),
+        vsew);
+    }
+  if (altfmt && vsew != 1)
+    {
+      as_bad (_("bad value for vsettnt immediate vsew field: %salt"),
+        riscv_vsew[vsew]);
+    }
+}
 
 /* This routine assembles an instruction into its binary format.  As a
    side effect, it sets the global variable imm_reloc to the type of
@@ -3487,6 +3630,43 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  goto unknown_riscv_ip_operand;
 		}
 	      break; /* end RVV */
+
+	    case 'M': /* SiFive Mammotth */
+	      switch (*++oparg)
+		{
+		case 'a': /* vsettnt immediate encoding */
+		  riscv_get_vsettnt_expression (imm_expr, asarg);
+		  riscv_validate_mammoth_vsettnt_imm (imm_expr->X_add_number);
+		  ip->insn_opcode
+		    |= ENCODE_VSETTNT_IMM (imm_expr->X_add_number);
+		  imm_expr->X_op = O_absent;
+		  asarg = expr_parse_end;
+		  continue;
+
+		case 's': /* Tile specifier.
+			     's' followed by a digit to specify the number of
+			     bits for encoding.  For example, s2 use 2 bits
+			     that encodes t[3:2], the unused lower bits t[1:0]
+			     should be 0.  */
+		  {
+		    int bits = CHAR_TO_INT(*++oparg);
+		    unsigned mtd = riscv_get_tile_specifier (asarg);
+		    /* The lower (MAX_MTD_BITS - bits) should be zero.  */
+		    if (mtd & MTD_MASK(bits))
+		      as_bad (_("bad value for mtd: mt%i. "
+		                "only mt register with multiples of %i can be use for this operand."),
+		              mtd, 1 << (MAX_MTD_BITS - bits));
+		    /* mtd[3:0] encodes to inst[11:8].*/
+		    ip->insn_opcode |= (mtd << 8);
+		    asarg = expr_parse_end;
+
+		    continue;
+		  }
+
+		default:
+		  goto unknown_riscv_ip_operand;
+		}
+	      break; /* end SiFive Mammoth */
 
 	    case ',':
 	      if (*asarg++ == *oparg)
