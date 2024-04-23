@@ -2683,6 +2683,9 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sf.vqdotsu.vx", 0, INSN_CLASS_XSFVQDOTQ, "Vd,Vt,sVm", MATCH_SF_VQDOTSU_VX, MASK_SF_VQDOTSU_VX, match_opcode, 0},
 {"sf.vqdotus.vx", 0, INSN_CLASS_XSFVQDOTQ, "Vd,Vt,sVm", MATCH_SF_VQDOTUS_VX, MASK_SF_VQDOTUS_VX, match_opcode, 0},
 
+/* Xsfvfexpa */
+{"sf.vfexpa.v", 0, INSN_CLASS_XSFVFEXPA, "Vd,VtVm",  MATCH_SF_VFEXPA_V,  MASK_SF_VFEXPA_V ,  match_opcode, 0 },
+
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 {"th.addsl",    0, INSN_CLASS_XTHEADBA,    "d,s,t,Xtu2@25",   MATCH_TH_ADDSL,    MASK_TH_ADDSL,    match_opcode, 0},
 

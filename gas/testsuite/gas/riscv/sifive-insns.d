@@ -57,3 +57,5 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+48869257[ 	]+vfwcvtbf16.f.f.v[ 	]+v4,v8,v0.t
 [ 	]+[0-9a-f]+:[ 	]+488e9257[ 	]+vfncvtbf16.f.f.w[ 	]+v4,v8,v0.t
 [ 	]+[0-9a-f]+:[ 	]+f2c4125b[ 	]+sf.vfwmacc.4x4x4[ 	]+v4,v8,v12
+[ 	]+[0-9a-f]+:[ 	]+4c531157[ 	]+sf.vfexpa.v[ 	]+v2,v5,v0.t
+[ 	]+[0-9a-f]+:[ 	]+4c531157[ 	]+sf.vfexpa.v[ 	]+v2,v5,v0.t

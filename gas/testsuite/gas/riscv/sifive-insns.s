@@ -87,3 +87,15 @@
 	.option arch, +xsfvfwmaccqqq
 	sf.vfwmacc.4x4x4 v4, v8, v12
 	.option pop
+
+        # xsfvfexpa
+	.option push
+	.option arch, +xsfvfexpa
+        sf.vfexpa.v v2, v5, v0.t
+        .option pop
+
+        # xsfvfexpa64e
+	.option push
+	.option arch, +xsfvfexpa64e
+        sf.vfexpa.v v2, v5, v0.t
+        .option pop

@@ -3814,6 +3814,9 @@
 #define MASK_SF_VQDOTSU_VX 0xfc00707f
 #define MATCH_SF_VQDOTUS_VX 0xb8006057
 #define MASK_SF_VQDOTUS_VX 0xfc00707f
+/* Xsfvfexpa */
+#define MATCH_SF_VFEXPA_V 0x4c031057
+#define MASK_SF_VFEXPA_V 0xfc0ff07f
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01
