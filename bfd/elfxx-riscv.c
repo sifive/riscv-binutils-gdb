@@ -1599,6 +1599,8 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   /* Deprecate after EA */
   {"xsfmm32ea",         ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
 
+  /* SiFive PMP-based Memory Types Extension */
+  {"xsfpmpmt",		ISA_SPEC_CLASS_DRAFT, 0, 1, 0},
   {NULL, 0, 0, 0, 0}
 };
 
