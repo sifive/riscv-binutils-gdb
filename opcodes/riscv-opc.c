@@ -2686,6 +2686,9 @@ const struct riscv_opcode riscv_opcodes[] =
 /* Xsfvfexpa */
 {"sf.vfexpa.v", 0, INSN_CLASS_XSFVFEXPA, "Vd,VtVm",  MATCH_SF_VFEXPA_V,  MASK_SF_VFEXPA_V ,  match_opcode, 0 },
 
+/* Xsfvfexp32e, Xsfvfexp16e, Xsfvfbfexp16e have the same instruction.*/
+{"sf.vfexp.v", 0, INSN_CLASS_XSFVFEXP32E_OR_XSFVFEXP16E_OR_XSFVFBFEXP16E, "Vd,VtVm",  MATCH_SF_VFEXP,  MASK_SF_VFEXP ,  match_opcode, 0 },
+
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 {"th.addsl",    0, INSN_CLASS_XTHEADBA,    "d,s,t,Xtu2@25",   MATCH_TH_ADDSL,    MASK_TH_ADDSL,    match_opcode, 0},
 

@@ -99,3 +99,22 @@
 	.option arch, +xsfvfexpa64e
         sf.vfexpa.v v2, v5, v0.t
         .option pop
+
+        # xsfvfexp32e, xsfvfexp16e, xsfvfbfexp16e
+	.option push
+	.option arch, +xsfvfexp32e
+        sf.vfexp.v v2, v5, v0.t
+        sf.vfexp.v v2, v5
+        .option pop
+
+	.option push
+	.option arch, +xsfvfexp16e
+        sf.vfexp.v v2, v5, v0.t
+        sf.vfexp.v v2, v5
+        .option pop
+
+	.option push
+	.option arch, +xsfvfbfexp16e
+        sf.vfexp.v v2, v5, v0.t
+        sf.vfexp.v v2, v5
+        .option pop

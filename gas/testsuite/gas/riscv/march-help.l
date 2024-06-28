@@ -192,3 +192,6 @@ All available -march extensions for RISC-V:
 	xsfvqdotq                               0.1
 	xsfvfexpa                               0.2
 	xsfvfexpa64e                            0.2
+	xsfvfexp32e                             0.1
+	xsfvfexp16e                             0.1
+	xsfvfbfexp16e                           0.1

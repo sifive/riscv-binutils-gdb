@@ -3817,6 +3817,9 @@
 /* Xsfvfexpa */
 #define MATCH_SF_VFEXPA_V 0x4c031057
 #define MASK_SF_VFEXPA_V 0xfc0ff07f
+/* Xsfvfexp32e, Xsfvfexp16e, Xsfvfbfexp16e */
+#define MATCH_SF_VFEXP 0x4c039057
+#define MASK_SF_VFEXP 0xfc0ff07f
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01

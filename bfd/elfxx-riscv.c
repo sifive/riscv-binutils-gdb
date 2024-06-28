@@ -1193,6 +1193,9 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"xsfvfhbfmin", "+zvfbfmin", check_implicit_always},
   {"xsfvfexpa", "+zve32f", check_implicit_always},
   {"xsfvfexpa64e", "+xsfvfexpa,+zve64d", check_implicit_always},
+  {"xsfvfexp32e", "+zve32f",	check_implicit_always},
+  {"xsfvfexp16e", "+zvfh",	check_implicit_always},
+  {"xsfvfbfexp16e", "+zve32f",	check_implicit_always},
 
   {"v", "+zve64d,+zvl128b", check_implicit_always},
   {"zvfh", "+zvfhmin,+zfhmin", check_implicit_always},
@@ -1551,6 +1554,9 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {"xsfvqdotq",		ISA_SPEC_CLASS_DRAFT,	0, 1, 0},
   {"xsfvfexpa",		ISA_SPEC_CLASS_DRAFT,	0, 2, 0},
   {"xsfvfexpa64e",	ISA_SPEC_CLASS_DRAFT,	0, 2, 0},
+  {"xsfvfexp32e",		ISA_SPEC_CLASS_DRAFT, 0, 1, 0},
+  {"xsfvfexp16e",		ISA_SPEC_CLASS_DRAFT, 0, 1, 0},
+  {"xsfvfbfexp16e",		ISA_SPEC_CLASS_DRAFT, 0, 1, 0},
   {NULL, 0, 0, 0, 0}
 };
 
@@ -2861,6 +2867,10 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "xsfvqdotq");
     case INSN_CLASS_XSFVFEXPA:
       return riscv_subset_supports (rps, "xsfvfexpa");
+    case INSN_CLASS_XSFVFEXP32E_OR_XSFVFEXP16E_OR_XSFVFBFEXP16E:
+      return (riscv_subset_supports (rps, "xsfvfexp32e")
+	      || riscv_subset_supports (rps, "xsfvfexp16e")
+	      || riscv_subset_supports (rps, "xsfvfbfexp16e"));
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));
@@ -3110,6 +3120,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return _("smctr' or `ssctr");
     case INSN_CLASS_XSFVFEXPA:
       return _("xsfvfexpa");
+    case INSN_CLASS_XSFVFEXP32E_OR_XSFVFEXP16E_OR_XSFVFBFEXP16E:
+      return _("xsfvfexp32e' or `xsfvfexp16e' or `xsfvfbfexp16e'");
     case INSN_CLASS_SVINVAL:
       return "svinval";
     case INSN_CLASS_H:
