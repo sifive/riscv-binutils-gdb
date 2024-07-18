@@ -19,9 +19,9 @@
 	vsetvli  a0, a1,  0x700
 	vsetvli  a0, a1,  0x400
 	vsetvli  a0, a1,  0x300
-	vsetvli  a0, a1,  0x100
+	vsetvli  a0, a1,  0x200
 	vsetivli a0, 0xb, 0x300
-	vsetivli a0, 0xb, 0x100
+	vsetivli a0, 0xb, 0x200
 
 	vlm.v v4, (a0)
 	vlm.v v4, 0(a0)

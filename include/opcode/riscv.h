@@ -353,6 +353,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define OP_SH_VTA		6
 #define OP_MASK_VMA		0x1
 #define OP_SH_VMA		7
+#define OP_MASK_ALTFMT		0x1
+#define OP_SH_ALTFMT		8
 #define OP_MASK_VWD		0x1
 #define OP_SH_VWD		26
 
@@ -565,6 +567,7 @@ enum riscv_insn_class
   INSN_CLASS_V_AND_XSFVFWNACCQQQ,
   INSN_CLASS_XSFPGFLUSHDLONE,
   INSN_CLASS_XSFVQDOTQ,
+  INSN_CLASS_XSFVFBFA,
   INSN_CLASS_XSFVFEXPA,
   INSN_CLASS_XSFVFEXP32E_OR_XSFVFEXP16E_OR_XSFVFBFEXP16E,
 };

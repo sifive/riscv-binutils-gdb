@@ -2636,13 +2636,22 @@ my_getOpcodeExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
    expression.  */
 
 static void
-my_getVsetvliExpression (expressionS *ep, char *str)
+get_vsetvli_expression (expressionS *ep, char *str)
 {
-  unsigned int vsew_value = 0, vlmul_value = 0;
+  unsigned int vsew_value = 0, altfmt_value = 0, vlmul_value = 0;
   unsigned int vta_value = 0, vma_value = 0;
   bfd_boolean vsew_found = FALSE, vlmul_found = FALSE;
   bfd_boolean vta_found = FALSE, vma_found = FALSE;
 
+  /* Use altfmt in vtype for bf16:
+
+     vsew  altfmt  assembler syntax
+     00     0        e8
+     00     0        e8alt
+     01     0        e16
+     01     1        e16alt
+     10     0        e32
+     11     0        e64   */
   if (arg_lookup (&str, riscv_vsew, ARRAY_SIZE (riscv_vsew), &vsew_value))
     {
       if (*str == ',')
@@ -2650,6 +2659,36 @@ my_getVsetvliExpression (expressionS *ep, char *str)
       if (vsew_found)
 	as_bad (_("multiple vsew constants"));
       vsew_found = TRUE;
+    }
+  else
+    {
+     /* For bf16 varients (e8alt and e16alt), parse it as a special case
+      because it doesn't fit into the convension that use an array index as the
+      encoding. If we got more special cases, consider using a new mechanism.
+      */
+      const char *e8alt = "e8alt";
+      size_t len = strlen (e8alt);
+      if (strncmp(str, e8alt, len) == 0)
+        {
+          vsew_value = 0;
+          altfmt_value = 1;
+          if (vsew_found)
+            as_bad (_("multiple vsew constants"));
+          vsew_found = TRUE;
+          str += len + 1;
+        }
+
+      const char *e16alt = "e16alt";
+      len = strlen (e16alt);
+      if (strncmp(str, e16alt, len) == 0)
+        {
+          vsew_value = 1;
+          altfmt_value = 1;
+          if (vsew_found)
+            as_bad (_("multiple vsew constants"));
+          vsew_found = TRUE;
+          str += len + 1;
+        }
     }
   if (arg_lookup (&str, riscv_vlmul, ARRAY_SIZE (riscv_vlmul), &vlmul_value))
     {
@@ -2680,9 +2719,10 @@ my_getVsetvliExpression (expressionS *ep, char *str)
     {
       ep->X_op = O_constant;
       ep->X_add_number = (vlmul_value << OP_SH_VLMUL)
-			 | (vsew_value << OP_SH_VSEW)
-			 | (vta_value << OP_SH_VTA)
-			 | (vma_value << OP_SH_VMA);
+                          | (vsew_value << OP_SH_VSEW)
+                          | (altfmt_value << OP_SH_ALTFMT)
+                          | (vta_value << OP_SH_VTA)
+                          | (vma_value << OP_SH_VMA);
       expr_parse_end = str;
     }
   else
@@ -3341,7 +3381,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  break;
 
 		case 'b': /* vtypei for vsetivli */
-		  my_getVsetvliExpression (imm_expr, asarg);
+		  get_vsetvli_expression (imm_expr, asarg);
 		  check_absolute_expr (ip, imm_expr, FALSE);
 		  if (!VALID_RVV_VB_IMM (imm_expr->X_add_number))
 		    as_bad (_("bad value for vsetivli immediate field, "
@@ -3353,7 +3393,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  continue;
 
 		case 'c': /* vtypei for vsetvli */
-		  my_getVsetvliExpression (imm_expr, asarg);
+		  get_vsetvli_expression (imm_expr, asarg);
 		  check_absolute_expr (ip, imm_expr, FALSE);
 		  if (!VALID_RVV_VC_IMM (imm_expr->X_add_number))
 		    as_bad (_("bad value for vsetvli immediate field, "

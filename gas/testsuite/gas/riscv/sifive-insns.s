@@ -118,3 +118,12 @@
         sf.vfexp.v v2, v5, v0.t
         sf.vfexp.v v2, v5
         .option pop
+
+        # xsfvfbfa
+        .option push
+        .option arch, +xsfvfbfa
+        vsetvli a0, a1, e8alt, m1, ta, ma
+        vsetvli a0, a1, e16alt, m1, ta, ma
+        vsetivli a0, 0xb, e8alt,  m2
+        vsetivli a0, 0xb, e16alt,  m2
+        .option pop
