@@ -164,6 +164,11 @@ parse_riscv_dis_option (const char *option)
 				 option, value, name);
 	}
     }
+  else if (strcmp (option, "arch") == 0)
+    {
+      riscv_release_subset_list (&riscv_subsets);
+      riscv_parse_subset (&riscv_rps_dis, value);
+    }
   else
     {
       /* xgettext:c-format */
@@ -1638,6 +1643,7 @@ typedef enum
 {
   RISCV_OPTION_ARG_NONE = -1,
   RISCV_OPTION_ARG_PRIV_SPEC,
+  RISCV_OPTION_ARG_ARCH,
 
   RISCV_OPTION_ARG_COUNT
 } riscv_option_arg_t;
@@ -1659,7 +1665,10 @@ static struct
     RISCV_OPTION_ARG_NONE },
   { "priv-spec=",
     N_("Print the CSR according to the chosen privilege spec."),
-    RISCV_OPTION_ARG_PRIV_SPEC }
+    RISCV_OPTION_ARG_PRIV_SPEC },
+  { "arch=",
+    N_("Disassemble with the specified arch."),
+    RISCV_OPTION_ARG_ARCH }
 };
 
 /* Build the structure representing valid RISCV disassembler options.
@@ -1690,6 +1699,10 @@ disassembler_options_riscv (void)
           = riscv_priv_specs[i].name;
       /* The array we return must be NULL terminated.  */
       args[RISCV_OPTION_ARG_PRIV_SPEC].values[i] = NULL;
+
+      /* Setup -M arch. Since we accept any values, set values to NULL.  */
+      args[RISCV_OPTION_ARG_ARCH].name = "ARCH";
+      args[RISCV_OPTION_ARG_ARCH].values = NULL;
 
       /* The array we return must be NULL terminated.  */
       args[num_args].name = NULL;
