@@ -1009,15 +1009,23 @@ riscv_disassemble_insn (bfd_vma memaddr,
   op = riscv_hash[OP_HASH_IDX (word)];
   if (op != NULL)
     {
-      /* If XLEN is not known, get its value from the ELF class.  */
-      if (info->mach == bfd_mach_riscv64)
-	xlen = 64;
-      else if (info->mach == bfd_mach_riscv32)
-	xlen = 32;
-      else if (info->section != NULL)
+      /* If XLEN is not known, try to set it. Default to 32.  */
+      if (xlen == 0)
 	{
-	  Elf_Internal_Ehdr *ehdr = elf_elfheader (info->section->owner);
-	  xlen = ehdr->e_ident[EI_CLASS] == ELFCLASS64 ? 64 : 32;
+	  /* Default to 32.  */
+	  xlen = 32;
+	  if (info->mach == bfd_mach_riscv64)
+	    xlen = 64;
+	  else if (info->mach == bfd_mach_riscv32)
+	    xlen = 32;
+	  else if (info->section != NULL)
+	    {
+	      Elf_Internal_Ehdr *ehdr = elf_elfheader (info->section->owner);
+	      if (ehdr->e_ident[EI_CLASS] == ELFCLASS64)
+		xlen = 64;
+	      else if (ehdr->e_ident[EI_CLASS] == ELFCLASS32)
+		xlen = 32;
+	    }
 	}
 
       /* If arch has the Zfinx extension, replace FPR with GPR.  */
