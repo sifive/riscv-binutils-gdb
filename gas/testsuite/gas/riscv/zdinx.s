@@ -29,7 +29,9 @@ target:
 	fcvt.lu.d	a0, a1
 	fcvt.lu.d	a0, a1, rne
 	fcvt.d.w	a0, a1
+	fcvt.d.w	a0, a1, dyn
 	fcvt.d.wu	a0, a1
+	fcvt.d.wu	a0, a1, dyn
 	fcvt.d.l	a0, a1
 	fcvt.d.l	a0, a1, rne
 	fcvt.d.lu	a0, a1

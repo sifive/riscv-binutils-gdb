@@ -67,8 +67,11 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+e4058553[ 	]+fmv.x.h[ 	]+a0,fa1
 [ 	]+[0-9a-f]+:[ 	]+f4058553[ 	]+fmv.h.x[ 	]+fa0,a1
 [ 	]+[0-9a-f]+:[ 	]+40258553[ 	]+fcvt.s.h[ 	]+fa0,fa1
+[ 	]+[0-9a-f]+:[ 	]+4025f553[ 	]+fcvt.s.h[ 	]+fa0,fa1,dyn
 [ 	]+[0-9a-f]+:[ 	]+42258553[ 	]+fcvt.d.h[ 	]+fa0,fa1
+[ 	]+[0-9a-f]+:[ 	]+4225f553[ 	]+fcvt.d.h[ 	]+fa0,fa1,dyn
 [ 	]+[0-9a-f]+:[ 	]+46258553[ 	]+fcvt.q.h[ 	]+fa0,fa1
+[ 	]+[0-9a-f]+:[ 	]+4625f553[ 	]+fcvt.q.h[ 	]+fa0,fa1,dyn
 [ 	]+[0-9a-f]+:[ 	]+4405f553[ 	]+fcvt.h.s[ 	]+fa0,fa1
 [ 	]+[0-9a-f]+:[ 	]+44058553[ 	]+fcvt.h.s[ 	]+fa0,fa1,rne
 [ 	]+[0-9a-f]+:[ 	]+4415f553[ 	]+fcvt.h.d[ 	]+fa0,fa1

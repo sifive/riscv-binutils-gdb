@@ -53,8 +53,11 @@
 	fmv.h.x		fa0, a1
 
 	fcvt.s.h	fa0, fa1
+	fcvt.s.h	fa0, fa1, dyn
 	fcvt.d.h	fa0, fa1
+	fcvt.d.h	fa0, fa1, dyn
 	fcvt.q.h	fa0, fa1
+	fcvt.q.h	fa0, fa1, dyn
 	fcvt.h.s	fa0, fa1
 	fcvt.h.s	fa0, fa1, rne
 	fcvt.h.d	fa0, fa1

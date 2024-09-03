@@ -29,12 +29,18 @@ target:
 	fcvt.lu.q	a0, a2
 	fcvt.lu.q	a0, a2, rne
 	fcvt.q.w	a0, a2
+	fcvt.q.w	a0, a2, dyn
 	fcvt.q.wu	a0, a2
+	fcvt.q.wu	a0, a2, dyn
 	fcvt.q.l	a0, a2
+	fcvt.q.l	a0, a2, dyn
 	fcvt.q.lu	a0, a2
+	fcvt.q.lu	a0, a2, dyn
 
 	fcvt.q.s	a0, a2
+	fcvt.q.s	a0, a2, dyn
 	fcvt.q.d	a0, a2
+	fcvt.q.d	a0, a2, dyn
 	fcvt.s.q	a0, a2
 	fcvt.s.q	a0, a2, rne
 	fcvt.d.q	a0, a2
