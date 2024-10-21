@@ -1733,6 +1733,29 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		  goto unknown_validate_operand;
 		}
 	      break;
+		/* SIMD exntension insns.  */
+		case 'p':
+	    switch (*++oparg)
+		{
+		/* shift amount, 0 - 7.  */
+		case 'B': USE_BITS (OP_MASK_SHAMTB, OP_SH_SHAMTB); break;
+		/* shift amount, 0 - 15.  */
+		case 'H': USE_BITS (OP_MASK_SHAMTH, OP_SH_SHAMTH); break;
+		/* load word imm.  */
+		case 'I': used_bits |= ENCODE_PLI_IMM (-1U); break;
+		/* load byte imm.  */
+		case 'b': used_bits |= ENCODE_PLI_B_IMM (-1U); break;
+		/* load half word unsigned imm.  */
+		case 'h': used_bits |= ENCODE_PLUI_H_IMM (-1U); break;
+		/* load word unsigned imm.  */
+		case 'u': used_bits |= ENCODE_PLUI_IMM (-1U); break;
+		case 'd': USE_BITS (OP_MASK_RDP, OP_SH_RDP); break;
+		case 's': USE_BITS (OP_MASK_RS1P, OP_SH_RS1P); break;
+		case 't': USE_BITS (OP_MASK_RS2P, OP_SH_RS2P); break;
+		default:
+		  goto unknown_validate_operand;
+		}
+	      break;
 	    default:
 	      goto unknown_validate_operand;
 	    }
@@ -3656,6 +3679,115 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 
 		      default:
 			goto unknown_riscv_ip_operand;
+		    }
+		  break;
+
+		case 'p':
+		  switch (*++oparg)
+		    {
+		    case 'B': /* Immediate field for 'pslli.b'.  */
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, false);
+		      const uint64_t SHAMTB_MAX = 7;
+		      uint64_t shift_b = (uint64_t)imm_expr->X_add_number;
+		      if (shift_b > SHAMTB_MAX)
+			as_bad(_("Invalid shift amount for 'pslli.b' "
+			    "(should between 0-%"PRIu64")")
+			    , SHAMTB_MAX);
+		      INSERT_OPERAND (SHAMTB, *ip, imm_expr->X_add_number);
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;
+		    case 'H': /* Immediate field for 'pslli.h'.  */
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, false);
+		      const uint64_t SHAMTH_MAX = 15;
+		      uint64_t shift_h = (uint64_t)imm_expr->X_add_number;
+		      if (shift_h > SHAMTH_MAX)
+			as_bad(_("Invalid shift amount. (should between 0-%"PRIu64")")
+			    , SHAMTH_MAX);
+		      INSERT_OPERAND (SHAMTH, *ip, imm_expr->X_add_number);
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;
+		    case 'b': /* Immediate field for 'pli.b'.  */
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, false);
+		      if (imm_expr->X_add_number > 127
+			 || imm_expr->X_add_number < -128)
+		      as_bad(_("Improper immediate value for 'pli.b' (%"PRIu64"). "
+			    "(should between -128-127)"),
+			    imm_expr->X_add_number);
+		      ip->insn_opcode |= ENCODE_PLI_B_IMM (imm_expr->X_add_number);
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;
+		    case 'I': /* Immediate field for 'pli.h/w'.  */
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, false);
+		      if (imm_expr->X_add_number > 511
+			|| imm_expr->X_add_number < -512)
+		      as_bad (_("Improper immediate value for 'pli.h/w' (%"PRIi64"). "
+				"(shoud between -512-511)"),
+				imm_expr->X_add_number);
+		      ip->insn_opcode |= ENCODE_PLI_IMM (imm_expr->X_add_number);
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;
+		    case 'h': /* Immediate field for 'plui.h'.  */
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, false);
+		      if (imm_expr->X_add_number > 511
+			 || imm_expr->X_add_number < -512)
+		      as_bad(_("Improper immediate value for 'plui.h' (%"PRIu64"). "
+			    "(should between -512-512)"),
+			    imm_expr->X_add_number);
+			  imm_expr->X_add_number <<= RISCV_PIMM_H_BITS;
+		      ip->insn_opcode |= ENCODE_PLUI_H_IMM (imm_expr->X_add_number);
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;
+		    case 'u': /* Immediate field for 'plui.w'.  */
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, false);
+		      if (imm_expr->X_add_number > 511
+			 || imm_expr->X_add_number < -512)
+		      as_bad(_("Improper immediate value for 'plui.w' (%"PRIu64"). "
+			    "(should between -512-512)"),
+			    imm_expr->X_add_number);
+			  imm_expr->X_add_number <<= RISCV_PIMM_BITS;
+		      ip->insn_opcode |= ENCODE_PLUI_IMM (imm_expr->X_add_number);
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;
+		    case 'd': /* Destination register.  */
+		    case 's': /* Source register.  */
+		    case 't': /* Source register2.*/
+		      if (reg_lookup (&asarg, RCLASS_GPR, &regno))
+		      {
+			char c = *oparg;
+			if (is_whitespace (*asarg))
+			  ++asarg;
+
+			/* Now that we have assembled one operand, we use the args
+			 string to figure out where it goes in the instruction.  */
+			switch (c)
+			{
+			  case 's':
+			    INSERT_OPERAND (RS1P, *ip, regno);
+			    break;
+			  case 'd':
+			    INSERT_OPERAND (RDP, *ip, regno);
+			    break;
+			  case 't':
+			    INSERT_OPERAND (RS2P, *ip, regno);
+			    break;
+			}
+			continue;
+		      }
+	      break;
+		    default:
+		      goto unknown_riscv_ip_operand;
 		    }
 		  break;
 

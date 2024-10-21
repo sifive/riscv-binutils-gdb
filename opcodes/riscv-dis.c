@@ -336,6 +336,9 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
   struct riscv_private_data *pd = info->private_data;
   int rs1 = (l >> OP_SH_RS1) & OP_MASK_RS1;
   int rd = (l >> OP_SH_RD) & OP_MASK_RD;
+  int rdp = (l >> OP_SH_RDP) & OP_MASK_RDP;
+  int rs1p = (l >> OP_SH_RS1P) & OP_MASK_RS1P;
+  int rs2p = (l >> OP_SH_RS2P) & OP_MASK_RS2P;
   fprintf_styled_ftype print = info->fprintf_styled_func;
   const char *opargStart;
 
@@ -821,6 +824,49 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 			 "%" PRIu64, EXTRACT_ZCMT_INDEX (l));
 		  maybe_print_jvt_address (
 		    pd, EXTRACT_ZCMT_INDEX (l));
+		  break;
+		default:
+		  goto undefined_modifier;
+		}
+	      break;
+	    case 'p': /* SIMD extension instruction fields. */
+	      switch (*++oparg)
+		{
+		case 'B':
+		  print (info->stream, dis_style_immediate, "0x%x",
+			(unsigned)EXTRACT_OPERAND (SHAMTB, l));
+		  break;
+		case 'H':
+		  print (info->stream, dis_style_immediate, "0x%x",
+			(unsigned)EXTRACT_OPERAND (SHAMTH, l));
+		  break;
+		case 'b':
+		  print (info->stream, dis_style_immediate, "%i",
+			(int)EXTRACT_PLI_B_IMM (l));
+		  break;
+		case 'I':
+		  print (info->stream, dis_style_immediate, "%d",
+			(int)EXTRACT_PLI_IMM (l));
+		  break;
+		case 'h':
+		  print (info->stream, dis_style_immediate, "%d",
+			(int)EXTRACT_PLUI_H_IMM (l));
+		  break;
+		case 'u':
+		  print (info->stream, dis_style_immediate, "%d",
+			(int)EXTRACT_PLUI_IMM (l));
+		  break;
+		case 'd':
+		  print (info->stream, dis_style_register, "%s",
+			pd->riscv_gpr_names[rdp]);
+		  break;
+		case 's':
+		  print (info->stream, dis_style_register, "%s",
+			pd->riscv_gpr_names[rs1p]);
+		  break;
+		case 't':
+		  print (info->stream, dis_style_register, "%s",
+			pd->riscv_gpr_names[rs2p]);
 		  break;
 		default:
 		  goto undefined_modifier;

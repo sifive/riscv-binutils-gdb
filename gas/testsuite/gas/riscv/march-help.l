@@ -9,6 +9,7 @@ All available -march extensions for RISC-V:
 	c                                       2.0
 	b                                       1.0
 	v                                       1.0
+	p                                       0.15
 	h                                       1.0
 	zic64b                                  1.0
 	ziccamoa                                1.0

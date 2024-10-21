@@ -119,6 +119,14 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   (RV_X(x, 2, 2) << 4)
 #define EXTRACT_ZCMT_INDEX(x) \
   (RV_X(x, 2, 8))
+#define EXTRACT_PLI_IMM(x) \
+  (RV_X(x, 16, 9) | (RV_IMM_SIGN_N(x, 15, 1) << 10))
+#define EXTRACT_PLI_B_IMM(x) \
+  (RV_X(x, 16, 8) | (RV_IMM_SIGN_N(x, 16, 8) << 8))
+#define EXTRACT_PLUI_IMM(x) \
+  (RV_X(x, 15, 9) << 23 | RV_X(x, 24, 1) << 22 | (RV_IMM_SIGN_N(x, 15, 9) << 31)) >> 22
+#define EXTRACT_PLUI_H_IMM(x) \
+  (RV_X(x, 15, 9) << 7 | RV_X(x, 24, 1) << 6 | (RV_IMM_SIGN_N(x, 15, 9) << 15)) >> 6
 /* Vendor-specific (CORE-V) extract macros.  */
 #define EXTRACT_CV_IS2_UIMM5(x) \
   (RV_X(x, 20, 5))
@@ -203,6 +211,14 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   (RV_X(x, 4, 2) << 2)
 #define ENCODE_ZCMT_INDEX(x) \
   (RV_X(x, 0, 8) << 2)
+#define ENCODE_PLI_IMM(x) \
+  (RV_X(x, 0, 9) << 16 | RV_X(x, 9, 1) << 15)
+#define ENCODE_PLI_B_IMM(x) \
+  (RV_X(x, 0, 8) << 16)
+#define ENCODE_PLUI_IMM(x) \
+  ((RV_X(x, 23, 9) << 15) | (RV_X(x, 22, 1) << 24))
+#define ENCODE_PLUI_H_IMM(x) \
+  ((RV_X(x, 7, 9) << 15) | (RV_X(x, 6, 1) << 24))
 /* Vendor-specific (CORE-V) encode macros.  */
 #define ENCODE_CV_IS2_UIMM5(x) \
   (RV_X(x, 0, 5) << 20)
@@ -252,6 +268,10 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define VALID_ZCB_BYTE_UIMM(x) (EXTRACT_ZCB_BYTE_UIMM(ENCODE_ZCB_BYTE_UIMM(x)) == (x))
 #define VALID_ZCB_HALFWORD_UIMM(x) (EXTRACT_ZCB_HALFWORD_UIMM(ENCODE_ZCB_HALFWORD_UIMM(x)) == (x))
 #define VALID_ZCMP_SPIMM(x) (EXTRACT_ZCMP_SPIMM(ENCODE_ZCMP_SPIMM(x)) == (x))
+#define VALID_PLI_IMM(x) (EXTRACT_PLI_IMM(ENCODE_PLI_IMM(x)) == (x))
+#define VALID_PLI_B_IMM(x) (EXTRACT_PLI_B_IMM(ENCODE_PLI_B_IMM(x)) == (x))
+#define VALID_PLUI_IMM(x) (EXTRACT_PLUI_IMM(ENCODE_PLUI_IMM(x)) == (x))
+#define VALID_PLUI_H_IMM(x) (EXTRACT_PLUI_H_IMM(ENCODE_PLUI_H_IMM(x)) == (x))
 
 #define RISCV_RTYPE(insn, rd, rs1, rs2) \
   ((MATCH_ ## insn) | ((rd) << OP_SH_RD) | ((rs1) << OP_SH_RS1) | ((rs2) << OP_SH_RS2))
@@ -289,6 +309,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define RISCV_BRANCH_ALIGN_BITS RISCV_JUMP_ALIGN_BITS
 #define RISCV_BRANCH_ALIGN (1 << RISCV_BRANCH_ALIGN_BITS)
 #define RISCV_BRANCH_REACH (RISCV_IMM_REACH * RISCV_BRANCH_ALIGN)
+#define RISCV_PIMM_BITS 22
+#define RISCV_PIMM_H_BITS 6
 
 /* RV fields.  */
 
@@ -316,6 +338,10 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define OP_SH_AQ		26
 #define OP_MASK_RL		0x1
 #define OP_SH_RL		25
+#define OP_MASK_SHAMTB		0x7
+#define OP_SH_SHAMTB		20
+#define OP_MASK_SHAMTH		0xf
+#define OP_SH_SHAMTH		20
 
 #define OP_MASK_CSR		0xfffU
 #define OP_SH_CSR		20
@@ -402,6 +428,14 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define OP_SH_SREG1		7
 #define OP_MASK_SREG2		0x7
 #define OP_SH_SREG2		2
+
+/* RVP fields.  */
+#define OP_MASK_RS2P		0xf
+#define OP_SH_RS2P		21
+#define OP_MASK_RS1P		0xf
+#define OP_SH_RS1P		16
+#define OP_MASK_RDP		0xf
+#define OP_SH_RDP		8
 
 #define NVECR 32
 #define NVECM 1
@@ -585,6 +619,11 @@ enum riscv_insn_class
   INSN_CLASS_ZABHA,
   INSN_CLASS_ZACAS,
   INSN_CLASS_ZABHA_AND_ZACAS,
+  INSN_CLASS_P,
+  INSN_CLASS_P_OR_ZBA,
+  INSN_CLASS_P_OR_ZBB,
+  INSN_CLASS_P_OR_ZBKB,
+  INSN_CLASS_P_ZBB_OR_ZBKB,
   INSN_CLASS_H,
   INSN_CLASS_XCVALU,
   INSN_CLASS_XCVBI,
