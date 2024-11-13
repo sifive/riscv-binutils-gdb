@@ -611,6 +611,7 @@ enum riscv_insn_class
   INSN_CLASS_XSFMM32A8F,
   INSN_CLASS_XSFMM32A8I_OR_XSFMM32A,
   INSN_CLASS_XSFMM32A16F_OR_XSFMM32A32F_XSFMM64A64F_OR_XSFMM32A,
+  INSN_CLASS_XSFSCI,
 };
 
 /* This structure holds information for a particular instruction.  */

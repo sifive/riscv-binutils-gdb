@@ -3906,6 +3906,10 @@
 
 #define MATCH_SF_MAMMOTH_VTDISCARD 0x43c06057
 #define MASK_SF_MAMMOTH_VTDISCARD 0xffffffff
+
+/* Vendor-specific (SiFive) SiFive Scalar Coprocessor Interface (SSCI).  */
+#define MASK_SF_SCI 0x0000007f
+#define MATCH_SF_SCI 0x0000007b
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01

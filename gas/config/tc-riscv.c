@@ -1807,6 +1807,15 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 			  goto unknown_validate_operand;
 		      }
 		    break;
+		  case 'F':
+		    switch (*++oparg)
+		      {
+			case '3': USE_BITS (OP_MASK_FUNCT3, OP_SH_FUNCT3); break;
+			default:
+			  goto unknown_validate_operand;
+		      }
+		    break;
+
 		  default:
 		    goto unknown_validate_operand;
 		}
@@ -4679,6 +4688,38 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			    (XSO1, ip, imm_expr, imm_reloc, asarg, 26, 26);
 			  continue;
 			}
+		      goto unknown_riscv_ip_operand;
+		    case 'F':
+		      switch (*++oparg)
+			{
+			case '3': /* XsF3 */
+			  my_getExpression (imm_expr, asarg);
+			  if (imm_expr->X_op != O_constant)
+			    {
+			      as_bad (_("funct3 require a immediate value"));
+			      break;
+			    }
+			  if ((imm_expr->X_add_number & 0x1) == 1)
+			    {
+			      as_bad (_("SSCI instructions with funct3[0]=1 are reserved for future use."));
+			      break;
+			    }
+
+			  if (imm_expr->X_add_number < 0
+			      || imm_expr->X_add_number > 7)
+			    {
+			      as_bad (_("bad value for funct3 field, "
+					"value must be 0...7"));
+			      break;
+			    }
+			  INSERT_OPERAND (FUNCT3, *ip, imm_expr->X_add_number);
+			  imm_expr->X_op = O_absent;
+			  asarg = expr_parse_end;
+			  continue;
+			default:
+			  goto unknown_riscv_ip_operand;
+			}
+		      break;
 		    default:
 		      goto unknown_riscv_ip_operand;
 		    }

@@ -1959,6 +1959,9 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
 
   /* SiFive PMP-based Memory Types Extension */
   {"xsfpmpmt",		ISA_SPEC_CLASS_DRAFT, 0, 1, 0},
+
+  {"xsfsci",		ISA_SPEC_CLASS_DRAFT, 1, 0, 0},
+
   {NULL, 0, 0, 0, 0}
 };
 
@@ -3330,6 +3333,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
 	      || riscv_subset_supports (rps, "xsfmm32a32f")
 	      || riscv_subset_supports (rps, "xsfmm64a64f")
 	      || riscv_subset_supports (rps, "xsfmm32a"));
+    case INSN_CLASS_XSFSCI:
+      return riscv_subset_supports (rps, "xsfsci");
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));
@@ -3587,6 +3592,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return _("xsfvfexpa");
     case INSN_CLASS_XSFVFEXP32E_OR_XSFVFEXP16E_OR_XSFVFBFEXP16E:
       return _("xsfvfexp32e' or `xsfvfexp16e' or `xsfvfbfexp16e'");
+    case INSN_CLASS_XSFSCI:
+      return _("xsfsci");
     case INSN_CLASS_SVINVAL:
       return "svinval";
     case INSN_CLASS_H:

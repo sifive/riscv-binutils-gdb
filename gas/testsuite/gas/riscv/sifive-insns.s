@@ -127,3 +127,11 @@
         vsetivli a0, 0xb, e8alt,  m2
         vsetivli a0, 0xb, e16alt,  m2
         .option pop
+
+	# xsfsci
+
+	.option push
+	.option arch, +xsfsci
+	sf.sci 0, 0, a0, a1, a2
+	sf.sci 6, 127, a0, a1, a2
+	.option pop
