@@ -2785,6 +2785,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	case R_RISCV_COPY:
 	case R_RISCV_JUMP_SLOT:
 	case R_RISCV_RELATIVE:
+	case R_RISCV_LPAD:
 	  /* These require nothing of us at all.  */
 	  continue;
 

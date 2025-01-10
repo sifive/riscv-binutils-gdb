@@ -1956,6 +1956,9 @@ riscv_apply_const_reloc (bfd_reloc_code_real_type reloc_type, bfd_vma value)
     case BFD_RELOC_RISCV_LO12_I:
       return ENCODE_ITYPE_IMM (value);
 
+    case BFD_RELOC_RISCV_LPAD:
+      return ENCODE_UTYPE_IMM (value << RISCV_IMM_BITS);
+
     default:
       abort ();
     }
@@ -3678,6 +3681,16 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  *imm_reloc = BFD_RELOC_RISCV_HI20;
 		  imm_expr->X_add_number <<= RISCV_IMM_BITS;
 		}
+	      {
+		bool is_lpad = strcmp (str, "lpad") == 0;
+		if (is_lpad)
+		  {
+		    /* Always insert a lpad relocation for lpad instruction.  */
+		    *imm_reloc = BFD_RELOC_RISCV_LPAD;
+		    /* And recover the immediate format to unshift value.  */
+		    imm_expr->X_add_number >>= RISCV_IMM_BITS;
+		  }
+	      }
 	      asarg = expr_parse_end;
 	      continue;
 
@@ -4671,6 +4684,14 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 
   switch (fixP->fx_r_type)
     {
+    case BFD_RELOC_RISCV_LPAD:
+      bfd_putl32 (riscv_apply_const_reloc (fixP->fx_r_type, *valP)
+		  | bfd_getl32 (buf), buf);
+      fixP->fx_done = false;
+      fixP->fx_addnumber = 0;
+      fixP->fx_offset = 0;
+      relaxable = true;
+      break;
     case BFD_RELOC_RISCV_HI20:
     case BFD_RELOC_RISCV_LO12_I:
     case BFD_RELOC_RISCV_LO12_S:
@@ -4965,8 +4986,11 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
   if (fixP->fx_subsy != NULL)
     as_bad_subtract (fixP);
 
-  /* Add an R_RISCV_RELAX reloc if the reloc is relaxable.  */
-  if (relaxable && fixP->fx_tcbit && fixP->fx_addsy != NULL)
+  /* Add an R_RISCV_RELAX reloc if the reloc is relaxable,
+     and we need that for R_RISCV_LPAD as well.  */
+  if (relaxable && fixP->fx_tcbit
+      && (fixP->fx_addsy != NULL
+	  || (fixP->fx_r_type == BFD_RELOC_RISCV_LPAD)))
     {
       fixP->fx_next = xmemdup (fixP, sizeof (*fixP), sizeof (*fixP));
       fixP->fx_next->fx_addsy = fixP->fx_next->fx_subsy = NULL;
