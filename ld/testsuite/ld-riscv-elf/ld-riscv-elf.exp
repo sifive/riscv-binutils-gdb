@@ -335,6 +335,7 @@ if [istarget "riscv*-*-*"] {
     }
     run_dump_test "tls"
     run_dump_test "tlsbin"
+    run_dump_test "lpad-reloc"
 
     # Zcmt (jump table) tests
     run_dump_test "table-jump-jalt"

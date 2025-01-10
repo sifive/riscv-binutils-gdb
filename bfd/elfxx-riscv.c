@@ -878,7 +878,20 @@ static reloc_howto_type howto_table[] =
 	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
 	 false) 			/* pcrel_offset */
   ,
-  EMPTY_HOWTO (66), EMPTY_HOWTO (67), EMPTY_HOWTO (68), EMPTY_HOWTO (69),
+  HOWTO (R_RISCV_LPAD,			/* type */
+	 0,				/* rightshift */
+	 0,				/* size */
+	 0,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_LPAD",		/* name */
+	 false,				/* partial_inplace */
+	 0,				/* src_mask */
+	 0,				/* dst_mask */
+	 false),			/* pcrel_offset */
+  EMPTY_HOWTO (67), EMPTY_HOWTO (68), EMPTY_HOWTO (69),
   EMPTY_HOWTO (70), EMPTY_HOWTO (71), EMPTY_HOWTO (72), EMPTY_HOWTO (73),
   EMPTY_HOWTO (74), EMPTY_HOWTO (75), EMPTY_HOWTO (76), EMPTY_HOWTO (77),
   EMPTY_HOWTO (78), EMPTY_HOWTO (79), EMPTY_HOWTO (80), EMPTY_HOWTO (81),
@@ -1309,6 +1322,7 @@ static const struct elf_reloc_map riscv_reloc_map[] =
   { BFD_RELOC_RISCV_32_PCREL, R_RISCV_32_PCREL },
   { BFD_RELOC_RISCV_SET_ULEB128, R_RISCV_SET_ULEB128 },
   { BFD_RELOC_RISCV_SUB_ULEB128, R_RISCV_SUB_ULEB128 },
+  { BFD_RELOC_RISCV_LPAD, R_RISCV_LPAD },
   { BFD_RELOC_RISCV_GPREL_HI20, R_RISCV_SIFIVE_GPREL_HI20 },
   { BFD_RELOC_RISCV_GPREL_LO12_I, R_RISCV_SIFIVE_GPREL_LO12_I },
   { BFD_RELOC_RISCV_GPREL_LO12_S, R_RISCV_SIFIVE_GPREL_LO12_S },

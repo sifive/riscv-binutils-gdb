@@ -25,3 +25,5 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+6281[ 	]+sspopchk[ 	]+t0
 [ 	]+[0-9a-f]+:[ 	]+6281[ 	]+sspopchk[ 	]+t0
 [ 	]+[0-9a-f]+:[ 	]+00111017[ 	]+lpad[ 	]+0x111
+[ 	]+[0-9a-f]+:[ 	]+R_RISCV_LPAD[ 		]+\*ABS\*
+[ 	]+[0-9a-f]+:[ 	]+R_RISCV_RELAX[ 	]+\*ABS\*
