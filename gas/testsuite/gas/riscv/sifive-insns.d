@@ -52,3 +52,7 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+fc050073[ 	]+cflush.d.l1[ 	]+a0
 [ 	]+[0-9a-f]+:[ 	]+fc250073[ 	]+cdiscard.d.l1[ 	]+a0
 [ 	]+[0-9a-f]+:[ 	]+fc100073[ 	]+cflush.i.l1
+[ 	]+[0-9a-f]+:[ 	]+4a869257[ 	]+vfwcvtbf16.f.f.v[ 	]+v4,v8
+[ 	]+[0-9a-f]+:[ 	]+4a8e9257[ 	]+vfncvtbf16.f.f.w[ 	]+v4,v8
+[ 	]+[0-9a-f]+:[ 	]+48869257[ 	]+vfwcvtbf16.f.f.v[ 	]+v4,v8,v0.t
+[ 	]+[0-9a-f]+:[ 	]+488e9257[ 	]+vfncvtbf16.f.f.w[ 	]+v4,v8,v0.t

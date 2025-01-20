@@ -2664,6 +2664,10 @@ const struct riscv_opcode riscv_opcodes[] =
 {"cdiscard.d.l1", 0, INSN_CLASS_I, "s", MATCH_CDISCARD_D_L1, MASK_CDISCARD_D_L1, match_opcode, 0 },
 {"cflush.i.l1",   0, INSN_CLASS_I, "", MATCH_CFLUSH_I_L1, MASK_CFLUSH_I_L1, match_opcode, 0 },
 
+/* SiFive custom minimal bfloat16 vector instructions.  */
+{"sf.vfwcvt.f.bf16.v",0, INSN_CLASS_XSFVFHBFMIN, "Vd,VtVm", MATCH_VFWCVTBF16_F_F_V, MASK_VFWCVTBF16_F_F_V, match_opcode, 0},
+{"sf.vfncvt.bf16.f.w",0, INSN_CLASS_XSFVFHBFMIN, "Vd,VtVm", MATCH_VFNCVTBF16_F_F_W, MASK_VFNCVTBF16_F_F_W, match_opcode, 0},
+
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 {"th.addsl",    0, INSN_CLASS_XTHEADBA,    "d,s,t,Xtu2@25",   MATCH_TH_ADDSL,    MASK_TH_ADDSL,    match_opcode, 0},
 

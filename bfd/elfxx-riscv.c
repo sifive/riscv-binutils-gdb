@@ -1190,6 +1190,7 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"xsfvqmaccqoq", "+zve32x,+zvl256b", check_implicit_always},
   {"xsfvqmaccdod", "+zve32x,+zvl128b", check_implicit_always},
   {"xsfvfnrclipxfqf", "+zve32f", check_implicit_always},
+  {"xsfvfhbfmin", "+zvfbfmin", check_implicit_always},
 
   {"v", "+zve64d,+zvl128b", check_implicit_always},
   {"zvfh", "+zvfhmin,+zfhmin", check_implicit_always},
@@ -1513,6 +1514,7 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {"xsfvqmaccqoq",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0},
   {"xsfvqmaccdod",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0},
   {"xsfvfnrclipxfqf",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0},
+  {"xsfvfhbfmin",	ISA_SPEC_CLASS_DRAFT,	0, 1, 0},
   {NULL, 0, 0, 0, 0}
 };
 
@@ -2812,6 +2814,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "xsfvqmaccdod");
     case INSN_CLASS_XSFVFNRCLIPXFQF:
       return riscv_subset_supports (rps, "xsfvfnrclipxfqf");
+    case INSN_CLASS_XSFVFHBFMIN:
+      return riscv_subset_supports (rps, "xsfvfhbfmin");
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));

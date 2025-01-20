@@ -70,3 +70,13 @@
 	.insn 	i 	SYSTEM, 	0, 	x0, 	x10, 	-0x40
 	.insn 	i 	SYSTEM, 	0, 	x0, 	x10, 	-0x3E
 	.insn 	i 	SYSTEM, 	0, 	x0, 	x0, 	-0x3F
+
+	# xsfvfhbfmin
+	.option push
+	.option arch, +v
+	.option arch, +xsfvfhbfmin
+	sf.vfwcvt.f.bf16.v v4, v8
+	sf.vfncvt.bf16.f.w v4, v8
+	sf.vfwcvt.f.bf16.v v4, v8, v0.t
+	sf.vfncvt.bf16.f.w v4, v8, v0.t
+	.option pop
