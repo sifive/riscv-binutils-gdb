@@ -323,4 +323,14 @@ if [istarget "riscv*-*-*"] {
     }
     run_dump_test "tls"
     run_dump_test "tlsbin"
+
+    # Zcmt (jump table) tests
+    run_dump_test "table-jump-jalt"
+    run_dump_test "table-jump-jt"
+    run_dump_test "table-jump-jt-jalt"
+    run_dump_test "table-jump-dump-unknown"
+    run_dump_test "table-jump-no-relo"
+    run_dump_test "table-jump-relax-zcmt"
+    run_dump_test "table-jump-no-relax-zcmt"
+    run_dump_test "table-jump-multiple-local-sym"
 }

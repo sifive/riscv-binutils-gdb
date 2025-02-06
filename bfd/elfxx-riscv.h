@@ -33,6 +33,8 @@ struct riscv_elf_params
   bool relax_gp;
   /* Whether to check if SUB_ULEB128 relocation has non-zero addend.  */
   bool check_uleb128;
+  /* Whether to relax code sequences for zcmt.  */
+  bool relax_zcmt;
 };
 
 extern void riscv_elf32_set_options (struct bfd_link_info *,
@@ -89,6 +91,25 @@ typedef struct
   enum riscv_spec_class *isa_spec;
   bool check_unknown_prefixed_ext;
 } riscv_parse_subset_t;
+
+/* List the relxation pass.  */
+enum riscv_relax_pass
+{
+  RELAX_PASS_TABLE_JUMP_PROFILING,
+  RELAX_PASS_SHORTEN_LUI_CALL_TRREL_PCREL,
+  RELAX_PASS_CAN_BE_DISABLED = RELAX_PASS_SHORTEN_LUI_CALL_TRREL_PCREL,
+  RELAX_PASS_ALIGNMENT,
+  RELAX_PASS_END,
+};
+
+/* Trips for jvt profiling relaxation pass.  */
+enum jvt_profiling_trip
+{
+  JVT_PROFILING_RECORD_SYM,
+  JVT_PROFILING_RANK,
+  JVT_PROFILING_DETERMINE,
+  JVT_PROFILING_TRIM,
+};
 
 extern bool
 riscv_parse_subset (riscv_parse_subset_t *,
