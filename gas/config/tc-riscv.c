@@ -274,6 +274,7 @@ struct riscv_set_options
   int relax; /* Emit relocs the linker is allowed to relax.  */
   int arch_attr; /* Emit architecture and privileged elf attributes.  */
   int csr_check; /* Enable the CSR checking.  */
+  int compact; /* Generate compact code.  */
 };
 
 static struct riscv_set_options riscv_opts =
@@ -283,6 +284,7 @@ static struct riscv_set_options riscv_opts =
   1, /* relax */
   DEFAULT_RISCV_ATTR, /* arch_attr */
   0, /* csr_check */
+  0, /* compact */
 };
 
 /* Enable or disable the rvc flags for riscv_opts.  Turn on the rvc flag
@@ -1643,7 +1645,21 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	case '[': break; /* Unused operand.  */
 	case ']': break; /* Unused operand.  */
 	case '0': break; /* AMO displacement, must to zero.  */
-	case '1': break; /* Relaxation operand.  */
+	case 'g':
+	  break;  /* optional pseudo gp  */
+	case '1': /* SiFive relaxation operand.  */
+	  switch (*++oparg)
+	    {
+	    case 'r':
+	      break;
+	    case 'i':
+	      break;
+	    case 's':
+	      break;
+	    default:
+	      goto unknown_validate_operand;
+	    }
+	  break;
 	case 'F': /* Funct for .insn directive.  */
 	  switch (*++oparg)
 	    {
@@ -2130,6 +2146,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	case 'j':
 	case 'u':
 	case 'q':
+	case '1': /* relaxation operand.  */
 	  gas_assert (ep != NULL);
 	  r = va_arg (args, int);
 	  continue;
@@ -2238,6 +2255,38 @@ pcrel_store (int srcreg, int tempreg, expressionS *ep, const char *lo_insn,
 	     bfd_reloc_code_real_type lo_reloc)
 {
   pcrel_access (srcreg, tempreg, ep, lo_insn, "t,s,q", hi_reloc, lo_reloc);
+}
+
+static void
+gprel_access (int destreg, int tempreg, int gpreg, expressionS *ep,
+	      const char *lo_insn, const char *lo_pattern,
+	      bfd_reloc_code_real_type hi_reloc,
+	      bfd_reloc_code_real_type lo_reloc,
+	      bfd_reloc_code_real_type add_reloc)
+{
+  macro_build (ep, "lui", "d,u", tempreg, hi_reloc);
+  macro_build (ep, "add", "d,s,t,1", tempreg, gpreg, tempreg, add_reloc);
+  macro_build (ep, lo_insn, lo_pattern, destreg, tempreg, lo_reloc);
+}
+
+static void
+gprel_load (int destreg, int tempreg, int gpreg, expressionS *ep,
+	    const char *lo_insn, bfd_reloc_code_real_type hi_reloc,
+	    bfd_reloc_code_real_type lo_reloc,
+	    bfd_reloc_code_real_type add_reloc)
+{
+  gprel_access (destreg, tempreg, gpreg, ep, lo_insn, "d,s,j", hi_reloc,
+		lo_reloc, add_reloc);
+}
+
+static void
+gprel_store (int srcreg, int tempreg, int gpreg, expressionS *ep,
+	     const char *lo_insn, bfd_reloc_code_real_type hi_reloc,
+	     bfd_reloc_code_real_type lo_reloc,
+	     bfd_reloc_code_real_type add_reloc)
+{
+  gprel_access (srcreg, tempreg, gpreg, ep, lo_insn, "t,s,q", hi_reloc,
+		lo_reloc, add_reloc);
 }
 
 /* PC-relative function call using AUIPC/JALR, relaxed to JAL.  */
@@ -2381,6 +2430,7 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
   int rs1 = (ip->insn_opcode >> OP_SH_RS1) & OP_MASK_RS1;
   int rs2 = (ip->insn_opcode >> OP_SH_RS2) & OP_MASK_RS2;
   int mask = ip->insn_mo->mask;
+  int gp = (ip->insn_opcode >> OP_SH_PSEUDO_GP) & OP_MASK_PSEUDO_GP;
 
   source_macro = mask;
 
@@ -2455,6 +2505,96 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
       vector_macro (ip);
       break;
 
+    case M_LLA_GPREL: /* Local compact symbol */
+      gprel_load (rd, rd, gp, imm_expr, "addi", BFD_RELOC_RISCV_GPREL_HI20,
+		  BFD_RELOC_RISCV_GPREL_LO12_I, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_LA_GOT_GPREL: /* Global compact symbol */
+      gprel_load (rd, rd, gp, imm_expr, LOAD_ADDRESS_INSN,
+		  BFD_RELOC_RISCV_GOT_GPREL_HI20,
+		  BFD_RELOC_RISCV_GOT_GPREL_LO12_I,
+		  BFD_RELOC_RISCV_GOT_GPREL_ADD);
+      break;
+    case M_LA_TLS_GD_GPREL:
+      gprel_load (rd, rd, gp, imm_expr, "addi",
+		  BFD_RELOC_RISCV_TLS_GD_GPREL_HI20,
+		  BFD_RELOC_RISCV_TLS_GD_GPREL_LO12_I,
+		  BFD_RELOC_RISCV_TLS_GD_GPREL_ADD);
+      break;
+    case M_LA_TLS_IE_GPREL:
+      gprel_load (rd, rd, gp, imm_expr, LOAD_ADDRESS_INSN,
+		  BFD_RELOC_RISCV_TLS_GOT_GPREL_HI20,
+		  BFD_RELOC_RISCV_TLS_GOT_GPREL_LO12_I,
+		  BFD_RELOC_RISCV_TLS_GOT_GPREL_ADD);
+      break;
+    case M_LB_GPREL:
+      gprel_load (rd, rd, gp, imm_expr, "lb", BFD_RELOC_RISCV_GPREL_HI20,
+		  BFD_RELOC_RISCV_GPREL_LO12_I, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_LBU_GPREL:
+      gprel_load (rd, rd, gp, imm_expr, "lbu", BFD_RELOC_RISCV_GPREL_HI20,
+		  BFD_RELOC_RISCV_GPREL_LO12_I, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_LH_GPREL:
+      gprel_load (rd, rd, gp, imm_expr, "lh", BFD_RELOC_RISCV_GPREL_HI20,
+		  BFD_RELOC_RISCV_GPREL_LO12_I, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_LHU_GPREL:
+      gprel_load (rd, rd, gp, imm_expr, "lhu", BFD_RELOC_RISCV_GPREL_HI20,
+		  BFD_RELOC_RISCV_GPREL_LO12_I, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_LW_GPREL:
+      gprel_load (rd, rd, gp, imm_expr, "lw", BFD_RELOC_RISCV_GPREL_HI20,
+		  BFD_RELOC_RISCV_GPREL_LO12_I, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_LWU_GPREL:
+      gprel_load (rd, rd, gp, imm_expr, "lwu", BFD_RELOC_RISCV_GPREL_HI20,
+		  BFD_RELOC_RISCV_GPREL_LO12_I, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_LD_GPREL:
+      gprel_load (rd, rd, gp, imm_expr, "ld", BFD_RELOC_RISCV_GPREL_HI20,
+		  BFD_RELOC_RISCV_GPREL_LO12_I, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_FLH_GPREL:
+      gprel_load (rd, rs1, gp, imm_expr, "flh", BFD_RELOC_RISCV_GPREL_HI20,
+		  BFD_RELOC_RISCV_GPREL_LO12_I, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_FLW_GPREL:
+      gprel_load (rd, rs1, gp, imm_expr, "flw", BFD_RELOC_RISCV_GPREL_HI20,
+		  BFD_RELOC_RISCV_GPREL_LO12_I, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_FLD_GPREL:
+      gprel_load (rd, rs1, gp, imm_expr, "fld", BFD_RELOC_RISCV_GPREL_HI20,
+		  BFD_RELOC_RISCV_GPREL_LO12_I, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_SB_GPREL:
+      gprel_store (rs2, rs1, gp, imm_expr, "sb", BFD_RELOC_RISCV_GPREL_HI20,
+		   BFD_RELOC_RISCV_GPREL_LO12_S, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_SH_GPREL:
+      gprel_store (rs2, rs1, gp, imm_expr, "sh", BFD_RELOC_RISCV_GPREL_HI20,
+		   BFD_RELOC_RISCV_GPREL_LO12_S, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_SW_GPREL:
+      gprel_store (rs2, rs1, gp, imm_expr, "sw", BFD_RELOC_RISCV_GPREL_HI20,
+		   BFD_RELOC_RISCV_GPREL_LO12_S, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_SD_GPREL:
+      gprel_store (rs2, rs1, gp, imm_expr, "sd", BFD_RELOC_RISCV_GPREL_HI20,
+		   BFD_RELOC_RISCV_GPREL_LO12_S, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_FSH_GPREL:
+      gprel_store (rs2, rs1, gp, imm_expr, "fsh", BFD_RELOC_RISCV_GPREL_HI20,
+		   BFD_RELOC_RISCV_GPREL_LO12_S, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_FSW_GPREL:
+      gprel_store (rs2, rs1, gp, imm_expr, "fsw", BFD_RELOC_RISCV_GPREL_HI20,
+		   BFD_RELOC_RISCV_GPREL_LO12_S, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
+    case M_FSD_GPREL:
+      gprel_store (rs2, rs1, gp, imm_expr, "fsd", BFD_RELOC_RISCV_GPREL_HI20,
+		   BFD_RELOC_RISCV_GPREL_LO12_S, BFD_RELOC_RISCV_GPREL_ADD);
+      break;
     default:
       as_bad (_("internal: macro %s not implemented"), ip->insn_mo->name);
       break;
@@ -2472,6 +2612,10 @@ static const struct percent_op_match percent_op_utype[] =
   {"tls_ie_pcrel_hi", BFD_RELOC_RISCV_TLS_GOT_HI20},
   {"tls_gd_pcrel_hi", BFD_RELOC_RISCV_TLS_GD_HI20},
   {"hi", BFD_RELOC_RISCV_HI20},
+  {"gprel_hi", BFD_RELOC_RISCV_GPREL_HI20},
+  {"got_gprel_hi", BFD_RELOC_RISCV_GOT_GPREL_HI20},
+  {"tls_ie_gprel_hi", BFD_RELOC_RISCV_TLS_GOT_GPREL_HI20},
+  {"tls_gd_gprel_hi", BFD_RELOC_RISCV_TLS_GD_GPREL_HI20},
   {0, 0}
 };
 
@@ -2482,6 +2626,10 @@ static const struct percent_op_match percent_op_itype[] =
   {"pcrel_lo", BFD_RELOC_RISCV_PCREL_LO12_I},
   {"tlsdesc_load_lo", BFD_RELOC_RISCV_TLSDESC_LOAD_LO12},
   {"tlsdesc_add_lo", BFD_RELOC_RISCV_TLSDESC_ADD_LO12},
+  {"gprel_lo", BFD_RELOC_RISCV_GPREL_LO12_I},
+  {"got_gprel_lo", BFD_RELOC_RISCV_GOT_GPREL_LO12_I},
+  {"tls_ie_gprel_lo", BFD_RELOC_RISCV_TLS_GOT_GPREL_LO12_I},
+  {"tls_gd_gprel_lo", BFD_RELOC_RISCV_TLS_GD_GPREL_LO12_I},
   {0, 0}
 };
 
@@ -2490,6 +2638,7 @@ static const struct percent_op_match percent_op_stype[] =
   {"lo", BFD_RELOC_RISCV_LO12_S},
   {"tprel_lo", BFD_RELOC_RISCV_TPREL_LO12_S},
   {"pcrel_lo", BFD_RELOC_RISCV_PCREL_LO12_S},
+  {"gprel_lo", BFD_RELOC_RISCV_GPREL_LO12_S},
   {0, 0}
 };
 
@@ -2497,9 +2646,27 @@ static const struct percent_op_match percent_op_relax_only[] =
 {
   {"tlsdesc_call", BFD_RELOC_RISCV_TLSDESC_CALL},
   {"tprel_add", BFD_RELOC_RISCV_TPREL_ADD},
+  {"gprel", BFD_RELOC_RISCV_GPREL_ADD},
+  {"got_gprel", BFD_RELOC_RISCV_GOT_GPREL_ADD},
+  {"tls_ie_gprel", BFD_RELOC_RISCV_TLS_GOT_GPREL_ADD},
+  {"tls_gd_gprel", BFD_RELOC_RISCV_TLS_GD_GPREL_ADD},
   {0, 0}
 };
 
+
+static const struct percent_op_match percent_op_relax_only_itype[] =
+{
+  {"gprel", BFD_RELOC_RISCV_GPREL_LOAD},
+  {"got_gprel", BFD_RELOC_RISCV_GOT_GPREL_LOAD},
+  {0, 0}
+};
+
+static const struct percent_op_match percent_op_relax_only_stype[] =
+{
+  {"gprel", BFD_RELOC_RISCV_GPREL_STORE},
+  {"got_gprel", BFD_RELOC_RISCV_GOT_GPREL_STORE},
+  {0, 0}
+};
 static const struct percent_op_match percent_op_null[] =
 {
   {0, 0}
@@ -3864,12 +4031,15 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      p = percent_op_itype;
 	      *imm_reloc = BFD_RELOC_RISCV_LO12_I;
 	      goto load_store;
+#if 0
+	    // SiFive compact code model has extend that.
 	    case '1':
 	      /* This is used for TLS relocations that acts as relaxation
 		 markers and do not change the instruction encoding,
 		 i.e. %tprel_add and %tlsdesc_call.  */
 	      p = percent_op_relax_only;
 	      goto alu_op;
+#endif
 	    case '0': /* AMO displacement, which must be zero.  */
 	    load_store:
 	      if (riscv_handle_implicit_zero_offset (imm_expr, asarg))
@@ -4052,6 +4222,66 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		break;
 	      asarg = expr_parse_end;
 	      imm_expr->X_op = O_absent;
+	      continue;
+
+	    case 'g': /* Optional pseudo gp.  */
+	      if (*asarg == '\0')
+		{
+		  /* Use gp directly.  */
+		  INSERT_OPERAND (PSEUDO_GP, *ip, 3);
+		  continue;
+		}
+	      else if (*asarg == ',' && asarg++
+		       && reg_lookup (&asarg, RCLASS_GPR, &regno))
+		{
+		  INSERT_OPERAND (PSEUDO_GP, *ip, regno);
+		  continue;
+		}
+	      break;
+	    case '1': /* SiFive relaxation operand.  */
+	      /* The current RISC-V assembler creates the fixup (relocation)
+		 according to the parsed expression, and only one expression
+		 is used for an instruction.  Both imm field and the relaxation
+		 operand are parsed by the my_getSmallExpression for load/store.
+		 Therefore, the expression of imm would be change after parsing
+		 the relaxation operand.  We have to handle the expression of
+		 imm right now, not wait until md_apply_fix.
+		 If the type of imm expression is O_constant, then we can
+		 encode the exp->X_add_number to the ip->insn_opcode here.
+		 Therefore, we can continue to parse the relaxation operand
+		 and use the same expression.  Besides, we should already ensure
+		 the imm value is valid before, so just encode it here.
+		 If the type of imm expression is O_symbol or others, then
+		 we probably need to report the error here, since it is hard
+		 to represent two symbols by only one expression and relocation.  */
+
+	      gas_assert (imm_expr->X_op == O_constant
+			  || imm_expr->X_op == O_absent);
+	      switch (*++oparg)
+		{
+		case 'r':
+		  p = percent_op_relax_only;
+		  break;
+		case 'i':
+		  p = percent_op_relax_only_itype;
+		  if (imm_expr->X_op == O_constant)
+		    ip->insn_opcode
+			|= ENCODE_ITYPE_IMM (imm_expr->X_add_number);
+		  break;
+		case 's':
+		  p = percent_op_relax_only_stype;
+		  if (imm_expr->X_op == O_constant)
+		    ip->insn_opcode
+			|= ENCODE_STYPE_IMM (imm_expr->X_add_number);
+		  break;
+		default:
+		  goto unknown_riscv_ip_operand;
+		}
+	      /* Relaxation operand must start with prefixed `%`, and be
+		 recognized.  */
+	      if (!my_getSmallExpression (imm_expr, imm_reloc, asarg, p))
+		break;
+	      asarg = expr_parse_end;
 	      continue;
 
 	    case 'W': /* Various operands for standard z extensions.  */
@@ -4822,10 +5052,15 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
     case BFD_RELOC_RISCV_HI20:
     case BFD_RELOC_RISCV_LO12_I:
     case BFD_RELOC_RISCV_LO12_S:
-      bfd_putl32 (riscv_apply_const_reloc (fixP->fx_r_type, *valP)
-		  | bfd_getl32 (buf), buf);
+      /* SiFive: Only encode the addend when the symbol is NULL.  Otherwise,
+	 let linker relocate it according to the relocation.  */
       if (fixP->fx_addsy == NULL)
-	fixP->fx_done = true;
+	{
+	  bfd_putl32 (riscv_apply_const_reloc (fixP->fx_r_type, *valP)
+			  | bfd_getl32 (buf),
+		      buf);
+	  fixP->fx_done = true;
+	}
       relaxable = true;
       break;
 
@@ -4864,6 +5099,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
     case BFD_RELOC_RISCV_TLS_GD_HI20:
     case BFD_RELOC_RISCV_TLS_DTPREL32:
     case BFD_RELOC_RISCV_TLS_DTPREL64:
+    case BFD_RELOC_RISCV_TLS_GOT_GPREL_HI20:
+    case BFD_RELOC_RISCV_TLS_GOT_GPREL_LO12_I:
+    case BFD_RELOC_RISCV_TLS_GOT_GPREL_ADD:
+    case BFD_RELOC_RISCV_TLS_GD_GPREL_HI20:
+    case BFD_RELOC_RISCV_TLS_GD_GPREL_LO12_I:
+    case BFD_RELOC_RISCV_TLS_GD_GPREL_ADD:
+
       if (fixP->fx_addsy != NULL)
 	S_SET_THREAD_LOCAL (fixP->fx_addsy);
       else
@@ -4888,11 +5130,25 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	  fixP->fx_subsy = NULL;
 	  break;
 	}
-      /* Fall through.  */
+      goto reloc_diff;
+
     case BFD_RELOC_64:
+      if (fixP->fx_addsy && fixP->fx_subsy
+	  && (sub_segment = S_GET_SEGMENT (fixP->fx_subsy))
+	  && strcmp (sub_segment->name, ".eh_frame") == 0
+	  && S_GET_VALUE (fixP->fx_subsy)
+		 == fixP->fx_frag->fr_address + fixP->fx_where)
+	{
+	  fixP->fx_r_type = BFD_RELOC_RISCV_64_PCREL;
+	  fixP->fx_subsy = NULL;
+	  break;
+	}
+      goto reloc_diff;
+
     case BFD_RELOC_16:
     case BFD_RELOC_8:
     case BFD_RELOC_RISCV_CFA:
+reloc_diff:
       if (fixP->fx_addsy && fixP->fx_subsy)
 	{
 	  fixP->fx_next = xmemdup (fixP, sizeof (*fixP), sizeof (*fixP));
@@ -5100,6 +5356,19 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
       }
       relaxable = true;
       break;
+    case BFD_RELOC_RISCV_GPREL_HI20:
+    case BFD_RELOC_RISCV_GPREL_LO12_S:
+    case BFD_RELOC_RISCV_GPREL_LO12_I:
+    case BFD_RELOC_RISCV_GPREL_ADD:
+    case BFD_RELOC_RISCV_GPREL_LOAD:
+    case BFD_RELOC_RISCV_GPREL_STORE:
+    case BFD_RELOC_RISCV_GOT_GPREL_HI20:
+    case BFD_RELOC_RISCV_GOT_GPREL_LO12_I:
+    case BFD_RELOC_RISCV_GOT_GPREL_ADD:
+    case BFD_RELOC_RISCV_GOT_GPREL_LOAD:
+    case BFD_RELOC_RISCV_GOT_GPREL_STORE:
+      relaxable = true;
+      break;
 
     case BFD_RELOC_RISCV_ALIGN:
       break;
@@ -5218,6 +5487,10 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
       if (riscv_subset_supports (&riscv_rps_as, "ztso"))
 	riscv_set_tso ();
     }
+  else if (strcmp (name, "compact") == 0)
+    riscv_opts.compact = true;
+  else if (strcmp (name, "nocompact") == 0)
+    riscv_opts.compact = false;
   else if (strcmp (name, "push") == 0)
     {
       struct riscv_option_stack *s;
@@ -5627,6 +5900,26 @@ RISC-V options:\n\
   -mbig-endian                assemble for big-endian\n\
   -mlittle-endian             assemble for little-endian\n\
 "));
+}
+
+/* Define the frame addr size to 8 bytes for compact code model.  */
+
+int
+riscv_dwarf2_addr_size (void)
+{
+  if (riscv_opts.compact)
+    return 8;
+  else
+    return bfd_arch_bits_per_address (stdoutput) / 8;
+}
+
+int
+riscv_dwarf2_fde_reloc_size (void)
+{
+  if (riscv_opts.compact)
+    return 8;
+  else
+    return 4;
 }
 
 /* Standard calling conventions leave the CFA at SP on entry.  */

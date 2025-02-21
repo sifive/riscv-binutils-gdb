@@ -877,6 +877,295 @@ static reloc_howto_type howto_table[] =
 	 0,				/* src_mask */
 	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
 	 false) 			/* pcrel_offset */
+  ,
+  EMPTY_HOWTO (66), EMPTY_HOWTO (67), EMPTY_HOWTO (68), EMPTY_HOWTO (69),
+  EMPTY_HOWTO (70), EMPTY_HOWTO (71), EMPTY_HOWTO (72), EMPTY_HOWTO (73),
+  EMPTY_HOWTO (74), EMPTY_HOWTO (75), EMPTY_HOWTO (76), EMPTY_HOWTO (77),
+  EMPTY_HOWTO (78), EMPTY_HOWTO (79), EMPTY_HOWTO (80), EMPTY_HOWTO (81),
+  EMPTY_HOWTO (82), EMPTY_HOWTO (83), EMPTY_HOWTO (84), EMPTY_HOWTO (85),
+  EMPTY_HOWTO (86), EMPTY_HOWTO (87), EMPTY_HOWTO (88), EMPTY_HOWTO (89),
+  EMPTY_HOWTO (90), EMPTY_HOWTO (91), EMPTY_HOWTO (92), EMPTY_HOWTO (93),
+  EMPTY_HOWTO (94), EMPTY_HOWTO (95), EMPTY_HOWTO (96), EMPTY_HOWTO (97),
+  EMPTY_HOWTO (98), EMPTY_HOWTO (99), EMPTY_HOWTO (100), EMPTY_HOWTO (101),
+  EMPTY_HOWTO (102), EMPTY_HOWTO (103), EMPTY_HOWTO (104), EMPTY_HOWTO (105),
+  EMPTY_HOWTO (106), EMPTY_HOWTO (107), EMPTY_HOWTO (108), EMPTY_HOWTO (109),
+  EMPTY_HOWTO (110), EMPTY_HOWTO (111), EMPTY_HOWTO (112), EMPTY_HOWTO (113),
+  EMPTY_HOWTO (114), EMPTY_HOWTO (115), EMPTY_HOWTO (116), EMPTY_HOWTO (117),
+  EMPTY_HOWTO (118), EMPTY_HOWTO (119), EMPTY_HOWTO (120), EMPTY_HOWTO (121),
+  EMPTY_HOWTO (122), EMPTY_HOWTO (123), EMPTY_HOWTO (124), EMPTY_HOWTO (125),
+  EMPTY_HOWTO (126), EMPTY_HOWTO (127), EMPTY_HOWTO (128), EMPTY_HOWTO (129),
+  EMPTY_HOWTO (130), EMPTY_HOWTO (131), EMPTY_HOWTO (132), EMPTY_HOWTO (133),
+  EMPTY_HOWTO (134), EMPTY_HOWTO (135), EMPTY_HOWTO (136), EMPTY_HOWTO (137),
+  EMPTY_HOWTO (138), EMPTY_HOWTO (139), EMPTY_HOWTO (140), EMPTY_HOWTO (141),
+  EMPTY_HOWTO (142), EMPTY_HOWTO (143), EMPTY_HOWTO (144), EMPTY_HOWTO (145),
+  EMPTY_HOWTO (146), EMPTY_HOWTO (147), EMPTY_HOWTO (148), EMPTY_HOWTO (149),
+  EMPTY_HOWTO (150), EMPTY_HOWTO (151), EMPTY_HOWTO (152), EMPTY_HOWTO (153),
+  EMPTY_HOWTO (154), EMPTY_HOWTO (155), EMPTY_HOWTO (156), EMPTY_HOWTO (157),
+  EMPTY_HOWTO (158), EMPTY_HOWTO (159), EMPTY_HOWTO (160), EMPTY_HOWTO (161),
+  EMPTY_HOWTO (162), EMPTY_HOWTO (163), EMPTY_HOWTO (164), EMPTY_HOWTO (165),
+  EMPTY_HOWTO (166), EMPTY_HOWTO (167), EMPTY_HOWTO (168), EMPTY_HOWTO (169),
+  EMPTY_HOWTO (170), EMPTY_HOWTO (171), EMPTY_HOWTO (172), EMPTY_HOWTO (173),
+  EMPTY_HOWTO (174), EMPTY_HOWTO (175), EMPTY_HOWTO (176), EMPTY_HOWTO (177),
+  EMPTY_HOWTO (178), EMPTY_HOWTO (179), EMPTY_HOWTO (180), EMPTY_HOWTO (181),
+  EMPTY_HOWTO (182), EMPTY_HOWTO (183), EMPTY_HOWTO (184), EMPTY_HOWTO (185),
+  EMPTY_HOWTO (186), EMPTY_HOWTO (187), EMPTY_HOWTO (188), EMPTY_HOWTO (189),
+  EMPTY_HOWTO (190), EMPTY_HOWTO (191), EMPTY_HOWTO (192), EMPTY_HOWTO (193),
+
+  /* Compact relocations.  */
+  /* High 20 bits of 32-bit GP-relative reference.  */
+  HOWTO (R_RISCV_SIFIVE_GPREL_HI20, /* type */
+	 0,			    /* rightshift */
+	 2,			    /* size */
+	 32,			    /* bitsize */
+	 false,			    /* pc_relative */
+	 0,			    /* bitpos */
+	 complain_overflow_dont,    /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	    /* special_function */
+	 "R_RISCV_GPREL_HI20",	    /* name */
+	 false,			    /* partial_inplace */
+	 0,			    /* src_mask */
+	 ENCODE_UTYPE_IMM (-1U),    /* dst_mask */
+	 false),		    /* pcrel_offset */
+  /* Low 12 bits of a 32-bit GP-relative load or add.  */
+  HOWTO (R_RISCV_SIFIVE_GPREL_LO12_I, /* type */
+	 0,			      /* rightshift */
+	 2,			      /* size */
+	 32,			      /* bitsize */
+	 false,			      /* pc_relative */
+	 0,			      /* bitpos */
+	 complain_overflow_dont,      /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	      /* special_function */
+	 "R_RISCV_GPREL_LO12_I",      /* name */
+	 false,			      /* partial_inplace */
+	 0,			      /* src_mask */
+	 ENCODE_ITYPE_IMM (-1U),      /* dst_mask */
+	 false),		      /* pcrel_offset */
+  /* Low 12 bits of a 32-bit GP-relative store.  */
+  HOWTO (R_RISCV_SIFIVE_GPREL_LO12_S, /* type */
+	 0,			      /* rightshift */
+	 2,			      /* size */
+	 32,			      /* bitsize */
+	 false,			      /* pc_relative */
+	 0,			      /* bitpos */
+	 complain_overflow_dont,      /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	      /* special_function */
+	 "R_RISCV_GPREL_LO12_S",      /* name */
+	 false,			      /* partial_inplace */
+	 0,			      /* src_mask */
+	 ENCODE_STYPE_IMM (-1U),      /* dst_mask */
+	 false),		      /* pcrel_offset */
+  /* Compact GP-relative usage.  May be relaxed.  */
+  HOWTO (R_RISCV_SIFIVE_GPREL_ADD, /* type */
+	 0,			   /* rightshift */
+	 2,			   /* size */
+	 32,			   /* bitsize */
+	 false,			   /* pc_relative */
+	 0,			   /* bitpos */
+	 complain_overflow_dont,   /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	   /* special_function */
+	 "R_RISCV_GPREL_ADD",	   /* name */
+	 false,			   /* partial_inplace */
+	 0,			   /* src_mask */
+	 0,			   /* dst_mask */
+	 false),		   /* pcrel_offset */
+  /* Compact GP-relative usage.  May be relaxed.  */
+  HOWTO (R_RISCV_SIFIVE_GPREL_LOAD, /* type */
+	 0,			    /* rightshift */
+	 2,			    /* size */
+	 32,			    /* bitsize */
+	 false,			    /* pc_relative */
+	 0,			    /* bitpos */
+	 complain_overflow_dont,    /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	    /* special_function */
+	 "R_RISCV_GPREL_LOAD",	    /* name */
+	 false,			    /* partial_inplace */
+	 0,			    /* src_mask */
+	 0,			    /* dst_mask */
+	 false),		    /* pcrel_offset */
+  /* Compact GP-relative usage.  May be relaxed.  */
+  HOWTO (R_RISCV_SIFIVE_GPREL_STORE, /* type */
+	 0,			     /* rightshift */
+	 2,			     /* size */
+	 32,			     /* bitsize */
+	 false,			     /* pc_relative */
+	 0,			     /* bitpos */
+	 complain_overflow_dont,     /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	     /* special_function */
+	 "R_RISCV_GPREL_STORE",	     /* name */
+	 false,			     /* partial_inplace */
+	 0,			     /* src_mask */
+	 0,			     /* dst_mask */
+	 false),		     /* pcrel_offset */
+  /* High 20 bits of 32-bit GP-relative GOT reference.  */
+  HOWTO (R_RISCV_SIFIVE_GOT_GPREL_HI20, /* type */
+	 0,				/* rightshift */
+	 2,				/* size */
+	 32,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_GOT_GPREL_HI20",	/* name */
+	 false,				/* partial_inplace */
+	 0,				/* src_mask */
+	 ENCODE_UTYPE_IMM (-1U),	/* dst_mask */
+	 false),			/* pcrel_offset */
+  /* Low 12 bits of a 32-bit GP-relative GOT load or add.  */
+  HOWTO (R_RISCV_SIFIVE_GOT_GPREL_LO12_I, /* type */
+	 0,				  /* rightshift */
+	 2,				  /* size */
+	 32,				  /* bitsize */
+	 false,				  /* pc_relative */
+	 0,				  /* bitpos */
+	 complain_overflow_dont,	  /* complain_on_overflow */
+	 bfd_elf_generic_reloc,		  /* special_function */
+	 "R_RISCV_GOT_GPREL_LO12_I",	  /* name */
+	 false,				  /* partial_inplace */
+	 0,				  /* src_mask */
+	 ENCODE_ITYPE_IMM (-1U),	  /* dst_mask */
+	 false),			  /* pcrel_offset */
+  /* Compact GP-relative GOT usage.  May be relaxed.  */
+  HOWTO (R_RISCV_SIFIVE_GOT_GPREL_ADD, /* type */
+	 0,			       /* rightshift */
+	 2,			       /* size */
+	 32,			       /* bitsize */
+	 false,			       /* pc_relative */
+	 0,			       /* bitpos */
+	 complain_overflow_dont,       /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	       /* special_function */
+	 "R_RISCV_GOT_GPREL_ADD",      /* name */
+	 false,			       /* partial_inplace */
+	 0,			       /* src_mask */
+	 0,			       /* dst_mask */
+	 false),		       /* pcrel_offset */
+  /* Compact GP-relative GOT usage.  May be relaxed.  */
+  HOWTO (R_RISCV_SIFIVE_GOT_GPREL_LOAD, /* type */
+	 0,				/* rightshift */
+	 2,				/* size */
+	 32,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_GOT_GPREL_LOAD",	/* name */
+	 false,				/* partial_inplace */
+	 0,				/* src_mask */
+	 0,				/* dst_mask */
+	 false),			/* pcrel_offset */
+  /* Compact GP-relative GOT usage.  May be relaxed.  */
+  HOWTO (R_RISCV_SIFIVE_GOT_GPREL_STORE, /* type */
+	 0,				 /* rightshift */
+	 2,				 /* size */
+	 32,				 /* bitsize */
+	 false,				 /* pc_relative */
+	 0,				 /* bitpos */
+	 complain_overflow_dont,	 /* complain_on_overflow */
+	 bfd_elf_generic_reloc,		 /* special_function */
+	 "R_RISCV_GOT_GPREL_STORE",	 /* name */
+	 false,				 /* partial_inplace */
+	 0,				 /* src_mask */
+	 0,				 /* dst_mask */
+	 false),			 /* pcrel_offset */
+  /* High 20 bits of 32-bit GP-relative TLS IE GOT reference.  */
+  HOWTO (R_RISCV_SIFIVE_TLS_GOT_GPREL_HI20, /* type */
+	 0,				    /* rightshift */
+	 2,				    /* size */
+	 32,				    /* bitsize */
+	 false,				    /* pc_relative */
+	 0,				    /* bitpos */
+	 complain_overflow_dont,	    /* complain_on_overflow */
+	 bfd_elf_generic_reloc,		    /* special_function */
+	 "R_RISCV_TLS_GOT_GPREL_HI20",	    /* name */
+	 false,				    /* partial_inplace */
+	 0,				    /* src_mask */
+	 ENCODE_UTYPE_IMM (-1U),	    /* dst_mask */
+	 false),			    /* pcrel_offset */
+  /* Low 12 bits of a 32-bit GP-relative TLS IE GOT reference.  */
+  HOWTO (R_RISCV_SIFIVE_TLS_GOT_GPREL_LO12_I, /* type */
+	 0,				      /* rightshift */
+	 2,				      /* size */
+	 32,				      /* bitsize */
+	 false,				      /* pc_relative */
+	 0,				      /* bitpos */
+	 complain_overflow_dont,	      /* complain_on_overflow */
+	 bfd_elf_generic_reloc,		      /* special_function */
+	 "R_RISCV_TLS_GOT_GPREL_LO12_I",      /* name */
+	 false,				      /* partial_inplace */
+	 0,				      /* src_mask */
+	 ENCODE_ITYPE_IMM (-1U),	      /* dst_mask */
+	 false),			      /* pcrel_offset */
+  /* Compact GP-relative TLS IE GOT usage.  May be relaxed in the future?  */
+  HOWTO (R_RISCV_SIFIVE_TLS_GOT_GPREL_ADD, /* type */
+	 0,				   /* rightshift */
+	 2,				   /* size */
+	 32,				   /* bitsize */
+	 false,				   /* pc_relative */
+	 0,				   /* bitpos */
+	 complain_overflow_dont,	   /* complain_on_overflow */
+	 bfd_elf_generic_reloc,		   /* special_function */
+	 "R_RISCV_TLS_GOT_GPREL_ADD",	   /* name */
+	 false,				   /* partial_inplace */
+	 0,				   /* src_mask */
+	 ENCODE_ITYPE_IMM (-1U),	   /* dst_mask */
+	 false),			   /* pcrel_offset */
+  /* High 20 bits of 32-bit GP-relative TLS GD GOT reference.  */
+  HOWTO (R_RISCV_SIFIVE_TLS_GD_GPREL_HI20, /* type */
+	 0,				   /* rightshift */
+	 2,				   /* size */
+	 32,				   /* bitsize */
+	 false,				   /* pc_relative */
+	 0,				   /* bitpos */
+	 complain_overflow_dont,	   /* complain_on_overflow */
+	 bfd_elf_generic_reloc,		   /* special_function */
+	 "R_RISCV_TLS_GD_GPREL_HI20",	   /* name */
+	 false,				   /* partial_inplace */
+	 0,				   /* src_mask */
+	 ENCODE_UTYPE_IMM (-1U),	   /* dst_mask */
+	 false),			   /* pcrel_offset */
+  /* Low 12 bits of a 32-bit GP-relative TLS GD GOT reference.  */
+  HOWTO (R_RISCV_SIFIVE_TLS_GD_GPREL_LO12_I, /* type */
+	 0,				     /* rightshift */
+	 2,				     /* size */
+	 32,				     /* bitsize */
+	 false,				     /* pc_relative */
+	 0,				     /* bitpos */
+	 complain_overflow_dont,	     /* complain_on_overflow */
+	 bfd_elf_generic_reloc,		     /* special_function */
+	 "R_RISCV_TLS_GD_GPREL_LO12_I",	     /* name */
+	 false,				     /* partial_inplace */
+	 0,				     /* src_mask */
+	 ENCODE_ITYPE_IMM (-1U),	     /* dst_mask */
+	 false),			     /* pcrel_offset */
+  /* Compact GP-relative TLS GD GOT usage.  May be relaxed in the future?  */
+  HOWTO (R_RISCV_SIFIVE_TLS_GD_GPREL_ADD, /* type */
+	 0,				  /* rightshift */
+	 2,				  /* size */
+	 32,				  /* bitsize */
+	 false,				  /* pc_relative */
+	 0,				  /* bitpos */
+	 complain_overflow_dont,	  /* complain_on_overflow */
+	 bfd_elf_generic_reloc,		  /* special_function */
+	 "R_RISCV_TLS_GD_GPREL_ADD",	  /* name */
+	 false,				  /* partial_inplace */
+	 0,				  /* src_mask */
+	 ENCODE_ITYPE_IMM (-1U),	  /* dst_mask */
+	 false),			  /* pcrel_offset */
+  /* 64-bit PC relative.  This is used to set the offset between gp and
+     __global_pointer__ section, and also used in the eh_frame section
+    for compact code model.  */
+  HOWTO (R_RISCV_SIFIVE_64_PCREL, /* type */
+	 0,			  /* rightshift */
+	 3,			  /* size */
+	 64,			  /* bitsize */
+	 true,			  /* pc_relative */
+	 0,			  /* bitpos */
+	 complain_overflow_dont,  /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	  /* special_function */
+	 "R_RISCV_64_PCREL",	  /* name */
+	 false,			  /* partial_inplace */
+	 0,			  /* src_mask */
+	 MINUS_ONE,		  /* dst_mask */
+	 false),		  /* pcrel_offset */
 };
 
 static reloc_howto_type howto_table_internal[] =
@@ -1020,6 +1309,24 @@ static const struct elf_reloc_map riscv_reloc_map[] =
   { BFD_RELOC_RISCV_32_PCREL, R_RISCV_32_PCREL },
   { BFD_RELOC_RISCV_SET_ULEB128, R_RISCV_SET_ULEB128 },
   { BFD_RELOC_RISCV_SUB_ULEB128, R_RISCV_SUB_ULEB128 },
+  { BFD_RELOC_RISCV_GPREL_HI20, R_RISCV_SIFIVE_GPREL_HI20 },
+  { BFD_RELOC_RISCV_GPREL_LO12_I, R_RISCV_SIFIVE_GPREL_LO12_I },
+  { BFD_RELOC_RISCV_GPREL_LO12_S, R_RISCV_SIFIVE_GPREL_LO12_S },
+  { BFD_RELOC_RISCV_GPREL_ADD, R_RISCV_SIFIVE_GPREL_ADD },
+  { BFD_RELOC_RISCV_GPREL_LOAD, R_RISCV_SIFIVE_GPREL_LOAD },
+  { BFD_RELOC_RISCV_GPREL_STORE, R_RISCV_SIFIVE_GPREL_STORE },
+  { BFD_RELOC_RISCV_GOT_GPREL_HI20, R_RISCV_SIFIVE_GOT_GPREL_HI20 },
+  { BFD_RELOC_RISCV_GOT_GPREL_LO12_I, R_RISCV_SIFIVE_GOT_GPREL_LO12_I },
+  { BFD_RELOC_RISCV_GOT_GPREL_ADD, R_RISCV_SIFIVE_GOT_GPREL_ADD },
+  { BFD_RELOC_RISCV_GOT_GPREL_LOAD, R_RISCV_SIFIVE_GOT_GPREL_LOAD },
+  { BFD_RELOC_RISCV_GOT_GPREL_STORE, R_RISCV_SIFIVE_GOT_GPREL_STORE },
+  { BFD_RELOC_RISCV_TLS_GOT_GPREL_HI20, R_RISCV_SIFIVE_TLS_GOT_GPREL_HI20 },
+  { BFD_RELOC_RISCV_TLS_GOT_GPREL_LO12_I, R_RISCV_SIFIVE_TLS_GOT_GPREL_LO12_I },
+  { BFD_RELOC_RISCV_TLS_GOT_GPREL_ADD, R_RISCV_SIFIVE_TLS_GOT_GPREL_ADD },
+  { BFD_RELOC_RISCV_TLS_GD_GPREL_HI20, R_RISCV_SIFIVE_TLS_GD_GPREL_HI20 },
+  { BFD_RELOC_RISCV_TLS_GD_GPREL_LO12_I, R_RISCV_SIFIVE_TLS_GD_GPREL_LO12_I },
+  { BFD_RELOC_RISCV_TLS_GD_GPREL_ADD, R_RISCV_SIFIVE_TLS_GD_GPREL_ADD },
+  { BFD_RELOC_RISCV_64_PCREL, R_RISCV_SIFIVE_64_PCREL },
 };
 
 /* Given a BFD reloc type, return a howto structure.  */

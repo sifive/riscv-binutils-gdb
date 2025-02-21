@@ -323,6 +323,9 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define OP_MASK_FUNCT2		0x3
 #define OP_SH_FUNCT2		25
 
+#define OP_MASK_PSEUDO_GP	0x1f
+#define OP_SH_PSEUDO_GP		27
+
 /* RVC fields.  */
 
 #define OP_MASK_OP2		0x3
@@ -705,6 +708,29 @@ enum
   M_ZEXTW,
   M_SEXTB,
   M_VMSGE,
+  M_LLA_GPREL,
+  M_LA_GOT_GPREL,
+  M_LA_TLS_GD_GPREL,
+  M_LA_TLS_IE_GPREL,
+  M_LB_GPREL,
+  M_LBU_GPREL,
+  M_LH_GPREL,
+  M_LHU_GPREL,
+  M_LW_GPREL,
+  M_LWU_GPREL,
+  M_LD_GPREL,
+  M_SB_GPREL,
+  M_SH_GPREL,
+  M_SW_GPREL,
+  M_SD_GPREL,
+  M_FLH_GPREL,
+  M_FLW_GPREL,
+  M_FLD_GPREL,
+  M_FLQ_GPREL,
+  M_FSH_GPREL,
+  M_FSW_GPREL,
+  M_FSD_GPREL,
+  M_FSQ_GPREL,
   M_NUM_MACROS
 };
 

@@ -25,6 +25,8 @@ fragment <<EOF
 #include "elf/riscv.h"
 #include "elfxx-riscv.h"
 
+static bool compact_plt = false;
+
 static struct riscv_elf_params params = { .relax_gp = 1,
 					  .check_uleb128 = 0,
 					  .relax_zcmt = 0,
@@ -171,6 +173,36 @@ riscv_create_output_section_statements (void)
 }
 
 EOF
+
+# Define some shell vars to insert bits of code into the standard elf
+# parse_args and list_options functions.
+#
+
+PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
+  { "compact-plt", no_argument, NULL, OPTION_COMPACT_PLT },
+  { "no-compact-plt", no_argument, NULL, OPTION_NO_COMPACT_PLT },
+'
+
+PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
+  fprintf (file, _("\
+  --compact-plt           Generate compact .plt section\n"
+		  ));
+  fprintf (file, _("\
+  --no-compact-plt        Generate medlow/medany .plt section\n"
+		  ));
+'
+
+PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
+    case OPTION_COMPACT_PLT:
+      compact_plt = true;
+      params.plt_type |= PLT_COMPACT;
+      break;
+
+    case OPTION_NO_COMPACT_PLT:
+      compact_plt = false;
+      params.plt_type &= ~PLT_COMPACT;
+      break;
+'
 
 LDEMUL_BEFORE_ALLOCATION=riscv_elf_before_allocation
 LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation

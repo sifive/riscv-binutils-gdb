@@ -1285,7 +1285,7 @@ if [is_elf_format] {
 	set reloc_format mips64
     }
     # A relocation type not supported by any target
-    if { [istarget "nds32*-*"] } {
+    if { [istarget "nds32*-*"] || [istarget "riscv*-*"] } {
 	set reloc 255
     } else {
 	set reloc 215

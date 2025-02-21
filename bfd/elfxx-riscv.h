@@ -30,7 +30,8 @@
 typedef enum
 {
     PLT_NORMAL    = 0x0,  /* Normal plts.  */
-    PLT_ZICFILP   = 0x1   /* Landing pad plts.  */
+    PLT_ZICFILP   = 0x1,  /* Landing pad plts.  */
+    PLT_COMPACT   = 0x2   /* Compact plts.  */
 } riscv_plt_type;
 
 /* To indicate if LP is enabled with/without warning.  */
@@ -119,6 +120,7 @@ typedef struct
 /* List the relxation pass.  */
 enum riscv_relax_pass
 {
+  RELAX_PASS_COMPACT_CODE,
   RELAX_PASS_TABLE_JUMP_PROFILING,
   RELAX_PASS_SHORTEN_LUI_CALL_TRREL_PCREL,
   RELAX_PASS_CAN_BE_DISABLED = RELAX_PASS_SHORTEN_LUI_CALL_TRREL_PCREL,
