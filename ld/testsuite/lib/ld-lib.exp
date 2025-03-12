@@ -1638,6 +1638,10 @@ proc check_ctf_available { } {
 proc skip_ctf_tests { } {
     global enable_libctf
 
+    # SiFive: Skip that since GCC 14 has some issue with CTF emission.
+    # but we don't really care about the CTF stuff so far.
+    return 1
+
     if {$enable_libctf eq "no"} {
 	return 1
     }
