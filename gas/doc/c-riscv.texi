@@ -392,6 +392,15 @@ The pseudo la.tls.gd instruction can be expended to
 	addi  a0, a0, %pcrel_lo(@var{label})     // R_RISCV_PCREL_LO12_I
 @end smallexample
 
+@item %lpad_hash(@var{"string"})
+Calculating the hash of the function signature for landing pad, it can be used
+with @code{lapd} or @code{lui} instruction for setting up the landing pad value.
+
+@smallexample
+	lui        a0, %lpad_hash("FvvE")     // R_RISCV_LPAD
+	lpad       %lpad_hash("FvvE")         // R_RISCV_LPAD
+@end smallexample
+
 @end table
 
 @node RISC-V-Floating-Point
