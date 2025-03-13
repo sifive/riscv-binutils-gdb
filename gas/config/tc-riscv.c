@@ -33,6 +33,8 @@
 #include "elf/riscv.h"
 #include "opcode/riscv.h"
 
+#include "md5.h"
+
 #include <stdint.h>
 
 /* Information about an instruction, including its format, operands
@@ -194,6 +196,7 @@ static unsigned elf_flags = 0;
 static bool start_assemble = false;
 
 static bool probing_insn_operands;
+static bool parsing_lpad_hash = false;
 
 /* Set the default_isa_spec.  Return 0 if the spec isn't supported.
    Otherwise, return 1.  */
@@ -2450,6 +2453,7 @@ static const struct percent_op_match percent_op_utype[] =
   {"tls_ie_pcrel_hi", BFD_RELOC_RISCV_TLS_GOT_HI20},
   {"tls_gd_pcrel_hi", BFD_RELOC_RISCV_TLS_GD_HI20},
   {"hi", BFD_RELOC_RISCV_HI20},
+  {"lpad_hash", BFD_RELOC_RISCV_LPAD},
   {0, 0}
 };
 
@@ -2583,10 +2587,16 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
   if (str_depth || reloc_index)
     probing_insn_operands = false;
 
+  if (*reloc == BFD_RELOC_RISCV_LPAD)
+    parsing_lpad_hash = true;
+
   my_getExpression (ep, crux);
   str = expr_parse_end;
 
   probing_insn_operands = orig_probing;
+
+  if (*reloc == BFD_RELOC_RISCV_LPAD)
+    parsing_lpad_hash = false;
 
   /* Match every open bracket.  */
   while (crux_depth > 0 && (*str == ')' || is_whitespace (*str)))
@@ -3683,7 +3693,18 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		}
 	      {
 		bool is_lpad = strcmp (str, "lpad") == 0;
-		if (is_lpad)
+		if (*imm_reloc == BFD_RELOC_RISCV_LPAD)
+		  {
+		    /* We don't need to insert relocation for lui or auipc,
+		       only need that for lpad, so convert that into HI20 reloc,
+		       that will resolved at assembler stage.  */
+		    if (!is_lpad)
+		      {
+			*imm_reloc = BFD_RELOC_RISCV_HI20;
+			imm_expr->X_add_number <<= RISCV_IMM_BITS;
+		      }
+		  }
+		else if (is_lpad)
 		  {
 		    /* Always insert a lpad relocation for lpad instruction.  */
 		    *imm_reloc = BFD_RELOC_RISCV_LPAD;
@@ -4615,11 +4636,78 @@ riscv_after_parse_args (void)
     flag_dwarf_cie_version = 3;
 }
 
+static unsigned int
+riscv_lpad_hash (const char *str)
+{
+  uint32_t md5_block[4];
+  md5_buffer(str, strlen (str), md5_block);
+
+#define EXTRACT_N_BIT(VAL, START, LEN) \
+  (((VAL) >> (START)) & ((1 << (LEN)) - 1))
+
+  /* Take first 20 bit.  */
+  uint32_t hash_result = EXTRACT_N_BIT (md5_block[0], 0, 20);
+
+  if (hash_result != 0)
+    return hash_result;
+
+  /* Take next 20 bit, 12 bit from block[0] and 8 bit from block[1].  */
+  hash_result = EXTRACT_N_BIT (md5_block[0], 20, 12)
+		| (EXTRACT_N_BIT (md5_block[1], 0, 8) << 12);
+
+  if (hash_result != 0)
+    return hash_result;
+
+  /* Take next 20 bit, 20 bit from block[1].  */
+  hash_result = EXTRACT_N_BIT (md5_block[1], 8, 20);
+
+  if (hash_result != 0)
+    return hash_result;
+
+  /* Take next 20 bit, 4 bit from block[1] and 16 bit from block[2].  */
+  hash_result = EXTRACT_N_BIT (md5_block[1], 28, 4)
+		| (EXTRACT_N_BIT (md5_block[2], 0, 16) << 4);
+
+  if (hash_result != 0)
+    return hash_result;
+
+  /* Take next 20 bit, 16 bit from block[2] and 4 bit from block[3].  */
+  hash_result = EXTRACT_N_BIT (md5_block[2], 16, 16)
+		| (EXTRACT_N_BIT (md5_block[3], 0, 4) << 16);
+
+  if (hash_result != 0)
+    return hash_result;
+
+  /* Take next 20 bit, 20 bit from block[3].  */
+  hash_result = EXTRACT_N_BIT (md5_block[3], 4, 20);
+
+  if (hash_result != 0)
+    return hash_result;
+
+  /* If we've checked all 20-bit segments, check the last 8 bits.  */
+  hash_result = EXTRACT_N_BIT (md5_block[3], 24, 8);
+  if (hash_result != 0)
+    return hash_result;
+
+#undef EXTRACT_N_BIT
+
+  /* If everything was zero, return the has of "RISC-V",
+     but we didn't found any string will result all-zero result so far.   */
+  return riscv_lpad_hash ("RISC-V");
+}
+
 bool riscv_parse_name (const char *name, struct expressionS *ep,
 		       enum expr_mode mode)
 {
   unsigned int regno;
   symbolS *sym;
+
+  if (parsing_lpad_hash)
+    {
+      ep->X_op = O_constant;
+      ep->X_add_number = riscv_lpad_hash (name);
+      return true;
+    }
 
   if (!probing_insn_operands)
     return false;
