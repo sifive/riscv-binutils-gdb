@@ -3741,22 +3741,22 @@ _bfd_riscv_elf_link_setup_gnu_properties (struct bfd_link_info *info,
     {
       prop = _bfd_elf_get_property (ebfd, GNU_PROPERTY_RISCV_FEATURE_1_AND, 4);
 
-      if (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP
-	  && !(prop->u.number & GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP))
+      if (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED
+	  && !(prop->u.number & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED))
 	{
 	  _bfd_error_handler (
-	      _ ("%pB: warning: Zicfilp turned on by -z force-zicfilp "
-		 "when all inputs do not have ZICFILP in NOTE "
+	      _ ("%pB: warning: CFI_LP_UNLABELED turned on by -z force-zicfilp "
+		 "when all inputs do not have CFI_LP_UNLABELED in NOTE "
 		 "section."),
 	      ebfd);
 	}
 
-      if (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS
-	  && !(prop->u.number & GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS))
+      if (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS
+	  && !(prop->u.number & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS))
 	{
 	  _bfd_error_handler (
-	      _ ("%pB: warning: Zicfiss turned on by -z force-zicfiss "
-		 "when all inputs do not have ZICFISS in NOTE "
+	      _ ("%pB: warning: CFI_SS turned on by -z force-zicfiss "
+		 "when all inputs do not have CFI_SS in NOTE "
 		 "section."),
 	      ebfd);
 	}
@@ -3798,8 +3798,8 @@ _bfd_riscv_elf_link_setup_gnu_properties (struct bfd_link_info *info,
          if (GNU_PROPERTY_RISCV_FEATURE_1_AND == p->property.pr_type)
            {
              and_prop = p->property.u.number
-                        & (GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP
-                           | GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS);
+			& (GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED
+			   | GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS);
              break;
            }
          else

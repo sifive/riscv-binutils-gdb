@@ -21323,12 +21323,12 @@ decode_riscv_feature_1_and (unsigned int bitmask)
       bitmask &= ~ bit;
       switch (bit)
 	{
-	case GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP:
-	  printf ("ZICFILP");
+	case GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED:
+	  printf ("CFI_LP_UNLABELED");
 	  break;
 
-	case GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS:
-	  printf ("ZICFISS");
+	case GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS:
+	  printf ("CFI_SS");
 	  break;
 
 	default:

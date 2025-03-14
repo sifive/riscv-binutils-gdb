@@ -210,11 +210,11 @@ struct _bfd_riscv_elf_obj_tdata
   uint32_t gnu_and_prop;
 
   /* True to warn when linking objects with incompatible
-     GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP.  */
-  bool zicfilp_warn;
+     GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED.  */
+  bool zicfilp_unlabeled_warn;
 
   /* True to warn when linking objects with incompatible
-     GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS.  */
+     GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS.  */
   bool zicfiss_warn;
 
   /* PLT type based on security.  */
@@ -426,20 +426,20 @@ riscv_elfNN_set_options (struct bfd_link_info *link_info,
 
   tdata->plt_type = params->plt_type;
   tdata->zicfiss_warn = params->zicfiss_type;
-  tdata->zicfilp_warn = params->zicfilp_type;
+  tdata->zicfilp_unlabeled_warn = params->zicfilp_type;
 
   if (params->zicfiss_type == ZICFISS_WARN)
     {
       tdata->gnu_and_prop
-       |= GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS;
+       |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS;
     }
 
   switch (params->plt_type)
     {
     case PLT_ZICFILP:
-      tdata->zicfilp_warn = true;
+      tdata->zicfilp_unlabeled_warn = true;
       tdata->gnu_and_prop
-        |= GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP;
+	|= GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED;
       break;
 
     default:
@@ -7330,7 +7330,7 @@ elfNN_riscv_link_setup_gnu_properties (struct bfd_link_info *info)
 
   _bfd_riscv_elf_tdata (info->output_bfd)->gnu_and_prop = and_prop;
   _bfd_riscv_elf_tdata (info->output_bfd)->plt_type
-      |= (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP) ? PLT_ZICFILP : 0;
+      |= (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED) ? PLT_ZICFILP : 0;
   setup_plt_values (info, _bfd_riscv_elf_tdata (info->output_bfd)->plt_type);
   return pbfd;
 }
@@ -7340,11 +7340,13 @@ elfNN_riscv_link_setup_gnu_properties (struct bfd_link_info *info)
 static void
 riscv_warn_zicfilp_if_necessary(const elf_property* prop, const bfd *abfd)
 {
-  if ((prop && !(prop->u.number & GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP))
+  if ((prop && !(prop->u.number
+		 & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED))
        || !prop)
     {
-      _bfd_error_handler (_("%pB: warning: Zicfilp turned on by -z force-zicfilp when "
-                            "all inputs do not have ZICFILP in NOTE section."),
+      _bfd_error_handler (_("%pB: warning: CFI_LP_UNLABELED turned on by -z "
+			    "force-zicfilp when all inputs do not have "
+			    "CFI_LP_UNLABELED in NOTE section."),
                           abfd);
     }
 }
@@ -7354,11 +7356,12 @@ riscv_warn_zicfilp_if_necessary(const elf_property* prop, const bfd *abfd)
 static void
 riscv_warn_zicfiss_if_necessary (const elf_property* prop, const bfd *abfd)
 {
-  if ((prop && !(prop->u.number & GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS))
+  if ((prop && !(prop->u.number & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS))
        || !prop)
     {
-      _bfd_error_handler (_("%pB: warning: Zicfiss turned on by -z force-zicfiss when "
-                            "all inputs do not have ZICFISS in NOTE section."),
+      _bfd_error_handler (_("%pB: warning: CFI_SS turned on by -z force-zicfiss"
+			    " when all inputs do not have CFI_SS in NOTE "
+			    "section."),
                           abfd);
     }
 }
@@ -7379,10 +7382,10 @@ elfNN_riscv_merge_gnu_properties (struct bfd_link_info *info,
   /* If output has been marked with CFILP using command line argument, give out
      warning if necessary.  */
   /* Properties are merged per type, hence only check for warnings when merging
-     GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP.  */
+     GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED.  */
   if (((aprop && aprop->pr_type == GNU_PROPERTY_RISCV_FEATURE_1_AND)
        || (bprop && bprop->pr_type == GNU_PROPERTY_RISCV_FEATURE_1_AND))
-      && (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_ZICFISS)
+      && (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS)
       && (_bfd_riscv_elf_tdata (info->output_bfd)->zicfiss_warn))
     {
       riscv_warn_zicfiss_if_necessary(aprop, abfd);
@@ -7391,8 +7394,8 @@ elfNN_riscv_merge_gnu_properties (struct bfd_link_info *info,
 
   if (((aprop && aprop->pr_type == GNU_PROPERTY_RISCV_FEATURE_1_AND)
 	|| (bprop && bprop->pr_type == GNU_PROPERTY_RISCV_FEATURE_1_AND))
-      && (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_ZICFILP)
-      && (_bfd_riscv_elf_tdata (info->output_bfd)->zicfilp_warn))
+      && (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
+      && (_bfd_riscv_elf_tdata (info->output_bfd)->zicfilp_unlabeled_warn))
     {
       riscv_warn_zicfilp_if_necessary(aprop, abfd);
       riscv_warn_zicfilp_if_necessary(bprop, bbfd);

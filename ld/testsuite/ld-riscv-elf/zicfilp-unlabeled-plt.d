@@ -1,5 +1,5 @@
 #name: Check --force-zicfilp emits landing pad PLT (shared)
-#source: zicfilp-plt.s
+#source: zicfilp-unlabeled-plt.s
 #ld: -shared -z force-zicfilp
 #objdump: -dr -j .plt
 #as: -march=rv64gc_zicfilp

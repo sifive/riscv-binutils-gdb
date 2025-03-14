@@ -1,16 +1,16 @@
-#name: Warn with one missing GNU NOTE Zicfilp input
+#name: Warn with one missing GNU NOTE CFI_LP_UNLABELED input
 #source: property1.s
 #source: property2.s
 #as: -mabi=lp64 -defsym __property_zicfilp__=1 -defsym __property_zicfiss__=1
 #ld: -shared -z force-zicfilp
-#warning: .*: warning: Zicfilp turned on by -z force-zicfilp.*$
+#warning: .*: warning: CFI_LP_UNLABELED turned on by -z force-zicfilp.*$
 #readelf: -n
 
-# Should warn about the missing input ZICFILP NOTE but should
-# still mark output as ZICFILP
+# Should warn about the missing input CFI_LP_UNLABELED NOTE but should
+# still mark output as CFI_LP_UNLABELED.
 
 Displaying notes found in: .note.gnu.property
 [ 	]+Owner[ 	]+Data size[ 	]+Description
 [ 	]+GNU[ 	]+0x00000010[ 	]+NT_GNU_PROPERTY_TYPE_0
-[ 	]+Properties: RISC-V AND feature: ZICFILP
+[ 	]+Properties: RISC-V AND feature: CFI_LP_UNLABELED
 
