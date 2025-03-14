@@ -29,9 +29,10 @@
 
 typedef enum
 {
-    PLT_NORMAL    = 0x0,  /* Normal plts.  */
-    PLT_ZICFILP   = 0x1,  /* Landing pad plts.  */
-    PLT_COMPACT   = 0x2   /* Compact plts.  */
+    PLT_NORMAL           = 0x0,  /* Normal plts.  */
+    PLT_ZICFILP          = 0x1,  /* Landing pad plts.  */
+    PLT_ZICFILP_FUNC_SIG = 0x2,  /* Function-signature based landing pad plts.  */
+    PLT_COMPACT          = 0x3   /* Compact plts.  */
 } riscv_plt_type;
 
 /* To indicate if LP is enabled with/without warning.  */
@@ -59,6 +60,7 @@ struct riscv_elf_params
   /* Zicfilp requires diffrent PLT header and entries.  */
   riscv_plt_type plt_type;
   riscv_enable_zicfilp_type zicfilp_type;
+  riscv_enable_zicfilp_type zicfilp_func_sig_type;
   riscv_enable_zicfiss_type zicfiss_type;
 };
 

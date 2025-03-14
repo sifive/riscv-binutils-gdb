@@ -32,6 +32,7 @@ static struct riscv_elf_params params = { .relax_gp = 1,
 					  .relax_zcmt = 0,
 					  .plt_type = PLT_NORMAL,
 					  .zicfilp_type = ZICFILP_NONE,
+					  .zicfilp_func_sig_type = ZICFILP_NONE,
 					  .zicfiss_type = ZICFISS_NONE };
 EOF
 
@@ -54,6 +55,7 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   fprintf (file, _("  --relax-zcmt                Perform Zcmt relaxation\n"));
   fprintf (file, _("  --no-relax-zcmt             Don'\''t perform Zcmt relaxation (default)\n"));
   fprintf (file, _("  -z force-zicfilp            Turn on Zicfilp mechanism and generate PLTs with landing pad. Generate warnings for missing Zicfilp on inputs\n\n"));
+  fprintf (file, _("  -z force-zicfilp-func-sig   Turn on Zicfilp mechanism with function signature-based and generate PLTs with landing pad. Generate warnings for missing Zicfilp on inputs\n\n"));
   fprintf (file, _("  -z force-zicfiss            Turn on Zicfiss. Generate warnings for missing Zicfilp on inputs\n\n"));
 '
 
@@ -62,6 +64,11 @@ PARSE_AND_LIST_ARGS_CASE_Z_RISCV='
 	{
           params.plt_type |= PLT_ZICFILP;
           params.zicfilp_type = ZICFILP_WARN;
+	}
+      else if (strcmp (optarg, "force-zicfilp-func-sig") == 0)
+	{
+          params.plt_type |= PLT_ZICFILP_FUNC_SIG;
+          params.zicfilp_func_sig_type = ZICFILP_WARN;
 	}
       else if (strcmp (optarg, "force-zicfiss") == 0)
        {

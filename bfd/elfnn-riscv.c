@@ -193,6 +193,11 @@ struct riscv_elf_link_hash_entry
 #define PLT_ZICFILP_HEADER_SIZE (PLT_ZICFILP_HEADER_INSNS * INSN_BYTES)
 #define PLT_ZICFILP_ENTRY_SIZE (PLT_ZICFILP_ENTRY_INSNS * INSN_BYTES)
 
+#define PLT_ZICFILP_FUNC_SIG_HEADER_INSNS 12
+#define PLT_ZICFILP_FUNC_SIG_ENTRY_INSNS 8
+#define PLT_ZICFILP_FUNC_SIG_HEADER_SIZE (PLT_ZICFILP_FUNC_SIG_HEADER_INSNS * INSN_BYTES)
+#define PLT_ZICFILP_FUNC_SIG_ENTRY_SIZE (PLT_ZICFILP_FUNC_SIG_ENTRY_INSNS * INSN_BYTES)
+
 #define GOT_ENTRY_SIZE RISCV_ELF_WORD_BYTES
 /* Reserve two entries of GOTPLT for ld.so, one is used for PLT resolver,
    the other is used for link map.  Other targets also reserve one more
@@ -212,6 +217,10 @@ struct _bfd_riscv_elf_obj_tdata
   /* True to warn when linking objects with incompatible
      GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED.  */
   bool zicfilp_unlabeled_warn;
+
+  /* True to warn when linking objects with incompatible
+     GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG.  */
+  bool zicfilp_func_sig_warn;
 
   /* True to warn when linking objects with incompatible
      GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS.  */
@@ -374,6 +383,13 @@ riscv_make_plt_zicfilp_header (bfd *, struct riscv_elf_link_hash_table *);
 static bool
 riscv_make_plt_zicfilp_entry (bfd *, asection *, bfd_vma, asection *, bfd_vma);
 
+static bool
+riscv_make_plt_zicfilp_func_sig_header (bfd *, struct riscv_elf_link_hash_table *);
+
+static bool
+riscv_make_plt_zicfilp_func_sig_entry (bfd *, asection *, bfd_vma, asection *, bfd_vma);
+
+
 static void
 setup_plt_values (struct bfd_link_info *link_info,
                   unsigned plt_type)
@@ -395,6 +411,13 @@ setup_plt_values (struct bfd_link_info *link_info,
       htab->plt_entry_size = PLT_ZICFILP_ENTRY_SIZE;
       htab->make_plt_header = riscv_make_plt_zicfilp_header;
       htab->make_plt_entry = riscv_make_plt_zicfilp_entry;
+      break;
+
+    case PLT_ZICFILP_FUNC_SIG:
+      htab->plt_header_size = PLT_ZICFILP_FUNC_SIG_HEADER_SIZE;
+      htab->plt_entry_size = PLT_ZICFILP_FUNC_SIG_ENTRY_SIZE;
+      htab->make_plt_header = riscv_make_plt_zicfilp_func_sig_header;
+      htab->make_plt_entry = riscv_make_plt_zicfilp_func_sig_entry;
       break;
 
     case PLT_COMPACT:
@@ -427,6 +450,7 @@ riscv_elfNN_set_options (struct bfd_link_info *link_info,
   tdata->plt_type = params->plt_type;
   tdata->zicfiss_warn = params->zicfiss_type;
   tdata->zicfilp_unlabeled_warn = params->zicfilp_type;
+  tdata->zicfilp_func_sig_warn = params->zicfilp_func_sig_type;
 
   if (params->zicfiss_type == ZICFISS_WARN)
     {
@@ -440,6 +464,12 @@ riscv_elfNN_set_options (struct bfd_link_info *link_info,
       tdata->zicfilp_unlabeled_warn = true;
       tdata->gnu_and_prop
 	|= GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED;
+      break;
+
+    case PLT_ZICFILP_FUNC_SIG:
+      tdata->zicfilp_func_sig_warn = true;
+      tdata->gnu_and_prop
+	|= GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG;
       break;
 
     default:
@@ -836,6 +866,63 @@ riscv_make_plt_zicfilp_header (bfd *output_bfd, struct riscv_elf_link_hash_table
   return true;
 }
 
+static bool
+riscv_make_plt_zicfilp_func_sig_header (bfd *output_bfd,
+					struct riscv_elf_link_hash_table *htab)
+{
+  /*
+      lpad   0 # disable label checking
+      sub    t1, t1, t3               # shifted .got.plt offset + hdr size + 20
+1:    auipc  t3, %pcrel_hi(.got.plt)
+      addi   t0, t3, %pcrel_lo(1b)    # &.got.plt
+      l[w|d] t3, %pcrel_lo(1b)(t3)    # _dl_runtime_resolve
+      addi   t1, t1, -(hdr size + 20) # shifted .got.plt offset
+      srli   t1, t1, log2(32/PTRSIZE) # .got.plt offset
+      l[w|d] t0, PTRSIZE(t0)          # link map
+      jr     t3
+      nop
+      nop
+      nop  */
+
+  /* RVE has no t3 register, so this won't work, and is not supported.  */
+  if (elf_elfheader (output_bfd)->e_flags & EF_RISCV_RVE)
+    {
+      _bfd_error_handler (_("%pB: warning: RVE PLT generation not supported"),
+			  output_bfd);
+      return false;
+    }
+
+  asection *gotplt = htab->elf.sgotplt;
+  bfd_vma gotplt_addr = sec_addr (gotplt);
+
+  asection *splt = htab->elf.splt;
+  bfd_vma plt_header_addr = sec_addr (splt);
+
+  /* Add INSN_BYTES to skip the lpad instruction.  */
+  bfd_vma gotplt_offset_high = RISCV_PCREL_HIGH_PART (gotplt_addr, plt_header_addr + (INSN_BYTES * 2));
+  bfd_vma gotplt_offset_low = RISCV_PCREL_LOW_PART (gotplt_addr, plt_header_addr + (INSN_BYTES * 2));
+
+  uint32_t header[PLT_ZICFILP_FUNC_SIG_HEADER_INSNS];
+  header[0] = RISCV_UTYPE (LPAD, X_ZERO, 0);
+  header[1] = RISCV_RTYPE (SUB, X_T1, X_T1, X_T3);
+  header[2] = RISCV_UTYPE (AUIPC, X_T3, gotplt_offset_high);
+  header[3] = RISCV_ITYPE (ADDI, X_T0, X_T3, gotplt_offset_low);
+  header[4] = RISCV_ITYPE (LREG, X_T3, X_T3, gotplt_offset_low);
+  header[5] = RISCV_ITYPE (ADDI, X_T1, X_T1, (uint32_t) -(PLT_ZICFILP_FUNC_SIG_HEADER_SIZE + 20));
+  header[6] = RISCV_ITYPE (SRLI, X_T1, X_T1, 5 - RISCV_ELF_LOG_WORD_BYTES);
+  header[7] = RISCV_ITYPE (LREG, X_T0, X_T0, RISCV_ELF_WORD_BYTES);
+  header[8] = RISCV_ITYPE (JALR, 0, X_T3, 0);
+  header[9] = RISCV_NOP;
+  header[10] = RISCV_NOP;
+  header[11] = RISCV_NOP;
+
+  for (int i = 0; i < PLT_ZICFILP_FUNC_SIG_HEADER_INSNS; i++)
+    bfd_putl32 (header[i], splt->contents + INSN_BYTES*i);
+
+  return true;
+
+}
+
 /* Generate a PLT entry.  */
 
 static bool
@@ -987,6 +1074,44 @@ riscv_make_plt_zicfilp_entry (bfd *output_bfd, asection *got,
 
   return true;
 }
+
+static bool
+riscv_make_plt_zicfilp_func_sig_entry (bfd *output_bfd, asection *got,
+				       bfd_vma got_offset, asection *plt,
+				       bfd_vma plt_offset)
+{
+  /* FIXME: Use 1 for landing pad label now, need use from
+            .riscv.lpadinfo section.  */
+  int64_t lpl = 1 << 12;
+
+  /*  lpad    <value>
+      auipc   t3, %hi(function@.got.plt)
+      l[w|d]  t3, %lo(1b)(t3)
+      lui     t2, <value>
+      jalr    t1, t3
+      nop
+      nop
+      nop  */
+
+  bfd_vma got_entry_addr = sec_addr(got) + got_offset;
+  bfd_vma plt_entry_addr = sec_addr(plt) + plt_offset;
+  uint32_t entry[PLT_ZICFILP_FUNC_SIG_ENTRY_INSNS];
+  entry[0] = RISCV_UTYPE (LPAD, X_ZERO, lpl);
+  entry[1] = RISCV_UTYPE (AUIPC, X_T3, RISCV_PCREL_HIGH_PART (got_entry_addr, plt_entry_addr + 4));
+  entry[2] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART (got_entry_addr, plt_entry_addr + 4));
+  entry[3] = RISCV_UTYPE (LUI, X_T2, lpl);
+  entry[4] = RISCV_ITYPE (JALR, X_T1, X_T3, 0);
+  entry[5] = RISCV_NOP;
+  entry[6] = RISCV_NOP;
+  entry[7] = RISCV_NOP;
+
+  bfd_byte *loc = plt->contents + plt_offset;
+  for (int i = 0; i < PLT_ZICFILP_FUNC_SIG_ENTRY_INSNS; i++)
+    bfd_putl32 (entry[i], loc + INSN_BYTES * i);
+
+  return true;
+}
+
 
 static inline bool
 riscv_is_special_symbol_name (bfd *abfd, const char *name)
@@ -4686,6 +4811,10 @@ riscv_elf_plt_sym_val (bfd_vma i, const asection *plt,
     case PLT_ZICFILP:
       return plt->vma + PLT_ZICFILP_HEADER_SIZE + (i * PLT_ZICFILP_ENTRY_SIZE);
 
+    case PLT_ZICFILP_FUNC_SIG:
+      return plt->vma + PLT_ZICFILP_FUNC_SIG_HEADER_SIZE
+	     + (i * PLT_ZICFILP_FUNC_SIG_ENTRY_SIZE);
+
     case PLT_COMPACT:
       return plt->vma + PLT_COMPACT_HEADER_SIZE + i * PLT_COMPACT_ENTRY_SIZE;
 
@@ -7329,8 +7458,11 @@ elfNN_riscv_link_setup_gnu_properties (struct bfd_link_info *info)
   bfd *pbfd = _bfd_riscv_elf_link_setup_gnu_properties (info, &and_prop);
 
   _bfd_riscv_elf_tdata (info->output_bfd)->gnu_and_prop = and_prop;
-  _bfd_riscv_elf_tdata (info->output_bfd)->plt_type
-      |= (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED) ? PLT_ZICFILP : 0;
+  if (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
+    _bfd_riscv_elf_tdata (info->output_bfd)->plt_type = PLT_ZICFILP;
+  else if (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG)
+    _bfd_riscv_elf_tdata (info->output_bfd)->plt_type = PLT_ZICFILP_FUNC_SIG;
+
   setup_plt_values (info, _bfd_riscv_elf_tdata (info->output_bfd)->plt_type);
   return pbfd;
 }
@@ -7363,6 +7495,22 @@ riscv_warn_zicfiss_if_necessary (const elf_property* prop, const bfd *abfd)
 			    " when all inputs do not have CFI_SS in NOTE "
 			    "section."),
                           abfd);
+    }
+}
+
+/* Warn CFI_LP_FUNC_SIG when -z force-zicfilp-func-sig is enabled but the bfd
+   doesn't have the property in NOTE. */
+static void
+riscv_warn_zicfilp_func_sig_if_necessary(const elf_property* prop, const bfd *abfd)
+{
+  if ((prop && !(prop->u.number
+		 & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG))
+       || !prop)
+    {
+      _bfd_error_handler (_("%pB: warning: CFI_LP_FUNC_SIG turned on by -z "
+			    "force-zicfilp-func-sig when all inputs do not have"
+			    " CFI_LP_FUNC_SIG in NOTE section."),
+			  abfd);
     }
 }
 
@@ -7399,6 +7547,15 @@ elfNN_riscv_merge_gnu_properties (struct bfd_link_info *info,
     {
       riscv_warn_zicfilp_if_necessary(aprop, abfd);
       riscv_warn_zicfilp_if_necessary(bprop, bbfd);
+    }
+
+  if (((aprop && aprop->pr_type == GNU_PROPERTY_RISCV_FEATURE_1_AND)
+	|| (bprop && bprop->pr_type == GNU_PROPERTY_RISCV_FEATURE_1_AND))
+      && (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG)
+      && (_bfd_riscv_elf_tdata (info->output_bfd)->zicfilp_unlabeled_warn))
+    {
+      riscv_warn_zicfilp_func_sig_if_necessary(aprop, abfd);
+      riscv_warn_zicfilp_func_sig_if_necessary(bprop, bbfd);
     }
 
   return _bfd_riscv_elf_merge_gnu_properties (info, abfd, aprop, bprop,

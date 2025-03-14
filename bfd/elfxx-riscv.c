@@ -3761,6 +3761,17 @@ _bfd_riscv_elf_link_setup_gnu_properties (struct bfd_link_info *info,
 	      ebfd);
 	}
 
+      if (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG
+	  && !(prop->u.number & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG))
+	{
+	  _bfd_error_handler (
+	      _ ("%pB: warning: CFI_LP_FUNC_SIG turned on by -z"
+		 "force-zicfilp-func-sig when all inputs do not have "
+		 "CFI_LP_FUNC_SIG in NOTE section."),
+	      ebfd);
+	}
+
+
       prop->u.number |= and_prop;
       prop->pr_kind = property_number;
 
@@ -3799,7 +3810,8 @@ _bfd_riscv_elf_link_setup_gnu_properties (struct bfd_link_info *info,
            {
              and_prop = p->property.u.number
 			& (GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED
-			   | GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS);
+			   | GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS
+			   | GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG);
              break;
            }
          else

@@ -21331,6 +21331,10 @@ decode_riscv_feature_1_and (unsigned int bitmask)
 	  printf ("CFI_SS");
 	  break;
 
+	case GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG:
+	  printf ("CFI_LP_FUNC_SIG");
+	  break;
+
 	default:
 	  printf (_("<unknown: %x>"), bit);
 	  break;
