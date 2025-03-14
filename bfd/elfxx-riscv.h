@@ -30,7 +30,8 @@
 typedef enum
 {
     PLT_NORMAL            = 0x0,  /* Normal plts.  */
-    PLT_ZICFILP_UNLABELED = 0x1   /* Landing pad unlabeled plts.  */
+    PLT_ZICFILP_UNLABELED = 0x1,  /* Landing pad unlabeled plts.  */
+    PLT_ZICFILP_FUNC_SIG  = 0x2   /* Function-signature based landing pad plts.  */
 } riscv_plt_type;
 
 struct riscv_elf_params
