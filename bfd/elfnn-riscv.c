@@ -447,6 +447,52 @@ riscv_make_plt_entry (bfd *output_bfd, asection *gotsec, bfd_vma got_offset,
 }
 
 static bool
+riscv_make_plt_zicfilp_header (bfd *output_bfd, struct riscv_elf_link_hash_table *htab)
+{
+  asection *splt = htab->elf.splt;
+  bfd_vma addr = sec_addr(splt);
+
+  asection *sgotplt = htab->elf.sgotplt;
+  bfd_vma gotplt_addr = sec_addr (sgotplt);
+
+  bfd_vma gotplt_offset_high = RISCV_PCREL_HIGH_PART (gotplt_addr, addr);
+  bfd_vma gotplt_offset_low = RISCV_PCREL_LOW_PART (gotplt_addr, addr);
+
+  /* RVE has no t3 register, so this won't work, and is not supported.  */
+  if (elf_elfheader (output_bfd)->e_flags & EF_RISCV_RVE)
+    {
+      _bfd_error_handler (_("%pB: warning: RVE PLT generation not supported"),
+			  output_bfd);
+      return false;
+    }
+
+  /* auipc  t3, %hi(.got.plt)
+     sub    t1, t1, t2		     # shifted .got.plt offset + hdr size + 16
+     l[w|d] t2, %lo(.got.plt)(t3)    # _dl_runtime_resolve
+     addi   t1, t1, -(hdr size + 12) # shifted .got.plt offset
+     addi   t0, t3, %lo(.got.plt)    # &.got.plt
+     srli   t1, t1, log2(16/PTRSIZE) # .got.plt offset
+     l[w|d] t0, PTRSIZE(t0)	     # link map
+     jr	    t2  */
+
+  uint32_t entry[PLT_HEADER_INSNS];
+  entry[0] = RISCV_UTYPE (AUIPC, X_T3, gotplt_offset_high);
+  entry[1] = RISCV_RTYPE (SUB, X_T1, X_T1, X_T2);
+  entry[2] = RISCV_ITYPE (LREG, X_T2, X_T3, gotplt_offset_low);
+  entry[3] = RISCV_ITYPE (ADDI, X_T1, X_T1, (uint32_t) -(PLT_HEADER_SIZE + 16));
+  entry[4] = RISCV_ITYPE (ADDI, X_T0, X_T3, gotplt_offset_low);
+  entry[5] = RISCV_ITYPE (SRLI, X_T1, X_T1, 4 - RISCV_ELF_LOG_WORD_BYTES);
+  entry[6] = RISCV_ITYPE (LREG, X_T0, X_T0, RISCV_ELF_WORD_BYTES);
+  entry[7] = RISCV_ITYPE (JALR, 0, X_T2, 0);
+
+  for (int i = 0; i < PLT_HEADER_INSNS; i++)
+    bfd_putl32 (entry[i], splt->contents + 4*i);
+
+  return true;
+}
+
+
+static bool
 riscv_make_plt_zicfilp_entry (bfd *output_bfd, asection *got,
 			      bfd_vma got_offset, asection *plt,
 			      bfd_vma plt_offset)
@@ -464,11 +510,13 @@ riscv_make_plt_zicfilp_entry (bfd *output_bfd, asection *got,
       return false;
     }
 
+  // This is shared with unlabeled landing pad.
+  int lpad_value = 0;
   bfd_vma got_entry_addr = sec_addr(got) + got_offset;
   bfd_vma plt_entry_addr = sec_addr(plt) + plt_offset;
   bfd_vma auipc_addr = plt_entry_addr + 4;
   uint32_t entry[PLT_LANDING_PAD_ENTRY_INSNS];
-  entry[0] = RISCV_UTYPE (LPAD, X_ZERO, 0);
+  entry[0] = RISCV_UTYPE (LPAD, X_ZERO, lpad_value);
   entry[1] = RISCV_UTYPE (AUIPC, X_T2, RISCV_PCREL_HIGH_PART (got_entry_addr, auipc_addr));
   entry[2] = RISCV_ITYPE (LREG,  X_T2, X_T2, RISCV_PCREL_LOW_PART (got_entry_addr, auipc_addr));
   entry[3] = RISCV_ITYPE (JALR, X_T1, X_T2, 0);
@@ -609,7 +657,7 @@ setup_plt_values (struct bfd *output_bfd,
     case PLT_LANDING_PAD:
       htab->plt_header_size = PLT_LANDING_PAD_HEADER_SIZE;
       htab->plt_entry_size = PLT_LANDING_PAD_ENTRY_SIZE;
-      htab->make_plt_header = riscv_make_plt_header;
+      htab->make_plt_header = riscv_make_plt_zicfilp_header;
       htab->make_plt_entry = riscv_make_plt_zicfilp_entry;
       break;
 
@@ -5901,6 +5949,8 @@ elfNN_riscv_link_setup_gnu_properties (struct bfd_link_info *info)
   _bfd_riscv_elf_tdata (info->output_bfd)->gnu_and_prop = and_prop;
 
   if (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
+    _bfd_riscv_elf_tdata (info->output_bfd)->plt_type = PLT_LANDING_PAD;
+  else if (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG)
     _bfd_riscv_elf_tdata (info->output_bfd)->plt_type = PLT_LANDING_PAD;
 
   setup_plt_values (info->output_bfd, riscv_elf_hash_table (info),
