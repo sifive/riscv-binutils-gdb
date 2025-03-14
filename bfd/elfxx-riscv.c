@@ -3332,7 +3332,8 @@ _bfd_riscv_elf_link_setup_gnu_properties (struct bfd_link_info *info,
 				       != NULL)
 	and_prop = p->property.u.number
 		   & (GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED
-		      | GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS);
+		      | GNU_PROPERTY_RISCV_FEATURE_1_CFI_SS
+		      | GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG);
     }
 
   *and_prop_p = and_prop;

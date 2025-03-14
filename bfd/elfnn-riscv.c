@@ -469,11 +469,13 @@ riscv_make_plt_zicfilp_entry (bfd *output_bfd, asection *got,
       return false;
     }
 
+  // This is shared with unlabeled landing pad.
+  int lpad_value = 0;
   bfd_vma got_entry_addr = sec_addr(got) + got_offset;
   bfd_vma plt_entry_addr = sec_addr(plt) + plt_offset;
   bfd_vma auipc_addr = plt_entry_addr + 4;
   uint32_t entry[PLT_LANDING_PAD_ENTRY_INSNS];
-  entry[0] = RISCV_UTYPE (LPAD, X_ZERO, 0);
+  entry[0] = RISCV_UTYPE (LPAD, X_ZERO, lpad_value);
   entry[1] = RISCV_UTYPE (AUIPC, X_T2, RISCV_PCREL_HIGH_PART (got_entry_addr, auipc_addr));
   entry[2] = RISCV_ITYPE (LREG,  X_T2, X_T2, RISCV_PCREL_LOW_PART (got_entry_addr, auipc_addr));
   entry[3] = RISCV_ITYPE (JALR, X_ZERO, X_T2, 4);
@@ -5906,9 +5908,10 @@ elfNN_riscv_link_setup_gnu_properties (struct bfd_link_info *info)
   bfd *pbfd = _bfd_riscv_elf_link_setup_gnu_properties (info, &and_prop);
 
   _bfd_riscv_elf_tdata (info->output_bfd)->gnu_and_prop = and_prop;
-
   if (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
-  _bfd_riscv_elf_tdata (info->output_bfd)->plt_type = PLT_LANDING_PAD;
+    _bfd_riscv_elf_tdata (info->output_bfd)->plt_type = PLT_LANDING_PAD;
+  else if (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG)
+    _bfd_riscv_elf_tdata (info->output_bfd)->plt_type = PLT_LANDING_PAD;
 
   setup_plt_values (info, _bfd_riscv_elf_tdata (info->output_bfd)->plt_type);
 
@@ -5926,7 +5929,6 @@ elfNN_riscv_merge_gnu_properties (struct bfd_link_info *info,
 {
   uint32_t and_prop
     = _bfd_riscv_elf_tdata (info->output_bfd)->gnu_and_prop;
-
 
   return _bfd_riscv_elf_merge_gnu_properties (info, abfd, aprop, bprop,
 					      and_prop);

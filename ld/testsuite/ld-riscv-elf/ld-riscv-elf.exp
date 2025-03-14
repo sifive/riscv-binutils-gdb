@@ -228,12 +228,14 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "data-reloc-rv64-undef32-pic"
 
     run_dump_test "property-zicfilp-unlabeled"
+    run_dump_test "property-zicfilp-func-sig"
     run_dump_test "property-zicfiss"
     run_dump_test "property-combine-and-1"
     run_dump_test "property-combine-and-2"
     run_dump_test "property-combine-and-3"
 
     run_dump_test "zicfilp-unlabeled-plt"
+    run_dump_test "zicfilp-func-sig-plt"
 
     # IFUNC testcases.
     # Check IFUNC by single type relocs.
