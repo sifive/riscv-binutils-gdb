@@ -1843,6 +1843,7 @@ static struct riscv_supported_ext riscv_supported_std_s_ext[] =
   {"sdext",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"sdtrig",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ssqosid",           ISA_SPEC_CLASS_DRAFT,           1, 0, 0 },
+  {"ssstrict",           ISA_SPEC_CLASS_DRAFT,           1, 0, 0 },
   {"svukte",		ISA_SPEC_CLASS_DRAFT,		0, 4, 0 },
   {NULL, 0, 0, 0, 0}
 };
