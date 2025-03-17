@@ -151,6 +151,11 @@ All available -march extensions for RISC-V:
 	sswg                                    0.3
 	smwg                                    0.3
 	smwgd                                   0.3
+	ssnpm                                   1.0
+	smnpm                                   1.0
+	smmpm                                   1.0
+	sspm                                    1.0
+	supm                                    1.0
 	sv39                                    1.0
 	sv48                                    1.0
 	sv57                                    1.0
