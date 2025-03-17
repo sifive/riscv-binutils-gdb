@@ -1701,6 +1701,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zabha",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zacas",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zalrsc",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zama16b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zawrs",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfbfmin",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfbfmin",		ISA_SPEC_CLASS_DRAFT,		0, 8,  0 },
