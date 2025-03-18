@@ -1454,10 +1454,10 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sm3p1",    0, INSN_CLASS_ZKSH,    "d,s",    MATCH_SM3P1, MASK_SM3P1, match_opcode, 0 },
 
 /* vsetvl for SiFive Mammoth instructions, this must put before vsetvl/vsetvli since they using same opcode.  */
-{"sf.vsettn",   0, INSN_CLASS_XSFMMBASE_OR_XSFMM32EA, "d,s",      MATCH_SF_MAMMOTH_VSETTN,  MASK_SF_MAMMOTH_VSETTN,  match_opcode, 0},
-{"sf.vsettm",   0, INSN_CLASS_XSFMMBASE_OR_XSFMM32EA, "d,s",      MATCH_SF_MAMMOTH_VSETTM,  MASK_SF_MAMMOTH_VSETTM,  match_opcode, 0},
-{"sf.vsettk",   0, INSN_CLASS_XSFMMBASE_OR_XSFMM32EA, "d,s",      MATCH_SF_MAMMOTH_VSETTK,  MASK_SF_MAMMOTH_VSETTK,  match_opcode, 0},
-{"sf.vsettnt",  0, INSN_CLASS_XSFMMBASE_OR_XSFMM32EA, "d,s,Ma",   MATCH_VSETVLI, MASK_VSETVLI, match_vtwiden_non_zero, 0},
+{"sf.vsettn",   0, INSN_CLASS_XSFMMBASE, "d,s",      MATCH_SF_MAMMOTH_VSETTN,  MASK_SF_MAMMOTH_VSETTN,  match_opcode, 0},
+{"sf.vsettm",   0, INSN_CLASS_XSFMMBASE, "d,s",      MATCH_SF_MAMMOTH_VSETTM,  MASK_SF_MAMMOTH_VSETTM,  match_opcode, 0},
+{"sf.vsettk",   0, INSN_CLASS_XSFMMBASE, "d,s",      MATCH_SF_MAMMOTH_VSETTK,  MASK_SF_MAMMOTH_VSETTK,  match_opcode, 0},
+{"sf.vsettnt",  0, INSN_CLASS_XSFMMBASE, "d,s,Ma",   MATCH_VSETVLI, MASK_VSETVLI, match_vtwiden_non_zero, 0},
 
 /* RVV instructions.  */
 {"vsetvl",     0, INSN_CLASS_V,  "d,s,t",  MATCH_VSETVL, MASK_VSETVL, match_opcode, 0},
@@ -2757,10 +2757,10 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sf.vste32",   0, INSN_CLASS_XSFMMBASE, "t,0(s)",   MATCH_SF_MAMMOTH_VSTE32,  MASK_SF_MAMMOTH_VSTE32,  match_opcode, INSN_DREF },
 {"sf.vste64",   0, INSN_CLASS_XSFMMBASE, "t,0(s)",   MATCH_SF_MAMMOTH_VSTE64,  MASK_SF_MAMMOTH_VSTE64,  match_opcode, INSN_DREF },
 
-{"sf.vtmv.v.t", 0, INSN_CLASS_XSFMMBASE_OR_XSFMM32EA, "Vd,s",     MATCH_SF_MAMMOTH_VTMV_V_T,  MASK_SF_MAMMOTH_VTMV_V_T,  match_opcode, 0 },
-{"sf.vtmv.t.v", 0, INSN_CLASS_XSFMMBASE_OR_XSFMM32EA, "s,Vt",     MATCH_SF_MAMMOTH_VTMV_T_V,  MASK_SF_MAMMOTH_VTMV_T_V,  match_opcode, 0 },
+{"sf.vtmv.v.t", 0, INSN_CLASS_XSFMMBASE, "Vd,s",     MATCH_SF_MAMMOTH_VTMV_V_T,  MASK_SF_MAMMOTH_VTMV_V_T,  match_opcode, 0 },
+{"sf.vtmv.t.v", 0, INSN_CLASS_XSFMMBASE, "s,Vt",     MATCH_SF_MAMMOTH_VTMV_T_V,  MASK_SF_MAMMOTH_VTMV_T_V,  match_opcode, 0 },
 
-{"sf.mm.f.f",       0, INSN_CLASS_XSFMM32A16F_OR_XSFMM32A32F_XSFMM64A64F_OR_XSFMM32A_OR_XSFMM32EA, "Ms3,Vt,Vs",  MATCH_SF_MAMMOTH_MM_F_F,  MASK_SF_MAMMOTH_MM_F_F,  match_opcode, 0 },
+{"sf.mm.f.f",       0, INSN_CLASS_XSFMM32A16F_OR_XSFMM32A32F_XSFMM64A64F_OR_XSFMM32A, "Ms3,Vt,Vs",  MATCH_SF_MAMMOTH_MM_F_F,  MASK_SF_MAMMOTH_MM_F_F,  match_opcode, 0 },
 {"sf.mm.e5m2.e5m2", 0, INSN_CLASS_XSFMM32A8F, "Ms2,Vt,Vs",  MATCH_SF_MAMMOTH_MM_E5M2_E5M2,  MASK_SF_MAMMOTH_MM_A_B,  match_opcode, 0 },
 {"sf.mm.e5m2.e4m3", 0, INSN_CLASS_XSFMM32A8F, "Ms2,Vt,Vs",  MATCH_SF_MAMMOTH_MM_E5M2_E4M3,  MASK_SF_MAMMOTH_MM_A_B,  match_opcode, 0 },
 {"sf.mm.e4m3.e5m2", 0, INSN_CLASS_XSFMM32A8F, "Ms2,Vt,Vs",  MATCH_SF_MAMMOTH_MM_E4M3_E5M2,  MASK_SF_MAMMOTH_MM_A_B,  match_opcode, 0 },
@@ -2776,9 +2776,9 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sf.p2mm.u.s", 0, INSN_CLASS_XSFMM32A4I, "Ms2,Vt,Vs",  MATCH_SF_MAMMOTH_P2MM_U_S,  MASK_SF_MAMMOTH_P2MM_A_B,  match_opcode, 0 },
 {"sf.p2mm.s.s", 0, INSN_CLASS_XSFMM32A4I, "Ms2,Vt,Vs",  MATCH_SF_MAMMOTH_P2MM_S_S,  MASK_SF_MAMMOTH_P2MM_A_B,  match_opcode, 0 },
 
-{"sf.vtzero.t", 0, INSN_CLASS_XSFMMBASE_OR_XSFMM32EA, "Ms4",  MATCH_SF_MAMMOTH_VTZERO_T,  MASK_SF_MAMMOTH_VTZERO_T,  match_opcode, 0 },
+{"sf.vtzero.t", 0, INSN_CLASS_XSFMMBASE, "Ms4",  MATCH_SF_MAMMOTH_VTZERO_T,  MASK_SF_MAMMOTH_VTZERO_T,  match_opcode, 0 },
 
-{"sf.vtdiscard", 0, INSN_CLASS_XSFMMBASE_OR_XSFMM32EA, "",  MATCH_SF_MAMMOTH_VTDISCARD,  MASK_SF_MAMMOTH_VTDISCARD,  match_opcode, 0 },
+{"sf.vtdiscard", 0, INSN_CLASS_XSFMMBASE, "",  MATCH_SF_MAMMOTH_VTDISCARD,  MASK_SF_MAMMOTH_VTDISCARD,  match_opcode, 0 },
 
 /* Sifive compact pseudo instruction.  */
 {"la.got.gprel",    0, INSN_CLASS_I,   "d,Ag",   0, (int) M_LA_GOT_GPREL, NULL, INSN_MACRO },

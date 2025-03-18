@@ -1522,8 +1522,6 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"xsfmm16t", "+xsfmmbase",	check_implicit_always},
   {"xsfmm32a", "+xsfmm32a8i,+xsfmm32a16f,+xsfmm32a32f",	check_implicit_always},
   {"xsfmmbase", "+v",	check_implicit_always},
-  /* EA Extension (Deprecate after EA) */
-  {"xsfmm32ea", "+v",	check_implicit_always},
 
   {"v", "+zve64d,+zvl128b", check_implicit_always},
   {"zvfh", "+zvfhmin,+zfhmin", check_implicit_always},
@@ -1917,8 +1915,6 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {"xsfmm64t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
   {"xsfmm32t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
   {"xsfmm16t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
-  /* Deprecate after EA */
-  {"xsfmm32ea",         ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
 
   /* SiFive PMP-based Memory Types Extension */
   {"xsfpmpmt",		ISA_SPEC_CLASS_DRAFT, 0, 1, 0},
@@ -3279,15 +3275,11 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
               || riscv_subset_supports (rps, "xsfmm32a"));
     case INSN_CLASS_XSFMM32A8F:
       return riscv_subset_supports (rps, "xsfmm32a8f");
-    case INSN_CLASS_XSFMMBASE_OR_XSFMM32EA:
-      return (riscv_subset_supports (rps, "xsfmmbase")
-              || riscv_subset_supports (rps, "xsfmm32ea"));
-    case INSN_CLASS_XSFMM32A16F_OR_XSFMM32A32F_XSFMM64A64F_OR_XSFMM32A_OR_XSFMM32EA:
+    case INSN_CLASS_XSFMM32A16F_OR_XSFMM32A32F_XSFMM64A64F_OR_XSFMM32A:
       return (riscv_subset_supports (rps, "xsfmm32a16f")
 	      || riscv_subset_supports (rps, "xsfmm32a32f")
 	      || riscv_subset_supports (rps, "xsfmm64a64f")
-	      || riscv_subset_supports (rps, "xsfmm32a")
-	      || riscv_subset_supports (rps, "xsfmm32ea"));
+	      || riscv_subset_supports (rps, "xsfmm32a"));
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));
@@ -3597,10 +3589,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return _("xsfmm32a8i' or `xsfmm32a");
     case INSN_CLASS_XSFMM32A8F:
       return "xsfmm32a8f";
-    case INSN_CLASS_XSFMMBASE_OR_XSFMM32EA:
-      return _("xsfmmbase' or `xsfmm32ea");
-    case INSN_CLASS_XSFMM32A16F_OR_XSFMM32A32F_XSFMM64A64F_OR_XSFMM32A_OR_XSFMM32EA:
-      return _("xsfmm32a16f' or `xsfmm32a32f' or `xsfmm64a64f' or `xsfmm32a' or `xsfmm32ea");
+    case INSN_CLASS_XSFMM32A16F_OR_XSFMM32A32F_XSFMM64A64F_OR_XSFMM32A:
+      return _("xsfmm32a16f' or `xsfmm32a32f' or `xsfmm64a64f' or `xsfmm32a'");
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));

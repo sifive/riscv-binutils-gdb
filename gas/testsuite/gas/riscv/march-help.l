@@ -217,5 +217,4 @@ All available -march extensions for RISC-V:
 	xsfmm64t                                0.6
 	xsfmm32t                                0.6
 	xsfmm16t                                0.6
-	xsfmm32ea                               0.6
 	xsfpmpmt                                0.1
