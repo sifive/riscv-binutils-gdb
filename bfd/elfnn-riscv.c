@@ -189,7 +189,7 @@ struct riscv_elf_link_hash_entry
 #define PLT_COMPACT_ENTRY_SIZE (PLT_COMPACT_ENTRY_INSNS_CNT * INSN_BYTES)
 
 #define PLT_ZICFILP_HEADER_INSNS 12
-#define PLT_ZICFILP_ENTRY_INSNS 8
+#define PLT_ZICFILP_ENTRY_INSNS 4
 #define PLT_ZICFILP_HEADER_SIZE (PLT_ZICFILP_HEADER_INSNS * INSN_BYTES)
 #define PLT_ZICFILP_ENTRY_SIZE (PLT_ZICFILP_ENTRY_INSNS * INSN_BYTES)
 
@@ -794,18 +794,14 @@ riscv_make_plt_zicfilp_header (bfd *output_bfd, struct riscv_elf_link_hash_table
 {
   /*
       lpad   0  # disable label checking
-      auipc  t4, %hi(.got.plt)          # Rewrite this to using
-      sub    t1, t1, t3                 # shifted .got.plt offset + hdr size + 20
-      l[w|d] t3, %lo(1b)(t4)            # _dl_runtime_resolve
-      addi   t1, t1, -(hdr size + 20)   # shifted .got.plt offset
-      addi   t0, t4, %pcrel_lo(1b)      # &.got.plt
-      srli   t1, t1, log2(32/PTRSIZE)   # .got.plt offset
+      auipc  t2, %hi(.got.plt)          # Rewrite this to using
+      sub    t1, t1, t3                 # shifted .got.plt offset + hdr size + 12
+      l[w|d] t3, %lo(1b)(t2)            # _dl_runtime_resolve
+      addi   t1, t1, -(hdr size + 12)   # shifted .got.plt offset
+      addi   t0, t2, %pcrel_lo(1b)      # &.got.plt
+      srli   t1, t1, log2(16/PTRSIZE)   # .got.plt offset
       l[w|d] t0, PTRSIZE(t0)            # link map
       jr     t3
-      nop
-      nop
-      nop
-      nop
       nop
       nop
       nop  */
@@ -830,12 +826,12 @@ riscv_make_plt_zicfilp_header (bfd *output_bfd, struct riscv_elf_link_hash_table
 
   uint32_t header[PLT_ZICFILP_HEADER_INSNS];
   header[0] = RISCV_UTYPE (LPAD, X_ZERO, 0);
-  header[1] = RISCV_UTYPE (AUIPC, X_T4, gotplt_offset_high);
+  header[1] = RISCV_UTYPE (AUIPC, X_T2, gotplt_offset_high);
   header[2] = RISCV_RTYPE (SUB, X_T1, X_T1, X_T3);
-  header[3] = RISCV_ITYPE (LREG, X_T3, X_T4, gotplt_offset_low);
-  header[4] = RISCV_ITYPE (ADDI, X_T1, X_T1, (uint32_t) -(PLT_ZICFILP_HEADER_SIZE + 20));
-  header[5] = RISCV_ITYPE (ADDI, X_T0, X_T4, gotplt_offset_low);
-  header[6] = RISCV_ITYPE (SRLI, X_T1, X_T1, 5 - RISCV_ELF_LOG_WORD_BYTES);
+  header[3] = RISCV_ITYPE (LREG, X_T3, X_T2, gotplt_offset_low);
+  header[4] = RISCV_ITYPE (ADDI, X_T1, X_T1, (uint32_t) -(PLT_ZICFILP_HEADER_SIZE + 12));
+  header[5] = RISCV_ITYPE (ADDI, X_T0, X_T2, gotplt_offset_low);
+  header[6] = RISCV_ITYPE (SRLI, X_T1, X_T1, 4 - RISCV_ELF_LOG_WORD_BYTES);
   header[7] = RISCV_ITYPE (LREG, X_T0, X_T0, RISCV_ELF_WORD_BYTES);
   header[8] = RISCV_ITYPE (JALR, 0, X_T3, 0);
   header[9] = RISCV_NOP;
@@ -1017,38 +1013,19 @@ static bool
 riscv_make_plt_zicfilp_entry (bfd *output_bfd, asection *got,
                               bfd_vma got_offset, asection *plt, bfd_vma plt_offset)
 {
-
-  /* Use fixed landing pad label for now.  */
-  int64_t lpl = 1 << 12;
-  if (!VALID_UTYPE_IMM(lpl))
-    {
-      _bfd_error_handler
-        (_("%pB: error: invalid landing pad label: %ld\n"), output_bfd, lpl);
-        bfd_set_error (bfd_error_bad_value);
-       return false;
-    }
-
-
-  /*  lpad <value> # t2/x7 is valid
-      auipc   t3, %hi(function@.got.plt)
-      l[w|d]  t3, %lo(1b)(t3)
-      lui t2, <value>
-      jalr    t1, t3
-      nop
-      nop
-      nop  */
+  /*
+    1:  auipc   t3, %pcrel_hi(function@.got.plt)
+        l[w|d]  t3, %pcrel_lo(1b)(t3)
+        jalr    t1, t3
+        nop  */
 
   bfd_vma got_entry_addr = sec_addr(got) + got_offset;
   bfd_vma plt_entry_addr = sec_addr(plt) + plt_offset;
   uint32_t entry[PLT_ZICFILP_ENTRY_INSNS];
-  entry[0] = RISCV_UTYPE (LPAD, X_ZERO, lpl);
-  entry[1] = RISCV_UTYPE (AUIPC, X_T3, RISCV_PCREL_HIGH_PART (got_entry_addr, plt_entry_addr + 4));
-  entry[2] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART (got_entry_addr, plt_entry_addr + 4));
-  entry[3] = RISCV_UTYPE (LUI, X_T2, lpl);
-  entry[4] = RISCV_ITYPE (JALR, X_T1, X_T3, 0);
-  entry[5] = RISCV_NOP;
-  entry[6] = RISCV_NOP;
-  entry[7] = RISCV_NOP;
+  entry[0] = RISCV_UTYPE (AUIPC, X_T3, RISCV_PCREL_HIGH_PART (got_entry_addr, plt_entry_addr));
+  entry[1] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART (got_entry_addr, plt_entry_addr));
+  entry[2] = RISCV_ITYPE (JALR, X_T1, X_T3, 0);
+  entry[3] = RISCV_NOP;
 
   bfd_byte *loc = plt->contents + plt_offset;
   for (int i = 0; i < PLT_ZICFILP_ENTRY_INSNS; i++)
