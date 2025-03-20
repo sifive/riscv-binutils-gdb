@@ -1488,6 +1488,20 @@ check_implicit_for_i (riscv_parse_subset_t *rps ATTRIBUTE_UNUSED,
 	      && subset->minor_version < 1));
 }
 
+/* Add the IMPLICIT only when the 'f' extension is also available
+   and XLEN is 32.  */
+
+static bool
+check_implicit_for_zcf (riscv_parse_subset_t *rps,
+			const struct riscv_implicit_subset *implicit
+			  ATTRIBUTE_UNUSED,
+			const riscv_subset_t *subset ATTRIBUTE_UNUSED)
+{
+  riscv_subset_t *tmp = NULL;
+  return *rps->xlen == 32
+	 && riscv_lookup_subset (rps->subset_list, "f", &tmp);
+}
+
 /* Please added in order since this table is only run once time.  */
 static struct riscv_implicit_subset riscv_implicit_subsets[] =
 {
@@ -1557,7 +1571,7 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
 
   {"zce", "+zca", check_implicit_always},
   {"zce", "+zcb", check_implicit_always},
-  {"zce", "+zcf", check_implicit_always},
+  {"zce", "+zcf", check_implicit_for_zcf},
   {"zce", "+zcmp", check_implicit_always},
   {"zce", "+zcmt", check_implicit_always},
   {"zcb", "+zca", check_implicit_always},
