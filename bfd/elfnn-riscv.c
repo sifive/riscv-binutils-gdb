@@ -2711,10 +2711,6 @@ riscv_elf_late_size_sections (bfd *output_bfd, struct bfd_link_info *info)
       if (htab->variant_cc
 	  && !_bfd_elf_add_dynamic_entry (info, DT_RISCV_VARIANT_CC, 0))
        return false;
-
-      if ((_bfd_riscv_elf_tdata (output_bfd)->plt_type && PLT_ZICFILP)
-          && !_bfd_elf_add_dynamic_entry (info, DT_RISCV_ZICFILP_PLT, 0))
-        return false;
     }
 
   return true;

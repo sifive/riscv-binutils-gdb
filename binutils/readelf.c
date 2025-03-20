@@ -2882,7 +2882,6 @@ get_riscv_dynamic_type (unsigned long type)
   switch (type)
     {
     case DT_RISCV_VARIANT_CC:	return "RISCV_VARIANT_CC";
-    case DT_RISCV_ZICFILP_PLT:  return "RISCV_ZICFILP_PLT";
     default:
       return NULL;
     }
@@ -11777,8 +11776,6 @@ dynamic_section_riscv_val (Elf_Internal_Dyn * entry)
 {
   switch (entry->d_tag)
     {
-    case DT_RISCV_ZICFILP_PLT:
-      break;
     default:
       print_vma (entry->d_un.d_ptr, PREFIX_HEX);
       break;
