@@ -677,33 +677,15 @@ elfNN_riscv_get_synthetic_symtab (bfd *abfd,
     }
 
   /* Check Zicfilp PLT.  */
-  bfd_byte *contents, *extdyn, *extdynend;
-  asection *sec = bfd_get_section_by_name (abfd, ".dynamic");
-  if (sec && bfd_malloc_and_get_section (abfd, sec, &contents))
-  {
-    extdyn = contents;
-    extdynend = contents + sec->size;
-    for (; extdyn < extdynend; extdyn += sizeof (ElfNN_External_Dyn))
-      {
-        Elf_Internal_Dyn dyn;
-        bfd_elfNN_swap_dyn_in (abfd, extdyn, &dyn);
-
-        /* Let's check the processor specific dynamic array tags.  */
-        bfd_vma tag = dyn.d_tag;
-        if (tag < DT_LOPROC || tag > DT_HIPROC)
-         continue;
-
-        switch (tag)
-         {
-         case DT_RISCV_ZICFILP_PLT:
-           _bfd_riscv_elf_tdata (abfd)->plt_type |= PLT_ZICFILP;
-           break;
-
-         default: break;
-         }
-      }
-    free (contents);
-  }
+  elf_property *prop;
+  prop = _bfd_elf_get_property (abfd, GNU_PROPERTY_RISCV_FEATURE_1_AND, 4);
+  if (prop)
+    {
+      if (prop->u.number & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_UNLABELED)
+	 _bfd_riscv_elf_tdata (abfd)->plt_type |= PLT_ZICFILP;
+      if (prop->u.number & GNU_PROPERTY_RISCV_FEATURE_1_CFI_LP_FUNC_SIG)
+	_bfd_riscv_elf_tdata (abfd)->plt_type |= PLT_ZICFILP_FUNC_SIG;
+    }
 
   return _bfd_elf_get_synthetic_symtab (abfd, symcount, syms,
                     dynsymcount, dynsyms, ret);
