@@ -1288,6 +1288,24 @@ const struct riscv_opcode riscv_opcodes[] =
 {"mop.rr.6",   0, INSN_CLASS_ZIMOP, "d,s,t",  MATCH_MOP_RR_6, MASK_MOP_RR_6, match_opcode, 0 },
 {"mop.rr.7",   0, INSN_CLASS_ZIMOP, "d,s,t",  MATCH_MOP_RR_7, MASK_MOP_RR_7, match_opcode, 0 },
 
+/* Zalasr instructions.  */
+{"lb.aq",      0, INSN_CLASS_ZALASR, "d,0(s)", MATCH_LB_AQ, MASK_LB_AQ|MASK_RL, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"lb.aqrl",    0, INSN_CLASS_ZALASR, "d,0(s)", MATCH_LB_AQ|MASK_RL, MASK_LB_AQ|MASK_RL, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"lh.aq",      0, INSN_CLASS_ZALASR, "d,0(s)", MATCH_LH_AQ, MASK_LH_AQ|MASK_RL, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"lh.aqrl",    0, INSN_CLASS_ZALASR, "d,0(s)", MATCH_LH_AQ|MASK_RL, MASK_LH_AQ|MASK_RL, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"lw.aq",      0, INSN_CLASS_ZALASR, "d,0(s)", MATCH_LW_AQ, MASK_LW_AQ|MASK_RL, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"lw.aqrl",    0, INSN_CLASS_ZALASR, "d,0(s)", MATCH_LW_AQ|MASK_RL, MASK_LW_AQ|MASK_RL, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"ld.aq",     64, INSN_CLASS_ZALASR, "d,0(s)", MATCH_LD_AQ, MASK_LD_AQ|MASK_RL, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"ld.aqrl",   64, INSN_CLASS_ZALASR, "d,0(s)", MATCH_LD_AQ|MASK_RL, MASK_LD_AQ|MASK_RL, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"sb.rl",      0, INSN_CLASS_ZALASR, "t,0(s)", MATCH_SB_RL, MASK_SB_RL|MASK_AQ, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"sb.aqrl",    0, INSN_CLASS_ZALASR, "t,0(s)", MATCH_SB_RL|MASK_AQ, MASK_SB_RL|MASK_AQ, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"sh.rl",      0, INSN_CLASS_ZALASR, "t,0(s)", MATCH_SH_RL, MASK_SH_RL|MASK_AQ, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"sh.aqrl",    0, INSN_CLASS_ZALASR, "t,0(s)", MATCH_SH_RL|MASK_AQ, MASK_SH_RL|MASK_AQ, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"sw.rl",      0, INSN_CLASS_ZALASR, "t,0(s)", MATCH_SW_RL, MASK_SW_RL|MASK_AQ, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"sw.aqrl",    0, INSN_CLASS_ZALASR, "t,0(s)", MATCH_SW_RL|MASK_AQ, MASK_SW_RL|MASK_AQ, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"sd.rl",     64, INSN_CLASS_ZALASR, "t,0(s)", MATCH_SD_RL, MASK_SD_RL|MASK_AQ, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"sd.aqrl",   64, INSN_CLASS_ZALASR, "t,0(s)", MATCH_SD_RL|MASK_AQ, MASK_SD_RL|MASK_AQ, match_opcode, INSN_DREF|INSN_1_BYTE },
+
 /* Zawrs instructions.  */
 {"wrs.nto",    0, INSN_CLASS_ZAWRS, "", MATCH_WRS_NTO, MASK_WRS_NTO, match_opcode, 0 },
 {"wrs.sto",    0, INSN_CLASS_ZAWRS, "", MATCH_WRS_STO, MASK_WRS_STO, match_opcode, 0 },

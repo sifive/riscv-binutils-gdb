@@ -1727,6 +1727,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zaamo",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zabha",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zacas",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zalasr",		ISA_SPEC_CLASS_DRAFT,		0, 3,  0 },
   {"zalrsc",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zama16b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zawrs",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -3065,6 +3066,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
     case INSN_CLASS_ZABHA_AND_ZACAS:
       return (riscv_subset_supports (rps, "zabha")
 	      && riscv_subset_supports (rps, "zacas"));
+    case INSN_CLASS_ZALASR:
+      return riscv_subset_supports (rps, "zalasr");
     case INSN_CLASS_ZALRSC:
       return riscv_subset_supports (rps, "zalrsc");
     case INSN_CLASS_ZAWRS:
@@ -3374,6 +3377,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zabha";
     case INSN_CLASS_ZACAS:
       return "zacas";
+    case INSN_CLASS_ZALASR:
+      return "zalasr";
     case INSN_CLASS_ZALRSC:
       return "zalrsc";
     case INSN_CLASS_ZAWRS:
