@@ -3676,6 +3676,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return _("xsfvfexp32e' or `xsfvfexp16e' or `xsfvfbfexp16e'");
     case INSN_CLASS_XSFSCI:
       return _("xsfsci");
+    case INSN_CLASS_SMRNMI:
+      return "smrnmi";
     case INSN_CLASS_SVINVAL:
       return "svinval";
     case INSN_CLASS_P:
