@@ -30,6 +30,7 @@ imply zvfh
 imply zvfhmin
 imply zvfbfwma
 imply zvfbfmin
+imply zvfofp8min
 imply zve64d
 imply zve64f
 imply zve32f
