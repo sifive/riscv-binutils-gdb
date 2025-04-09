@@ -1789,6 +1789,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zvfh",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvfhmin",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvfofp8min",	ISA_SPEC_CLASS_DRAFT,		0, 2,  0 },
+  {"zvfofp4min",	ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },
   {"zvkb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvkg",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvkn",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -3207,6 +3208,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
     case INSN_CLASS_ZVFBFMIN_OR_ZVFOFP8MIN:
       return (riscv_subset_supports (rps, "zvfbfmin")
 	      || riscv_subset_supports (rps, "zvfofp8min"));
+    case INSN_CLASS_ZVFOFP4MIN:
+      return riscv_subset_supports (rps, "zvfofp4min");
     case INSN_CLASS_ZVKB:
       return riscv_subset_supports (rps, "zvkb");
     case INSN_CLASS_ZVKG:
@@ -3560,6 +3563,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zvfofp8min";
     case INSN_CLASS_ZVFBFMIN_OR_ZVFOFP8MIN:
       return _("zvfbfmin' or `zvfofp8min");
+    case INSN_CLASS_ZVFOFP4MIN:
+      return "zvfofp4min";
     case INSN_CLASS_ZVKB:
       return _("zvkb");
     case INSN_CLASS_ZVKG:

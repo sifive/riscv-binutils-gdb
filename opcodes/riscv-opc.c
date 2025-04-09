@@ -2252,6 +2252,9 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vfncvt.sat.f.f.q", 0, INSN_CLASS_ZVFOFP8MIN, "Vd,VtVm", MATCH_VFNCVT_SAT_F_F_Q, MASK_VFNCVT_SAT_F_F_Q, match_opcode, 0},
 {"vfncvt.f.f.q", 0, INSN_CLASS_ZVFOFP8MIN, "Vd,VtVm", MATCH_VFNCVT_F_F_Q, MASK_VFNCVT_F_F_Q, match_opcode, 0},
 
+/* Zvfofp4min instructions.  */
+{"vfext.vf2", 0, INSN_CLASS_ZVFOFP4MIN, "Vd,VtVm", MATCH_VFEXT_VF2, MASK_VFEXT_VF2, match_opcode, 0},
+
 /* Zvbb/Zvkb instructions.  */
 {"vandn.vv",   0, INSN_CLASS_ZVKB, "Vd,Vt,VsVm", MATCH_VANDN_VV, MASK_VANDN_VV, match_opcode, 0},
 {"vandn.vx",   0, INSN_CLASS_ZVKB, "Vd,Vt,sVm", MATCH_VANDN_VX, MASK_VANDN_VX, match_opcode, 0},
