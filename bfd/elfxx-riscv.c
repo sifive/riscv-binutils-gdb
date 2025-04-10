@@ -1548,18 +1548,18 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   /* TEW=32-bit Accumulation */
   {"xsfmm32a4i", "+xsfmmbase",	check_implicit_always},
   {"xsfmm32a8i", "+xsfmmbase",	check_implicit_always},
-  {"xsfmm32a8f", "+xsfmmbase",	check_implicit_always},
-  {"xsfmm32a16f", "+xsfmmbase",	check_implicit_always},
-  {"xsfmm32a32f", "+xsfmmbase",	check_implicit_always},
+  {"xsfmm32a8f", "+xsfmmbase,+zve32f",	check_implicit_always},
+  {"xsfmm32a16f", "+xsfmmbase,+zve32f",	check_implicit_always},
+  {"xsfmm32a32f", "+xsfmmbase,+zve32f",	check_implicit_always},
   /* TEW=64-bit Accumulation */
-  {"xsfmm64a64f", "+xsfmmbase",	check_implicit_always},
+  {"xsfmm64a64f", "+xsfmmbase,+zve64d",	check_implicit_always},
   /* Accumulator Array Size */
-  {"xsfmm128t", "+xsfmmbase",	check_implicit_always},
-  {"xsfmm64t", "+xsfmmbase",	check_implicit_always},
-  {"xsfmm32t", "+xsfmmbase",	check_implicit_always},
-  {"xsfmm16t", "+xsfmmbase",	check_implicit_always},
-  {"xsfmm32a", "+xsfmm32a8i,+xsfmm32a16f,+xsfmm32a32f",	check_implicit_always},
-  {"xsfmmbase", "+v",	check_implicit_always},
+  {"xsfmm128t", "+xsfmmbase,+zvl512b",	check_implicit_always},
+  {"xsfmm64t", "+xsfmmbase,+zvl256b",	check_implicit_always},
+  {"xsfmm32t", "+xsfmmbase,+zvl128b",	check_implicit_always},
+  {"xsfmm16t", "+xsfmmbase,+zvl64b",	check_implicit_always},
+  {"xsfmm32a", "+xsfmm32a8i,+xsfmm32a16f,+xsfmm32a32f,+xsfmmbase,+zve32f",	check_implicit_always},
+  {"xsfmmbase", "+zve32x",	check_implicit_always},
 
   {"v", "+zve64d,+zvl128b", check_implicit_always},
   {"zvfh", "+zvfhmin,+zfhmin", check_implicit_always},
@@ -1942,21 +1942,21 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {"xsfvfbfa",			ISA_SPEC_CLASS_DRAFT, 0, 1, 0},
 
   /* SiFive Mammoth extension */
-  {"xsfmmbase",         ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
+  {"xsfmmbase",         ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
   /* TEW=32-bit Accumulation */
-  {"xsfmm32a4i",                ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
-  {"xsfmm32a8i",                ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
-  {"xsfmm32a8f",                ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
-  {"xsfmm32a16f",               ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
-  {"xsfmm32a32f",               ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
-  {"xsfmm32a",          ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
+  {"xsfmm32a4i",                ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
+  {"xsfmm32a8i",                ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
+  {"xsfmm32a8f",                ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
+  {"xsfmm32a16f",               ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
+  {"xsfmm32a32f",               ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
+  {"xsfmm32a",          ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
   /* TEW=64-bit Accumulation */
-  {"xsfmm64a64f",               ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
+  {"xsfmm64a64f",               ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
   /* Accumulator Array Size */
-  {"xsfmm128t",         ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
-  {"xsfmm64t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
-  {"xsfmm32t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
-  {"xsfmm16t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 0},
+  {"xsfmm128t",         ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
+  {"xsfmm64t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
+  {"xsfmm32t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
+  {"xsfmm16t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
 
   /* SiFive PMP-based Memory Types Extension */
   {"xsfpmpmt",		ISA_SPEC_CLASS_DRAFT, 0, 1, 0},
