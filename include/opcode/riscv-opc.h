@@ -2542,7 +2542,7 @@
 #define MASK_VFNCVTBF16_SAT_F_F_W 0xfc0ff07f
 #define MATCH_VFNCVT_SAT_F_F_Q 0x480d9057
 #define MASK_VFNCVT_SAT_F_F_Q 0xfc0ff07f
-#define MATCH_VFNCVT_F_F_Q 0x48045057
+#define MATCH_VFNCVT_F_F_Q 0x480c9057
 #define MASK_VFNCVT_F_F_Q 0xfc0ff07f
 /* Zvfofp4min instruction.  */
 #define MATCH_VFEXT_VF2 0x480b2057
