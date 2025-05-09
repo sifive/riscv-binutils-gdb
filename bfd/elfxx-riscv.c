@@ -1599,6 +1599,7 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
 
   {"zicfilp", "+zicsr", check_implicit_always},
   {"zicfiss", "+zimop,+zicsr", check_implicit_always},
+  {"zclsd", "+zca,+zilsd", check_implicit_always},
 
   {"shcounterenw", "+h", check_implicit_always},
   {"shgatpa", "+h", check_implicit_always},
@@ -1737,6 +1738,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zimop",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicfiss",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicfilp",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zilsd",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zmmul",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"za64rs",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"za128rs",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -1836,7 +1838,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zcmop",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zcmp",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zcmt",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
-
+  {"zclsd",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {NULL, 0, 0, 0, 0}
 };
 
@@ -2574,6 +2576,15 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
 	(_("`xtheadvector' is conflict with the `v' extension"));
       no_conflict = false;
     }
+  if (riscv_lookup_subset (rps->subset_list, "zclsd", &subset)
+      && ((riscv_lookup_subset (rps->subset_list, "c", &subset)
+	   && riscv_lookup_subset (rps->subset_list, "f", &subset))
+	  || riscv_lookup_subset (rps->subset_list, "zcf", &subset)))
+    {
+      rps->error_handler
+	(_("`zclsd' is conflict with the `c+f'/ `zcf' extension"));
+      no_conflict = false;
+    }
   if (riscv_lookup_subset (rps->subset_list, "ssnpm", &subset) && xlen != 64)
     {
       rps->error_handler (_ ("rv%d does not support the `ssnpm' extension"),
@@ -3244,6 +3255,10 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
     case INSN_CLASS_SMCTR_OR_SSCTR:
       return (riscv_subset_supports (rps, "smctr")
 	      || riscv_subset_supports (rps, "ssctr"));
+    case INSN_CLASS_ZILSD:
+      return riscv_subset_supports (rps, "zilsd");
+    case INSN_CLASS_ZCLSD:
+      return riscv_subset_supports (rps, "zclsd");
     case INSN_CLASS_SMRNMI:
       return riscv_subset_supports (rps, "smrnmi");
     case INSN_CLASS_SVINVAL:
@@ -3594,6 +3609,10 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zcmt";
     case INSN_CLASS_SMCTR_OR_SSCTR:
       return _("smctr' or `ssctr");
+    case INSN_CLASS_ZILSD:
+     return "zilsd";
+    case INSN_CLASS_ZCLSD:
+      return "zclsd";
     case INSN_CLASS_XSFVFEXPA:
       return _("xsfvfexpa");
     case INSN_CLASS_XSFVFEXP32E_OR_XSFVFEXP16E_OR_XSFVFBFEXP16E:
