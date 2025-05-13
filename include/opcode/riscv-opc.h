@@ -3911,8 +3911,47 @@
 #define MASK_SF_MAMMOTH_VTDISCARD 0xffffffff
 
 /* Vendor-specific (SiFive) SiFive Scalar Coprocessor Interface (SSCI).  */
-#define MASK_SF_SCI 0x0000007f
-#define MATCH_SF_SCI 0x0000007b
+//R-Type
+#define MASK_SF_SCI_0_R 0x0000007f
+#define MATCH_SF_SCI_0_R 0x0000000b
+#define MASK_SF_SCI_1_R 0x0000007f
+#define MATCH_SF_SCI_1_R 0x0000002b
+#define MASK_SF_SCI_2_R 0X0000007f
+#define MATCH_SF_SCI_2_R 0x0000005b
+#define MASK_SF_SCI_3_R 0X0000007f
+#define MATCH_SF_SCI_3_R 0x0000007b
+
+//I-Type
+#define MASK_SF_SCI_0_I 0x0000007f
+#define MATCH_SF_SCI_0_I 0x0000000b
+#define MASK_SF_SCI_1_I 0x0000007f
+#define MATCH_SF_SCI_1_I 0x0000002b
+#define MASK_SF_SCI_2_I 0X0000007f
+#define MATCH_SF_SCI_2_I 0x0000005b
+#define MASK_SF_SCI_3_I 0X0000007f
+#define MATCH_SF_SCI_3_I 0x0000007b
+
+//U-Type
+#define MASK_SF_SCI_0_U 0x0000007f
+#define MATCH_SF_SCI_0_U 0x0000000b
+#define MASK_SF_SCI_1_U 0x0000007f
+#define MATCH_SF_SCI_1_U 0x0000002b
+#define MASK_SF_SCI_2_U 0X0000007f
+#define MATCH_SF_SCI_2_U 0x0000005b
+#define MASK_SF_SCI_3_U 0X0000007f
+#define MATCH_SF_SCI_3_U 0x0000007b
+
+//X-Type
+#define MASK_SF_SCI_0_X 0x0000007f
+#define MATCH_SF_SCI_0_X 0x0000000b
+#define MASK_SF_SCI_1_X 0x0000007f
+#define MATCH_SF_SCI_1_X 0x0000002b
+#define MASK_SF_SCI_2_X 0X0000007f
+#define MATCH_SF_SCI_2_X 0x0000005b
+#define MASK_SF_SCI_3_X 0X0000007f
+#define MATCH_SF_SCI_3_X 0x0000007b
+
+
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01

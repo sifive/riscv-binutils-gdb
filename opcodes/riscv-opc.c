@@ -3686,7 +3686,29 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sf.vfnrclip.x.f.qf",  0, INSN_CLASS_XSFVFNRCLIPXFQF, "Vd,Vt,S", MATCH_SFVFNRCLIPXFQF, MASK_SFVFNRCLIPXFQF, match_opcode, 0},
 
 /* SiFive Scalar Coprocessor Interface (SSCI) instructions.  */
-{"sf.sci", 0, INSN_CLASS_XSFSCI, "XsF3,F7,d,s,t", MATCH_SF_SCI, MASK_SF_SCI, match_opcode, 0 },
+//R-Type
+{"sf.sci.0.r", 0, INSN_CLASS_XSFSCI, "F3,F7,d,s,t", MATCH_SF_SCI_0_R, MASK_SF_SCI_0_R, match_opcode, 0 },
+{"sf.sci.1.r", 0, INSN_CLASS_XSFSCI, "F3,F7,d,s,t", MATCH_SF_SCI_1_R, MASK_SF_SCI_1_R, match_opcode, 0 },
+{"sf.sci.2.r", 0, INSN_CLASS_XSFSCI, "F3,F7,d,s,t", MATCH_SF_SCI_2_R, MASK_SF_SCI_2_R, match_opcode, 0 },
+{"sf.sci.3.r", 0, INSN_CLASS_XSFSCI, "F3,F7,d,s,t", MATCH_SF_SCI_3_R, MASK_SF_SCI_3_R, match_opcode, 0 },
+
+//I-Type
+{"sf.sci.0.i", 0, INSN_CLASS_XSFSCI, "F3,d,s,Xsj", MATCH_SF_SCI_0_I, MASK_SF_SCI_0_I, match_opcode, 0 },
+{"sf.sci.1.i", 0, INSN_CLASS_XSFSCI, "F3,d,s,Xsj", MATCH_SF_SCI_1_I, MASK_SF_SCI_1_I, match_opcode, 0 },
+{"sf.sci.2.i", 0, INSN_CLASS_XSFSCI, "F3,d,s,Xsj", MATCH_SF_SCI_2_I, MASK_SF_SCI_2_I, match_opcode, 0 },
+{"sf.sci.3.i", 0, INSN_CLASS_XSFSCI, "F3,d,s,Xsj", MATCH_SF_SCI_3_I, MASK_SF_SCI_3_I, match_opcode, 0 },
+
+//U-Type
+{"sf.sci.0.u", 0, INSN_CLASS_XSFSCI, "d,u", MATCH_SF_SCI_0_U, MASK_SF_SCI_0_U, match_opcode, 0 },
+{"sf.sci.1.u", 0, INSN_CLASS_XSFSCI, "d,u", MATCH_SF_SCI_1_U, MASK_SF_SCI_1_U, match_opcode, 0 },
+{"sf.sci.2.u", 0, INSN_CLASS_XSFSCI, "d,u", MATCH_SF_SCI_2_U, MASK_SF_SCI_2_U, match_opcode, 0 },
+{"sf.sci.3.u", 0, INSN_CLASS_XSFSCI, "d,u", MATCH_SF_SCI_3_U, MASK_SF_SCI_3_U, match_opcode, 0 },
+
+//X-Type
+{"sf.sci.0.x", 0, INSN_CLASS_XSFSCI, "Xsu", MATCH_SF_SCI_0_X, MASK_SF_SCI_0_X, match_opcode, 0 },
+{"sf.sci.1.x", 0, INSN_CLASS_XSFSCI, "Xsu", MATCH_SF_SCI_1_X, MASK_SF_SCI_1_X, match_opcode, 0 },
+{"sf.sci.2.x", 0, INSN_CLASS_XSFSCI, "Xsu", MATCH_SF_SCI_2_X, MASK_SF_SCI_2_X, match_opcode, 0 },
+{"sf.sci.3.x", 0, INSN_CLASS_XSFSCI, "Xsu", MATCH_SF_SCI_3_X, MASK_SF_SCI_3_X, match_opcode, 0 },
 
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}

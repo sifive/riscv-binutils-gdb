@@ -966,6 +966,10 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		print (info->stream, dis_style_register, "0x%x",
 		       (unsigned) EXTRACT_OPERAND (FUNCT7, l));
 		break;
+              case '3':
+                print (info->stream, dis_style_register, "0x%x",
+                       (unsigned) EXTRACT_OPERAND (FUNCT3, l));
+                break;
 	      default:
 		goto undefined_modifier;
 	    }

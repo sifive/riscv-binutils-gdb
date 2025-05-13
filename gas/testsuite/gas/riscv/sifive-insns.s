@@ -132,6 +132,27 @@
 
 	.option push
 	.option arch, +xsfsci
-	sf.sci 0, 0, a0, a1, a2
-	sf.sci 6, 127, a0, a1, a2
+	sf.sci.0.r 0, 0, a0, a1, a2
+	sf.sci.0.r 1, 63, a0, a1, a2
+	sf.sci.1.r 2, 64, a0, a1, a2
+	sf.sci.1.r 3, 45, a0, a1, a2
+	sf.sci.2.r 4, 10, a0, a1, a2
+	sf.sci.2.r 5, 87, a0, a1, a2
+	sf.sci.3.r 0, 0, a0, a1, a2
+	sf.sci.3.r 6, 127, a0, a1, a2
+
+	sf.sci.0.i 0, a2, a3, 1234
+	sf.sci.1.i 1, a3, a4, 2048
+	sf.sci.2.i 2, a4, a5, 2047
+	sf.sci.3.i 3, a5, a6, 4095
+
+	sf.sci.0.u a2, 1048575
+	sf.sci.1.u a3, 0
+	sf.sci.2.u a4, 123456
+	sf.sci.3.u a5, 4095
+
+	sf.sci.0.x 33554431
+	sf.sci.1.x 0
+	sf.sci.2.x 123456
+	sf.sci.3.x 4095	
 	.option pop

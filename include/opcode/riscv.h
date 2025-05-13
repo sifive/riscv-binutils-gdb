@@ -221,6 +221,10 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define ENCODE_VSETTNT_IMM(x) \
   (RV_X(x, 0, 11) << 20)
 
+/* SiFive SSCI */
+#define ENCODE_XSXTYPE_IMM(x) \
+  (RV_X(x, 7, 25) << 7) 
+
 #define VALID_ITYPE_IMM(x) (EXTRACT_ITYPE_IMM(ENCODE_ITYPE_IMM(x)) == (x))
 #define VALID_STYPE_IMM(x) (EXTRACT_STYPE_IMM(ENCODE_STYPE_IMM(x)) == (x))
 #define VALID_BTYPE_IMM(x) (EXTRACT_BTYPE_IMM(ENCODE_BTYPE_IMM(x)) == (x))
@@ -414,6 +418,11 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define OP_MASK_ALTFMT		0x1
 #define OP_SH_ALTFMT		8
 
+/* SiFive SSCI fields.	*/
+#define OP_MASK_XIMM12		0xfff
+#define OP_SH_XIMM12		20
+#define OP_MASK_XIMM25		0x1ffffff
+#define OP_SH_XIMM25		7
 /* ABI names for selected x-registers.  */
 
 #define X_ZERO 0
