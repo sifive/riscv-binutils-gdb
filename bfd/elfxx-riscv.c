@@ -1882,6 +1882,8 @@ static struct riscv_supported_ext riscv_supported_std_s_ext[] =
   {"sv39",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"sv48",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"sv57",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"sm",		ISA_SPEC_CLASS_DRAFT,		1, 12, 0 },
+  {"sm",		ISA_SPEC_CLASS_DRAFT,		1, 13, 0 },
   {"ss",		ISA_SPEC_CLASS_DRAFT,		1, 12, 0 },
   {"ss",		ISA_SPEC_CLASS_DRAFT,		1, 13, 0 },
   {"sdext",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
