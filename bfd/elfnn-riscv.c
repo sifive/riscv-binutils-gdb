@@ -964,10 +964,10 @@ riscv_make_plt_compact_entry (bfd *output_bfd, asection *got ATTRIBUTE_UNUSED,
       return false;
     }
 
-  /* lpad 0
-     lui   t3, %hi(offset)
+  /* lui   t3, %hi(offset)
      addi   t3, t3, %lo(offset)	# t3 = offset between .got.plt and .got.plt
-     entry jal    t1, compact_stub	# t1 = address of nop nop  */
+     jal    t1, compact_stub	# t1 = address of nop
+     nop  */
 
   bfd_vma addr = got_offset;
   bfd_vma compact_stub = plt_addr + PLT_COMPACT_HEADER_INSNS_CNT * INSN_BYTES
@@ -998,10 +998,10 @@ riscv_make_plt_compact_entry (bfd *output_bfd, asection *got ATTRIBUTE_UNUSED,
     }
 
   uint32_t entry[PLT_COMPACT_ENTRY_INSNS_CNT];
-  entry[0] = RISCV_UTYPE (LPAD, X_ZERO, 0);
-  entry[1] = RISCV_UTYPE (LUI, X_T3, RISCV_CONST_HIGH_PART (addr));
-  entry[2] = RISCV_ITYPE (ADDI, X_T3, X_T3, addr);
-  entry[3] = RISCV_JTYPE (JAL, X_T1, compact_stub);
+  entry[0] = RISCV_UTYPE (LUI, X_T3, RISCV_CONST_HIGH_PART (addr));
+  entry[1] = RISCV_ITYPE (ADDI, X_T3, X_T3, addr);
+  entry[2] = RISCV_JTYPE (JAL, X_T1, compact_stub);
+  entry[3] = RISCV_NOP;
 
   bfd_byte *loc = plt->contents + plt_offset;
   for (int i = 0; i < PLT_COMPACT_ENTRY_INSNS_CNT; i++)
