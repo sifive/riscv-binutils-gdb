@@ -795,7 +795,7 @@ riscv_make_plt_zicfilp_header (bfd *output_bfd, struct riscv_elf_link_hash_table
   /*
       lpad   0  # disable label checking
       auipc  t2, %hi(.got.plt)          # Rewrite this to using
-      sub    t1, t1, t3                 # shifted .got.plt offset + hdr size + 12
+      sub    t1, t1, t3                 # shifted .got.plt offset + hdr size + 16
       l[w|d] t3, %lo(1b)(t2)            # _dl_runtime_resolve
       addi   t1, t1, -(hdr size + 12)   # shifted .got.plt offset
       addi   t0, t2, %pcrel_lo(1b)      # &.got.plt
@@ -829,7 +829,7 @@ riscv_make_plt_zicfilp_header (bfd *output_bfd, struct riscv_elf_link_hash_table
   header[1] = RISCV_UTYPE (AUIPC, X_T2, gotplt_offset_high);
   header[2] = RISCV_RTYPE (SUB, X_T1, X_T1, X_T3);
   header[3] = RISCV_ITYPE (LREG, X_T3, X_T2, gotplt_offset_low);
-  header[4] = RISCV_ITYPE (ADDI, X_T1, X_T1, (uint32_t) -(PLT_ZICFILP_HEADER_SIZE + 12));
+  header[4] = RISCV_ITYPE (ADDI, X_T1, X_T1, (uint32_t) -(PLT_ZICFILP_HEADER_SIZE + 16));
   header[5] = RISCV_ITYPE (ADDI, X_T0, X_T2, gotplt_offset_low);
   header[6] = RISCV_ITYPE (SRLI, X_T1, X_T1, 4 - RISCV_ELF_LOG_WORD_BYTES);
   header[7] = RISCV_ITYPE (LREG, X_T0, X_T0, RISCV_ELF_WORD_BYTES);
@@ -964,7 +964,8 @@ riscv_make_plt_compact_entry (bfd *output_bfd, asection *got ATTRIBUTE_UNUSED,
       return false;
     }
 
-  /* lui   t3, %hi(offset)
+  /* lpad 0
+     lui   t3, %hi(offset)
      addi   t3, t3, %lo(offset)	# t3 = offset between .got.plt and .got.plt
      entry jal    t1, compact_stub	# t1 = address of nop nop  */
 
@@ -997,10 +998,10 @@ riscv_make_plt_compact_entry (bfd *output_bfd, asection *got ATTRIBUTE_UNUSED,
     }
 
   uint32_t entry[PLT_COMPACT_ENTRY_INSNS_CNT];
-  entry[0] = RISCV_UTYPE (LUI, X_T3, RISCV_CONST_HIGH_PART (addr));
-  entry[1] = RISCV_ITYPE (ADDI, X_T3, X_T3, addr);
-  entry[2] = RISCV_JTYPE (JAL, X_T1, compact_stub);
-  entry[3] = RISCV_NOP;
+  entry[0] = RISCV_UTYPE (LPAD, X_ZERO, 0);
+  entry[1] = RISCV_UTYPE (LUI, X_T3, RISCV_CONST_HIGH_PART (addr));
+  entry[2] = RISCV_ITYPE (ADDI, X_T3, X_T3, addr);
+  entry[3] = RISCV_JTYPE (JAL, X_T1, compact_stub);
 
   bfd_byte *loc = plt->contents + plt_offset;
   for (int i = 0; i < PLT_COMPACT_ENTRY_INSNS_CNT; i++)
@@ -1013,7 +1014,7 @@ static bool
 riscv_make_plt_zicfilp_entry (bfd *output_bfd, asection *got,
                               bfd_vma got_offset, asection *plt, bfd_vma plt_offset)
 {
-  /*
+  /*    lpad    0
     1:  auipc   t3, %pcrel_hi(function@.got.plt)
         l[w|d]  t3, %pcrel_lo(1b)(t3)
         jalr    t1, t3
@@ -1022,10 +1023,10 @@ riscv_make_plt_zicfilp_entry (bfd *output_bfd, asection *got,
   bfd_vma got_entry_addr = sec_addr(got) + got_offset;
   bfd_vma plt_entry_addr = sec_addr(plt) + plt_offset;
   uint32_t entry[PLT_ZICFILP_ENTRY_INSNS];
-  entry[0] = RISCV_UTYPE (AUIPC, X_T3, RISCV_PCREL_HIGH_PART (got_entry_addr, plt_entry_addr));
-  entry[1] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART (got_entry_addr, plt_entry_addr));
-  entry[2] = RISCV_ITYPE (JALR, X_T1, X_T3, 0);
-  entry[3] = RISCV_NOP;
+  entry[0] = RISCV_UTYPE (LPAD, X_ZERO, 0);
+  entry[1] = RISCV_UTYPE (AUIPC, X_T3, RISCV_PCREL_HIGH_PART (got_entry_addr, plt_entry_addr + 4));
+  entry[2] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART (got_entry_addr, plt_entry_addr + 4));
+  entry[3] = RISCV_ITYPE (JALR, X_T1, X_T3, 0);
 
   bfd_byte *loc = plt->contents + plt_offset;
   for (int i = 0; i < PLT_ZICFILP_ENTRY_INSNS; i++)
