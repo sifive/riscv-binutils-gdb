@@ -23,7 +23,7 @@ Disassembly of section \.plt:
 .*:[ 	]+[0-9a-f]+[ 	]+nop
 
 [0-9a-f]+ <foo@plt>:
-.*:[ 	]+[0-9a-f]+[ 	]+lpad[ 	]+0x1
+.*:[ 	]+[0-9a-f]+[ 	]+lpad[ 	]+0x0
 .*:[ 	]+[0-9a-f]+[ 	]+auipc[ 	]+t3,0x[0-9a-f]+
 .*:[ 	]+[0-9a-f]+[ 	]+ld[ 	]+t3,[0-9]+\(t3\) # [0-9a-f]+ <foo>
 .*:[ 	]+[0-9a-f]+[ 	]+lui[ 	]+t2,0x1
@@ -33,7 +33,7 @@ Disassembly of section \.plt:
 .*:[ 	]+[0-9a-f]+[ 	]+nop
 
 [0-9a-f]+ <bar@plt>:
-.*:[ 	]+[0-9a-f]+[ 	]+lpad[ 	]+0x1
+.*:[ 	]+[0-9a-f]+[ 	]+lpad[ 	]+0x0
 .*:[ 	]+[0-9a-f]+[ 	]+auipc[ 	]+t3,0x1
 .*:[ 	]+[0-9a-f]+[ 	]+ld[ 	]+t3,[0-9]+\(t3\) # [0-9a-f]+ <bar>
 .*:[ 	]+[0-9a-f]+[ 	]+lui[ 	]+t2,0x1
