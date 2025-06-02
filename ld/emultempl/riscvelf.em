@@ -30,6 +30,8 @@ static bool compact_plt = false;
 static struct riscv_elf_params params = { .relax_gp = 1,
 					  .check_uleb128 = 0,
 					  .relax_zcmt = 0,
+					  .relax_lpad = 1,
+					  .entry_symbol_name = NULL,
 					  .plt_type = PLT_NORMAL,
 					  .zicfilp_type = ZICFILP_NONE,
 					  .zicfilp_func_sig_type = ZICFILP_NONE,
@@ -46,6 +48,8 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
     { "no-check-uleb128", no_argument, NULL, OPTION_NO_CHECK_ULEB128 },
     { "relax-zcmt", no_argument, NULL, OPTION_RELAX_ZCMT },
     { "no-relax-zcmt", no_argument, NULL, OPTION_NO_RELAX_ZCMT },
+    { "relax-lpad", no_argument, NULL, OPTION_RELAX_LPAD },
+    { "no-relax-lpad", no_argument, NULL, OPTION_NO_RELAX_LPAD },
     { "relax-verbose", no_argument, NULL, OPTION_RELAX_VERBOSE },
 '
 
@@ -57,6 +61,8 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   fprintf (file, _("  --relax-zcmt                Perform Zcmt relaxation\n"));
   fprintf (file, _("  --relax-verbose             Verbose output for linker relaxation\n"));
   fprintf (file, _("  --no-relax-zcmt             Don'\''t perform Zcmt relaxation (default)\n"));
+  fprintf (file, _("  --relax-lpad                Perform LPAD relaxation (default)\n"));
+  fprintf (file, _("  --no-relax-lpad             Don'\''t perform LPAD relaxation\n"));
   fprintf (file, _("  -z force-zicfilp            Turn on Zicfilp mechanism and generate PLTs with landing pad. Generate warnings for missing Zicfilp on inputs\n\n"));
   fprintf (file, _("  -z force-zicfilp-func-sig   Turn on Zicfilp mechanism with function signature-based and generate PLTs with landing pad. Generate warnings for missing Zicfilp on inputs\n\n"));
   fprintf (file, _("  -z force-zicfiss            Turn on Zicfiss. Generate warnings for missing Zicfilp on inputs\n\n"));
@@ -103,6 +109,14 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
 
     case OPTION_NO_RELAX_ZCMT:
       params.relax_zcmt = 0;
+      break;
+
+    case OPTION_RELAX_LPAD:
+      params.relax_lpad = 1;
+      break;
+
+    case OPTION_NO_RELAX_LPAD:
+      params.relax_lpad = 0;
       break;
 
     case OPTION_RELAX_VERBOSE:
@@ -183,6 +197,7 @@ riscv_create_output_section_statements (void)
       return;
     }
 
+  params.entry_symbol_name = entry_symbol.name ? xstrdup (entry_symbol.name) : NULL;
   riscv_elf${ELFSIZE}_set_options (&link_info, &params);
 }
 
