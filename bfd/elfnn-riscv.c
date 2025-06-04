@@ -7195,7 +7195,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
       symval += sec_addr (sym_sec);
       unsigned symidx = ELFNN_R_SYM (rel->r_info);
       const char *sym_str = riscv_get_symbol_name (abfd, symidx);
-      size_t *sym_size = riscv_get_symbol_size (abfd, symidx);
+      size_t sym_size = riscv_get_symbol_size (abfd, symidx);
 
       _riscv_verbose_relax (abfd, sec,
 			    "Symbol %s "
