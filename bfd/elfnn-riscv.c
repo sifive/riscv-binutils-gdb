@@ -1047,7 +1047,7 @@ riscv_make_plt_compact_entry (bfd *output_bfd, asection *got ATTRIBUTE_UNUSED,
 }
 
 static bool
-riscv_make_plt_zicfilp_entry (bfd *output_bfd, asection *got,
+riscv_make_plt_zicfilp_entry (bfd *output_bfd ATTRIBUTE_UNUSED, asection *got,
                               bfd_vma got_offset, asection *plt, bfd_vma plt_offset)
 {
   /*    lpad    0
@@ -1072,7 +1072,7 @@ riscv_make_plt_zicfilp_entry (bfd *output_bfd, asection *got,
 }
 
 static bool
-riscv_make_plt_zicfilp_func_sig_entry (bfd *output_bfd, asection *got,
+riscv_make_plt_zicfilp_func_sig_entry (bfd *output_bfd ATTRIBUTE_UNUSED, asection *got,
 				       bfd_vma got_offset, asection *plt,
 				       bfd_vma plt_offset)
 {
