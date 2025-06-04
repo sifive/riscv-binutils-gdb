@@ -3837,7 +3837,10 @@ riscv_elf_relocate_section (bfd *output_bfd,
 							howto);
 		}
 	      else
-		relocation -= gp;
+		{
+		  absolute = false;
+		  relocation -= gp;
+		}
 	      /* Update howto if relocation is changed.  */
 	      howto = riscv_elf_rtype_to_howto (input_bfd,
 						ELFNN_R_TYPE (rel->r_info));
