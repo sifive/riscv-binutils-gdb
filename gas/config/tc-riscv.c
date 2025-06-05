@@ -1815,10 +1815,12 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 			  goto unknown_validate_operand;
 		      }
 		    break;
-		  case 'u': /* Xsu - upper 25 bits for SSCI X-Type. */ 
+		  case 'x': /* Xsx - upper 25 bits for SSCI X-Type. */ 
 		    used_bits |= ENCODE_XSXTYPE_IMM(-1U); break; 
 		  case 'j': /* Xsj - unsigned immediate for SSCI I-Type. */
 		    used_bits |= ENCODE_ITYPE_IMM (-1U); break;
+		  case 'u': /* Xsu - unsigned upper 20 bits fir SSCI U-Type */
+		    used_bits |= ENCODE_UTYPE_IMM (-1U); break;
 		  default:
 		    goto unknown_validate_operand;
 		}
@@ -4679,7 +4681,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      ENCODE_UIMM_BIT_FIELD
 			(RS2, ip, imm_expr, imm_reloc, asarg, 20, 24)
 		      continue; 
-		    case 'u': /* Xsu */
+		    case 'x': /* Xsx */
 		      my_getExpression (imm_expr, asarg);
 		      if (imm_expr->X_add_number < 0
 			  || imm_expr->X_add_number > 33554431)
@@ -4704,7 +4706,20 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      INSERT_OPERAND (XIMM12, *ip, imm_expr->X_add_number);
 		      imm_expr->X_op = O_absent;
 		      asarg = expr_parse_end;
-		      continue; 
+		      continue;
+		    case 'u': /* Xsu */
+		      my_getExpression (imm_expr, asarg);
+		      if (imm_expr->X_add_number < 0
+			  || imm_expr->X_add_number > 1048575)
+			{
+			  as_bad (_("bad value for uimm20 field, "
+				    "value must be 0...1048575"));
+			  break;
+			}
+		      INSERT_OPERAND (XIMM20, *ip, imm_expr->X_add_number);
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;  
 		    case 'O':
 		      switch (*++oparg)
 			{

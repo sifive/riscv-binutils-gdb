@@ -421,6 +421,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 /* SiFive SSCI fields.	*/
 #define OP_MASK_XIMM12		0xfff
 #define OP_SH_XIMM12		20
+#define OP_MASK_XIMM20		0xfffff
+#define OP_SH_XIMM20		12
 #define OP_MASK_XIMM25		0x1ffffff
 #define OP_SH_XIMM25		7
 /* ABI names for selected x-registers.  */
