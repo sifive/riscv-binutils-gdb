@@ -132,6 +132,9 @@
 
 	.option push
 	.option arch, +xsfsci
+	sf.sci 0, 0, a0, a1, a2
+	sf.sci 6, 127, a0, a1, a2
+
 	sf.sci.0.r 0, 0, a0, a1, a2
 	sf.sci.0.r 1, 63, a0, a1, a2
 	sf.sci.1.r 2, 64, a0, a1, a2

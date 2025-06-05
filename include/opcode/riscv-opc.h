@@ -3911,6 +3911,10 @@
 #define MASK_SF_MAMMOTH_VTDISCARD 0xffffffff
 
 /* Vendor-specific (SiFive) SiFive Scalar Coprocessor Interface (SSCI).  */
+//Old version of SSCI opcode
+#define MASK_SF_SCI 0x0000007f
+#define MATCH_SF_SCI 0x0000007b
+
 //R-Type
 #define MASK_SF_SCI_0_R 0x0000007f
 #define MATCH_SF_SCI_0_R 0x0000000b

@@ -3739,6 +3739,9 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sf.vfnrclip.x.f.qf",  0, INSN_CLASS_XSFVFNRCLIPXFQF, "Vd,Vt,S", MATCH_SFVFNRCLIPXFQF, MASK_SFVFNRCLIPXFQF, match_opcode, 0},
 
 /* SiFive Scalar Coprocessor Interface (SSCI) instructions.  */
+//Old version of SSCI instruction
+{"sf.sci", 0, INSN_CLASS_XSFSCI, "XsF3,F7,d,s,t", MATCH_SF_SCI, MASK_SF_SCI, match_opcode, 0 },
+
 //R-Type
 {"sf.sci.0.r", 0, INSN_CLASS_XSFSCI, "F3,F7,d,s,t", MATCH_SF_SCI_0_R, MASK_SF_SCI_0_R, match_opcode, 0 },
 {"sf.sci.1.r", 0, INSN_CLASS_XSFSCI, "F3,F7,d,s,t", MATCH_SF_SCI_1_R, MASK_SF_SCI_1_R, match_opcode, 0 },
