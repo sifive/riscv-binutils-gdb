@@ -2068,6 +2068,13 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
 				  address_expr, false, reloc_type);
 
 	  ip->fixp->fx_tcbit = riscv_opts.relax;
+
+
+	  /* Update last_relax status if we may applied R_RISCV_RELAX
+	     relocation on the instruction.  */
+	  if (riscv_opts.relax)
+	    seg_info (now_seg)->tc_segment_info_data.last_relax = true;
+
 	  ip->fixp->tc_fix_data.source_macro = source_macro;
 	}
     }
@@ -5800,8 +5807,10 @@ riscv_frag_align_code (int n)
       return false;
     }
 
-  /* When not relaxing, riscv_handle_align handles code alignment.  */
-  if (!riscv_opts.relax)
+  /* When not relaxing, riscv_handle_align handles code alignment,
+     and we should always emit R_RISCV_ALIGN *IF* we has enable relax
+     before.  */
+  if (!riscv_opts.relax && !seg_info (now_seg)->tc_segment_info_data.last_relax)
     return false;
 
   /* If the last item emitted was not an ordinary insn, first align back to
