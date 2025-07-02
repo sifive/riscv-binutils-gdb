@@ -330,10 +330,6 @@ struct riscv_elf_link_hash_table
 
   riscv_jvt_htab_t *jvt_htab;
 
-  /* Record those global symbols has been referenced by non-CALL/CALL_PLT
-     relocation.  */
-  htab_t reloc_refed_syms_htab;
-
   /* Find compact relocations in check_relocs.  */
   bool compact_relocs;
 
@@ -1333,39 +1329,6 @@ riscv_elf_get_local_sym_hash (struct riscv_elf_link_hash_table *htab,
   return &ret->elf;
 }
 
-static bool
-string_hash_find (htab_t table, const char *key)
-{
-  const char *found = htab_find (table, key);
-  return found != NULL;
-}
-
-static int
-eq_string (const void *str1, const void *str2)
-{
-  return strcmp ((const char *) str1, (const char *) str2) == 0;
-}
-
-static void
-string_hash_insert (htab_t htab, const char *str)
-{
-  void **slot = htab_find_slot (htab, str, INSERT);
-
-  if (*slot == NULL)
-    *slot = xstrdup (str);
-}
-
-static int
-string_hash_free (void **slot, void *info ATTRIBUTE_UNUSED)
-{
-  if (*slot != NULL)
-    {
-      free (*slot);
-      *slot = NULL;
-    }
-  return 1;
-}
-
 /* Destroy a RISC-V elf linker hash table.  */
 
 static void
@@ -1383,12 +1346,6 @@ riscv_elf_link_hash_table_free (bfd *obfd)
     {
       riscv_free_jvt_htab (ret->jvt_htab);
       free (ret->jvt_htab);
-    }
-
-  if (ret->reloc_refed_syms_htab)
-    {
-      htab_traverse (ret->reloc_refed_syms_htab, string_hash_free, NULL);
-      htab_delete (ret->reloc_refed_syms_htab);
     }
 
   _bfd_elf_link_hash_table_free (obfd);
@@ -1420,9 +1377,6 @@ riscv_elf_link_hash_table_create (bfd *abfd)
       riscv_elf_link_hash_table_free (abfd);
       return NULL;
     }
-
-  ret->reloc_refed_syms_htab = htab_create_alloc (
-      5000, htab_hash_string, eq_string, NULL, xcalloc, NULL);
 
   ret->max_alignment = (bfd_vma) -1;
   ret->max_alignment_for_gp = (bfd_vma) -1;
@@ -5883,190 +5837,6 @@ _bfd_riscv_jvt_record (bfd *abfd, asection *sec ATTRIBUTE_UNUSED,
   return riscv_update_jvt_entry (tbljal_htab, abfd, r_symndx, benefit, name);
 }
 
-/*
- * Iterate over all symbols (static + dynamic) in the given BFD.
- */
-static unsigned
-find_rel_ref_symbol (bfd *abfd, Elf_Internal_Rela *rel, asection *sec)
-{
-  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (abfd);
-  const char *name;
-  unsigned i;
-  unsigned symidx = 0;
-
-  if (!symtab_hdr->contents)
-    return 0;
-
-  /* Search global symbol first.  */
-  long symcount = ((symtab_hdr->sh_size / sizeof (ElfNN_External_Sym))
-		   - symtab_hdr->sh_info);
-
-  for (i = 0; i < symcount; i++)
-    {
-      struct elf_link_hash_entry *sym_hash = elf_sym_hashes (abfd)[i];
-      unsigned offseted_symidx = i + symtab_hdr->sh_info;
-      if (sym_hash->forced_local)
-	continue;
-
-      if ((sym_hash->root.u.def.section == sec)
-	  && sym_hash->root.u.def.value == rel->r_offset)
-	{
-	  if (symidx == 0)
-	    symidx = offseted_symidx;
-	  else
-	    {
-	      _riscv_verbose_relax (
-		  abfd, sec,
-		  "Found multiple symbol for this LPAD, give up %s and %s",
-		  riscv_get_symbol_name (abfd, symidx),
-		  riscv_get_symbol_name (abfd, offseted_symidx));
-	      return 0;
-	    }
-	}
-    }
-  if (symidx)
-    return symidx;
-
-  for (i = 0; i < symtab_hdr->sh_info; i++)
-    {
-      Elf_Internal_Sym *sym = (Elf_Internal_Sym *) symtab_hdr->contents + i;
-      name = bfd_elf_sym_name (abfd, symtab_hdr, sym, NULL);
-
-      if (sym->st_value == (sec_addr (sec) + rel->r_offset))
-	{
-	  name = bfd_elf_sym_name (abfd, symtab_hdr, sym, NULL);
-	  if (riscv_is_special_symbol_name (abfd, name))
-	    continue;
-	  return i;
-	}
-    }
-
-  _riscv_verbose_relax (abfd, sec, "Symbol not found, give up LPAD relax");
-  return 0;
-}
-
-/* Relax LPAD to NOP.  */
-
-static bool
-_bfd_riscv_relax_lpad (bfd *abfd, asection *sec ATTRIBUTE_UNUSED,
-		       asection *sym_sec ATTRIBUTE_UNUSED,
-		       struct bfd_link_info *link_info, Elf_Internal_Rela *rel,
-		       bfd_vma symval ATTRIBUTE_UNUSED,
-		       bfd_vma max_alignment ATTRIBUTE_UNUSED,
-		       bfd_vma reserve_size ATTRIBUTE_UNUSED,
-		       bool *again ATTRIBUTE_UNUSED,
-		       riscv_pcgp_relocs *pcgp_relocs ATTRIBUTE_UNUSED,
-		       bool undefined_weak ATTRIBUTE_UNUSED)
-{
-  // Check if this address has taken by non-CALL/CALL_PLT reloc.
-  // Iterate all the relocations in the section and check if
-  // the address is in the range of the relocation.
-
-  // Find this reloc has any symobl associated with it.
-  unsigned symidx = find_rel_ref_symbol (abfd, rel, sym_sec);
-  struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (link_info);
-
-  const char *sym_name = riscv_get_symbol_name (abfd, symidx);
-  if (!sym_name)
-    sym_name = "<unknown>";
-  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (abfd);
-
-  if (symidx == 0)
-    return true;
-
-  _riscv_verbose_relax (abfd, sec, "Try LPAD for %s...", sym_name);
-  bool delete_lpad = true;
-  /* Find if any reloc use this sym.  */
-  unsigned i;
-  /* Examine and consider relaxing each reloc.  */
-  asection *xsec;
-  if (riscv_is_local_symbol (symtab_hdr, symidx))
-    {
-      for (xsec = abfd->sections; xsec != NULL; xsec = xsec->next)
-	{
-	  if (!(xsec->flags & (SEC_RELOC | SEC_ALLOC)))
-	    continue;
-	  for (i = 0; i < xsec->reloc_count; i++)
-	    {
-	      if (!elf_section_data (xsec)->relocs)
-		continue;
-	      Elf_Internal_Rela *reloc = &elf_section_data (xsec)->relocs[i];
-	      if (ELFNN_R_SYM (reloc->r_info) == symidx)
-		{
-		  unsigned reloc_type = ELFNN_R_TYPE (reloc->r_info);
-		  /* Check if this reloc is R_RISCV_CALL or R_RISCV_CALL_PLT.
-		   */
-		  if (reloc_type != R_RISCV_CALL
-		      && reloc_type != R_RISCV_CALL_PLT)
-		    {
-		      if (relax_verbose)
-			{
-			  reloc_howto_type *r
-			      = riscv_elf_rtype_to_howto (abfd, reloc_type);
-			  _riscv_verbose_relax (abfd, sec,
-						"LPAD for %s is not relaxed, "
-						"it has ref by non-CALL reloc "
-						"(%s)",
-						sym_name, r->name);
-			}
-		      delete_lpad = false;
-		    }
-		  else
-		    delete_lpad = true;
-		}
-	    }
-	}
-    }
-  else /* This lpad is for a global symbol.  */
-    {
-      bool found = string_hash_find (htab->reloc_refed_syms_htab, sym_name);
-      /* We can only safely delete the lpad when the symbol is not refed in
-       *  anywhere as well. */
-      if (found)
-	{
-	  _riscv_verbose_relax (
-	      abfd, sec,
-	      "LPAD for %s is not relaxed, "
-	      "it has been referenced by some other relocation",
-	      sym_name);
-	  delete_lpad = false;
-	}
-      else
-	{
-	  // Must keep if it has GOT or PLT entry.
-	  struct elf_link_hash_entry *sym_hash
-	      = elf_sym_hashes (abfd)[symidx - symtab_hdr->sh_info];
-	  if (sym_hash->dynindx != -1 || sym_hash->got.refcount > 0
-	      || sym_hash->plt.refcount > 0)
-	    {
-	      _riscv_verbose_relax (abfd, sec,
-				    "LPAD for %s is not relaxed, "
-				    "it has GOT or PLT entry",
-				    sym_name);
-	      delete_lpad = false;
-	    }
-	  if (htab->params->entry_symbol_name
-	      && (strcmp (htab->params->entry_symbol_name, sym_name) == 0))
-	    {
-	      _riscv_verbose_relax (abfd, sec,
-				    "LPAD for %s is not relaxed, "
-				    "it's entry point of this output binary",
-				    sym_name);
-	      delete_lpad = false;
-	    }
-	}
-    }
-
-  if (delete_lpad)
-    {
-      _riscv_verbose_relax (abfd, sec, "LPAD for %s is relaxed", sym_name);
-      return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4, link_info,
-				       NULL, rel);
-    }
-  else
-    return true;
-}
-
 /* Relax JAL to CM.[JT,JALT].  */
 
 static bool
@@ -7224,66 +6994,6 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	      || type == R_RISCV_SIFIVE_GOT_GPREL_LOAD
 	      || type == R_RISCV_SIFIVE_GOT_GPREL_STORE))
 	relax_func = _bfd_riscv_compact_got_transition;
-      else if (info->relax_pass == RELAX_PASS_LPAD && htab->params->relax_lpad)
-	{
-	  if (info->relax_trip == 0)
-	    {
-	      if (!(sec->flags & SEC_ALLOC))
-		continue;
-	      /* Collect global symbols which has referenced by
-		 non-CALL/CALL_PLT relocation at first trip.  */
-	      switch (type)
-		{
-		case R_RISCV_SIFIVE_GOT_GPREL_HI20:
-		/* For those HI/LO paired relocation, check HI reloc is
-		   enough.  */
-		case R_RISCV_HI20:
-		case R_RISCV_PCREL_HI20:
-		case R_RISCV_32:
-		case R_RISCV_32_PCREL:
-		case R_RISCV_64:
-		  unsigned symidx = ELFNN_R_SYM (rel->r_info);
-
-		  if (riscv_is_local_symbol (symtab_hdr, symidx))
-		    break;
-
-		  const char *sym_str = riscv_get_symbol_name (abfd, symidx);
-		  if (!sym_str)
-		    continue;
-
-		  if (relax_verbose)
-		    {
-		      reloc_howto_type *r
-			  = riscv_elf_rtype_to_howto (abfd, type);
-		      _riscv_verbose_relax (
-			  abfd, sec,
-			  "LPAD record phase: %s has been ref by %s.", sym_str,
-			  r->name);
-		    }
-		  string_hash_insert (htab->reloc_refed_syms_htab, sym_str);
-		  break;
-		default:
-		  break;
-		}
-
-	      /* Only need second trip when we found any lpad instruction. */
-	      if (type == R_RISCV_LPAD)
-		*again = true;
-
-	      continue;
-	    }
-	  else
-	    {
-	      /* Determine LPAD should remove or not in second trip.  */
-	      if (type == R_RISCV_LPAD)
-		{
-		  riscv_relax_delete_bytes = _riscv_relax_delete_piecewise;
-		  relax_func = _bfd_riscv_relax_lpad;
-		}
-	      else
-		continue;
-	    }
-	}
       else if (info->relax_pass == RELAX_PASS_TABLE_JUMP_PROFILING)
 	{
 	  if (!riscv_use_jvt (info))
@@ -8001,8 +7711,6 @@ elfNN_riscv_merge_gnu_properties (struct bfd_link_info *info,
 
 #define elf_backend_setup_gnu_properties	elfNN_riscv_link_setup_gnu_properties
 #define elf_backend_merge_gnu_properties	elfNN_riscv_merge_gnu_properties
-#define elf_backend_parse_gnu_properties       \
-  _bfd_riscv_elf_parse_gnu_properties
 
 #define elf_backend_can_gc_sections		1
 #define elf_backend_can_refcount		1

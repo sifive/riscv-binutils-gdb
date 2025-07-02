@@ -57,10 +57,6 @@ struct riscv_elf_params
   bool check_uleb128;
   /* Whether to relax code sequences for zcmt.  */
   bool relax_zcmt;
-  /* Whether to relax for lpad.  */
-  bool relax_lpad;
-  /* Symbol name for entry point, used for lpad relaxation.  */
-  const char *entry_symbol_name;
   /* Zicfilp requires diffrent PLT header and entries.  */
   riscv_plt_type plt_type;
   riscv_enable_zicfilp_type zicfilp_type;
@@ -128,7 +124,6 @@ typedef struct
 /* List the relxation pass.  */
 enum riscv_relax_pass
 {
-  RELAX_PASS_LPAD,
   RELAX_PASS_COMPACT_CODE,
   RELAX_PASS_TABLE_JUMP_PROFILING,
   RELAX_PASS_SHORTEN_LUI_CALL_TRREL_PCREL,
@@ -196,3 +191,5 @@ extern bool _bfd_riscv_elf_merge_gnu_properties (struct bfd_link_info *, bfd *,
 						 elf_property *,
 						 elf_property *, uint32_t);
 
+#define elf_backend_parse_gnu_properties       \
+  _bfd_riscv_elf_parse_gnu_properties
