@@ -151,6 +151,9 @@
 #define ELF_MAXPAGESIZE			0x1000
 #define ELF_COMMONPAGESIZE		0x1000
 
+/* Max alignment allowed for GP relaxation.  */
+#define GP_RELAX_MAX_ALIGNMENT		(1 <<11)
+
 #define RISCV_ATTRIBUTES_SECTION_NAME ".riscv.attributes"
 
 /* RISC-V ELF linker hash entry.  */
@@ -313,6 +316,9 @@ struct riscv_elf_link_hash_table
 
   /* The max alignment of output sections in [gp-2K, gp+2K) range.  */
   bfd_vma max_alignment_for_gp;
+
+  /* True if the max alignment is too large for gp-relative addressing.  */
+  bool max_alignment_too_large_for_gp_p;
 
   /* Used by local STT_GNU_IFUNC symbols.  */
   htab_t loc_hash_table;
@@ -1380,6 +1386,7 @@ riscv_elf_link_hash_table_create (bfd *abfd)
 
   ret->max_alignment = (bfd_vma) -1;
   ret->max_alignment_for_gp = (bfd_vma) -1;
+  ret->max_alignment_too_large_for_gp_p = false;
   ret->compact_relocs = false;
 
   /* Create hash table for local ifunc.  */
@@ -6239,17 +6246,37 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
 				   link_info, pcgp_relocs, rel + 1);
 }
 
-/* Traverse all output sections and return the max alignment.
+/* Traverse all output sections and return the max alignment, also cache
+   the max alignment for the GP-relative relaxation.
 
    If gp is zero, then all the output section alignments are
    possible candidates;  Otherwise, only the output sections
-   which are in the [gp-2K, gp+2K) range need to be considered.  */
+   which are in the [gp-2K, gp+2K) range need to be considered.
+
+   If the max alignment is larger than GP_RELAX_MAX_ALIGNMENT, then it is too
+   large for the GP-relative relaxation.  In this case, the caller should not
+   try to relax the global variable references to GP-relative references.
+  */
 
 static bfd_vma
-_bfd_riscv_get_max_alignment (asection *sec, bfd_vma gp)
+_bfd_riscv_get_max_alignment (struct riscv_elf_link_hash_table *htab,
+			      asection *sec, bfd_vma gp)
 {
   unsigned int max_alignment_power = 0;
+  bool any_valid = false;
   asection *o;
+  bfd_vma max_alignment = -1;
+
+  if (gp && htab->max_alignment_too_large_for_gp_p)
+    return GP_RELAX_MAX_ALIGNMENT;
+
+  if (gp)
+    max_alignment = htab->max_alignment_for_gp;
+  else
+    max_alignment = htab->max_alignment;
+
+  if (max_alignment != (bfd_vma) -1)
+    return max_alignment;
 
   for (o = sec->output_section->owner->sections; o != NULL; o = o->next)
     {
@@ -6266,9 +6293,29 @@ _bfd_riscv_get_max_alignment (asection *sec, bfd_vma gp)
 
       if (valid && o->alignment_power > max_alignment_power)
 	max_alignment_power = o->alignment_power;
+
+      any_valid = any_valid || valid;
     }
 
-  return (bfd_vma) 1 << max_alignment_power;
+  if (!any_valid && gp)
+    {
+      /* Not found any valid output section for GP, that may cause by too large
+	 alignment in last relax iteration.  */
+      htab->max_alignment_too_large_for_gp_p = true;
+      return GP_RELAX_MAX_ALIGNMENT;
+    }
+
+  max_alignment = (bfd_vma) 1 << max_alignment_power;
+
+  if (gp && (max_alignment >= GP_RELAX_MAX_ALIGNMENT))
+    htab->max_alignment_too_large_for_gp_p = true;
+
+  if (gp)
+    htab->max_alignment_for_gp = max_alignment;
+  else
+    htab->max_alignment = max_alignment;
+
+  return max_alignment;
 }
 
 /* Relax non-PIC global variable references to GP-relative references.  */
@@ -6312,12 +6359,7 @@ _bfd_riscv_relax_lui (bfd *abfd,
       else
 	{
 	  /* Consider output section alignments which are in [gp-2K, gp+2K). */
-	  max_alignment = htab->max_alignment_for_gp;
-	  if (max_alignment == (bfd_vma) -1)
-	    {
-	      max_alignment = _bfd_riscv_get_max_alignment (sec, gp);
-	      htab->max_alignment_for_gp = max_alignment;
-	    }
+	  max_alignment = _bfd_riscv_get_max_alignment (htab, sec, gp);
 	}
 
       /* PR27566, for default linker script, if a symbol's value outsides the
@@ -6362,8 +6404,8 @@ _bfd_riscv_relax_lui (bfd *abfd,
 	  *again = true;
 	  _riscv_verbose_relax (abfd, sec,
 				"GP relaxation success"
-				"(target: %s).",
-				sym_str);
+				"(target: %s, GP: %llx, target addr: %llx).",
+				sym_str, (unsigned long long) gp, (unsigned long long)symval);
 	  return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4,
 					   link_info, pcgp_relocs, rel);
 
@@ -6399,8 +6441,8 @@ _bfd_riscv_relax_lui (bfd *abfd,
       *again = true;
       _riscv_verbose_relax (abfd, sec,
 			    "GP relaxation success"
-			    "(target: %s).",
-			    sym_str);
+				"(target: %s, GP: %llx, target addr: %llx).",
+				sym_str, (unsigned long long) gp, (unsigned long long)symval);
       return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + 2, 2,
 				       link_info, pcgp_relocs, rel + 1);
     }
@@ -6621,12 +6663,7 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
       else
 	{
 	  /* Consider output section alignments which are in [gp-2K, gp+2K). */
-	  max_alignment = htab->max_alignment_for_gp;
-	  if (max_alignment == (bfd_vma) -1)
-	    {
-	      max_alignment = _bfd_riscv_get_max_alignment (sec, gp);
-	      htab->max_alignment_for_gp = max_alignment;
-	    }
+	  max_alignment = _bfd_riscv_get_max_alignment (htab, sec, gp);
 	}
 
       /* PR27566, for default linker script, if a symbol's value outsides the
@@ -6680,8 +6717,8 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 				    pcgp_relocs, rel);
 	  _riscv_verbose_relax (abfd, sec,
 				"GP relaxation success"
-				"(target: %s, offset: %" PRId64 ").",
-				sym_str, 0);
+				"(target: %s, GP: %llx, target addr: %llx).",
+				sym_str, (unsigned long long) gp, (unsigned long long)symval);
 
 	  return true;
 
@@ -6874,12 +6911,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 
   /* Estimate the maximum alignment for all output sections once time
      should be enough.  */
-  max_alignment = htab->max_alignment;
-  if (max_alignment == (bfd_vma) -1)
-    {
-      max_alignment = _bfd_riscv_get_max_alignment (sec, 0/* gp */);
-      htab->max_alignment = max_alignment;
-    }
+  max_alignment = _bfd_riscv_get_max_alignment (htab, sec, 0/* gp */);
 
   /* relax_trip 0 / JVT_PROFILING_RECORD_SYM:
 	Record symbol address and expected size saving of each relocation
