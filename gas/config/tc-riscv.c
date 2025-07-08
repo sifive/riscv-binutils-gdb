@@ -5836,7 +5836,8 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
     }
   else if (strcmp (name, "norvc") == 0)
     {
-      riscv_update_subset (&riscv_rps_as, "-c");
+      riscv_update_subset (&riscv_rps_as, "-c,-zca,-zcd,-zcf,-zcb,-zce,-zcmp,"
+					  "-zcmt,-zcmop,-zclsd");
       riscv_set_arch_str (&riscv_rps_as.subset_list->arch_str);
       riscv_set_rvc (false);
     }
