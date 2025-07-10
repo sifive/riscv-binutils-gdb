@@ -2098,7 +2098,8 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
   if (reloc_type == BFD_RELOC_RISCV_HI20
       || reloc_type == BFD_RELOC_RISCV_PCREL_HI20
       || reloc_type == BFD_RELOC_RISCV_TPREL_HI20
-      || reloc_type == BFD_RELOC_RISCV_TPREL_ADD)
+      || reloc_type == BFD_RELOC_RISCV_TPREL_ADD
+      || reloc_type == BFD_RELOC_RISCV_LPAD)
     {
       frag_wane (frag_now);
       frag_new (0);
