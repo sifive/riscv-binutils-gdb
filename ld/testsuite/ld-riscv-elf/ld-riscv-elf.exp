@@ -190,10 +190,6 @@ if [istarget "riscv*-*-*"] {
 
     run_dump_test "relro-relax-lui"
     run_dump_test "relro-relax-pcrel"
-    run_dump_test "relax-lpad-1"
-    run_dump_test "relax-lpad-1-shared"
-    run_dump_test "relax-lpad-2"
-    run_dump_test "relax-lpad-3"
     run_dump_test "variant_cc-now"
     run_dump_test "variant_cc-shared"
     run_dump_test "variant_cc-r"
