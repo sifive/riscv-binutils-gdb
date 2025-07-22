@@ -2855,11 +2855,6 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sf.mm.u.s", 0, INSN_CLASS_XSFMM32A8I_OR_XSFMM32A, "Ms2,Vt,Vs",  MATCH_SF_MAMMOTH_MM_U_S,  MASK_SF_MAMMOTH_MM_A_B,  match_opcode, 0 },
 {"sf.mm.s.s", 0, INSN_CLASS_XSFMM32A8I_OR_XSFMM32A, "Ms2,Vt,Vs",  MATCH_SF_MAMMOTH_MM_S_S,  MASK_SF_MAMMOTH_MM_A_B,  match_opcode, 0 },
 
-{"sf.p2mm.u.u", 0, INSN_CLASS_XSFMM32A4I, "Ms2,Vt,Vs",  MATCH_SF_MAMMOTH_P2MM_U_U,  MASK_SF_MAMMOTH_P2MM_A_B,  match_opcode, 0 },
-{"sf.p2mm.s.u", 0, INSN_CLASS_XSFMM32A4I, "Ms2,Vt,Vs",  MATCH_SF_MAMMOTH_P2MM_S_U,  MASK_SF_MAMMOTH_P2MM_A_B,  match_opcode, 0 },
-{"sf.p2mm.u.s", 0, INSN_CLASS_XSFMM32A4I, "Ms2,Vt,Vs",  MATCH_SF_MAMMOTH_P2MM_U_S,  MASK_SF_MAMMOTH_P2MM_A_B,  match_opcode, 0 },
-{"sf.p2mm.s.s", 0, INSN_CLASS_XSFMM32A4I, "Ms2,Vt,Vs",  MATCH_SF_MAMMOTH_P2MM_S_S,  MASK_SF_MAMMOTH_P2MM_A_B,  match_opcode, 0 },
-
 {"sf.vtzero.t", 0, INSN_CLASS_XSFMMBASE, "Ms4",  MATCH_SF_MAMMOTH_VTZERO_T,  MASK_SF_MAMMOTH_VTZERO_T,  match_opcode, 0 },
 
 {"sf.vtdiscard", 0, INSN_CLASS_XSFMMBASE, "",  MATCH_SF_MAMMOTH_VTDISCARD,  MASK_SF_MAMMOTH_VTDISCARD,  match_opcode, 0 },

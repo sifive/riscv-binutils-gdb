@@ -1546,7 +1546,6 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
 
   /* Mammoth */
   /* TEW=32-bit Accumulation */
-  {"xsfmm32a4i", "+xsfmmbase",	check_implicit_always},
   {"xsfmm32a8i", "+xsfmmbase",	check_implicit_always},
   {"xsfmm32a8f", "+xsfmmbase,+zve32f",	check_implicit_always},
   {"xsfmm32a16f", "+xsfmmbase,+zve32f",	check_implicit_always},
@@ -1948,21 +1947,20 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {"xsfvfbfa",			ISA_SPEC_CLASS_DRAFT, 0, 1, 0},
 
   /* SiFive Mammoth extension */
-  {"xsfmmbase",         ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
+  {"xsfmmbase",         ISA_SPEC_CLASS_DRAFT, 0, 6, 4},
   /* TEW=32-bit Accumulation */
-  {"xsfmm32a4i",                ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
-  {"xsfmm32a8i",                ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
-  {"xsfmm32a8f",                ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
-  {"xsfmm32a16f",               ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
-  {"xsfmm32a32f",               ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
-  {"xsfmm32a",          ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
+  {"xsfmm32a8i",                ISA_SPEC_CLASS_DRAFT, 0, 6, 4},
+  {"xsfmm32a8f",                ISA_SPEC_CLASS_DRAFT, 0, 6, 4},
+  {"xsfmm32a16f",               ISA_SPEC_CLASS_DRAFT, 0, 6, 4},
+  {"xsfmm32a32f",               ISA_SPEC_CLASS_DRAFT, 0, 6, 4},
+  {"xsfmm32a",          ISA_SPEC_CLASS_DRAFT, 0, 6, 4},
   /* TEW=64-bit Accumulation */
-  {"xsfmm64a64f",               ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
+  {"xsfmm64a64f",               ISA_SPEC_CLASS_DRAFT, 0, 6, 4},
   /* Accumulator Array Size */
-  {"xsfmm128t",         ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
-  {"xsfmm64t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
-  {"xsfmm32t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
-  {"xsfmm16t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 1},
+  {"xsfmm128t",         ISA_SPEC_CLASS_DRAFT, 0, 6, 4},
+  {"xsfmm64t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 4},
+  {"xsfmm32t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 4},
+  {"xsfmm16t",          ISA_SPEC_CLASS_DRAFT, 0, 6, 4},
 
   /* SiFive PMP-based Memory Types Extension */
   {"xsfpmpmt",		ISA_SPEC_CLASS_DRAFT, 0, 1, 0},
@@ -3345,8 +3343,6 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
     /* SiFive Mammoth */
     case INSN_CLASS_XSFMMBASE:
       return riscv_subset_supports (rps, "xsfmmbase");
-    case INSN_CLASS_XSFMM32A4I:
-      return riscv_subset_supports (rps, "xsfmm32a4i");
     case INSN_CLASS_XSFMM32A8I_OR_XSFMM32A:
       return (riscv_subset_supports (rps, "xsfmm32a8i")
               || riscv_subset_supports (rps, "xsfmm32a"));
@@ -3678,8 +3674,6 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "xsfvfbfa";
     case INSN_CLASS_XSFMMBASE:
       return "xsfmmbase";
-    case INSN_CLASS_XSFMM32A4I:
-      return "xsfmm32a4i";
     case INSN_CLASS_XSFMM32A8I_OR_XSFMM32A:
       return _("xsfmm32a8i' or `xsfmm32a");
     case INSN_CLASS_XSFMM32A8F:

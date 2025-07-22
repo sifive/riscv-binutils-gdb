@@ -8,7 +8,6 @@ nop
 .text
 
 imply xsfmmbase
-imply xsfmm32a4i
 imply xsfmm32a8i
 imply xsfmm32a8f
 imply xsfmm32a16f

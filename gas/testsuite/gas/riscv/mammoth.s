@@ -45,12 +45,6 @@
         sf.mm.u.s mt8, v8, v9
         sf.mm.s.s mt12, v8, v9
 
-        ## Small integer matrix-multiplies
-        sf.p2mm.u.u mt0, v8, v9
-        sf.p2mm.s.u mt4, v8, v9
-        sf.p2mm.u.s mt8, v8, v9
-        sf.p2mm.s.s mt12, v8, v9
-
         ## Write zeros to tile
         sf.vtzero.t mt15
 
