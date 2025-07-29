@@ -858,15 +858,15 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		  break;
 		case 'd':
 		  print (info->stream, dis_style_register, "%s",
-			pd->riscv_gpr_names[rdp]);
+			 riscv_gpr_names[rdp]);
 		  break;
 		case 's':
 		  print (info->stream, dis_style_register, "%s",
-			pd->riscv_gpr_names[rs1p]);
+			 riscv_gpr_names[rs1p]);
 		  break;
 		case 't':
 		  print (info->stream, dis_style_register, "%s",
-			pd->riscv_gpr_names[rs2p]);
+			 riscv_gpr_names[rs2p]);
 		  break;
 		default:
 		  goto undefined_modifier;
