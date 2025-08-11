@@ -5880,6 +5880,10 @@ riscv_frag_align_code (int n)
   frag_wane (frag_now);
   frag_new (0);
 
+  /* Alignment also trigger relax, so update last_relax as well.  */
+  if (riscv_opts.relax)
+    info->last_relax = true;
+
   return true;
 }
 
