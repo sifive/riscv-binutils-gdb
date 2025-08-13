@@ -4554,7 +4554,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      uint64_t shift_b = (uint64_t)imm_expr->X_add_number;
 		      if (shift_b > SHAMTB_MAX)
 			as_bad(_("Invalid shift amount for 'pslli.b' "
-			    "(should between 0-%"PRIu64")")
+			    "(should be between 0-%"PRIu64")")
 			    , SHAMTB_MAX);
 		      INSERT_OPERAND (SHAMTB, *ip, imm_expr->X_add_number);
 		      imm_expr->X_op = O_absent;
@@ -4566,7 +4566,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      const uint64_t SHAMTH_MAX = 15;
 		      uint64_t shift_h = (uint64_t)imm_expr->X_add_number;
 		      if (shift_h > SHAMTH_MAX)
-			as_bad(_("Invalid shift amount. (should between 0-%"PRIu64")")
+			as_bad(_("Invalid shift amount. (should be between 0-%"PRIu64")")
 			    , SHAMTH_MAX);
 		      INSERT_OPERAND (SHAMTH, *ip, imm_expr->X_add_number);
 		      imm_expr->X_op = O_absent;
@@ -4578,7 +4578,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      if (imm_expr->X_add_number > 127
 			 || imm_expr->X_add_number < -128)
 		      as_bad(_("Improper immediate value for 'pli.b' (%"PRIu64"). "
-			    "(should between -128-127)"),
+			    "(should be between -128-127)"),
 			    imm_expr->X_add_number);
 		      ip->insn_opcode |= ENCODE_PLI_B_IMM (imm_expr->X_add_number);
 		      imm_expr->X_op = O_absent;
@@ -4590,7 +4590,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      if (imm_expr->X_add_number > 511
 			|| imm_expr->X_add_number < -512)
 		      as_bad (_("Improper immediate value for 'pli.h/w' (%"PRIi64"). "
-				"(shoud between -512-511)"),
+				"(shoud be between -512-511)"),
 				imm_expr->X_add_number);
 		      ip->insn_opcode |= ENCODE_PLI_IMM (imm_expr->X_add_number);
 		      imm_expr->X_op = O_absent;
@@ -4602,7 +4602,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      if (imm_expr->X_add_number > 511
 			 || imm_expr->X_add_number < -512)
 		      as_bad(_("Improper immediate value for 'plui.h' (%"PRIu64"). "
-			    "(should between -512-512)"),
+			    "(should be between -512-511)"),
 			    imm_expr->X_add_number);
 			  imm_expr->X_add_number <<= RISCV_PIMM_H_BITS;
 		      ip->insn_opcode |= ENCODE_PLUI_H_IMM (imm_expr->X_add_number);
@@ -4615,7 +4615,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      if (imm_expr->X_add_number > 511
 			 || imm_expr->X_add_number < -512)
 		      as_bad(_("Improper immediate value for 'plui.w' (%"PRIu64"). "
-			    "(should between -512-512)"),
+			    "(should be between -512-511)"),
 			    imm_expr->X_add_number);
 			  imm_expr->X_add_number <<= RISCV_PIMM_BITS;
 		      ip->insn_opcode |= ENCODE_PLUI_IMM (imm_expr->X_add_number);
