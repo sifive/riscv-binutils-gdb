@@ -113,6 +113,8 @@ enum riscv_csr_class
   CSR_CLASS_SMWG,	/* SMWG, world guard CSR */
   CSR_CLASS_SMWGD,	/* SMWGD, world guard CSR */
   CSR_CLASS_SSQOSID,	/* Ssqosid */
+  CSR_CLASS_SSPMP,	/* Sspmp extension */
+  CSR_CLASS_SSPMP_32,	/* Sspmp extension, RV32 only */
 };
 
 /* This structure holds all restricted conditions for a CSR.  */
@@ -1190,6 +1192,15 @@ riscv_csr_address (const char *csr_name,
     case CSR_CLASS_SSQOSID:
       extension = "ssqosid";
       need_check_version = false;
+      break;
+    case CSR_CLASS_SSPMP:
+      extension = "sspmp";
+      need_check_version = false;
+      break;
+    case CSR_CLASS_SSPMP_32:
+      extension = "sspmp";
+      need_check_version = false;
+      is_rv32_only = true;
       break;
 
     default:

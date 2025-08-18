@@ -1733,3 +1733,19 @@
 .*Info: macro .*
 .*Warning: invalid CSR `srmcfg', needs `ssqosid' extension
 .*Info: macro .*
+.*Warning: invalid CSR `mpmpdeleg', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mpmpdeleg', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpswitch', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpswitch', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpswitchh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpswitchh', needs `sspmp' extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpswitchh', needs rv32i extension
+.*Info: macro .*
+.*Warning: invalid CSR `spmpswitchh', needs `sspmp' extension
+.*Info: macro .*

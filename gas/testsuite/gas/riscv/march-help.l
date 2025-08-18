@@ -167,6 +167,7 @@ All available -march extensions for RISC-V:
 	ss                                      1.12, 1.13
 	sdext                                   1.0
 	sdtrig                                  1.0
+	sspmp                                   0.9
 	ssqosid                                 1.0
 	ssstrict                                1.0
 	svukte                                  0.4

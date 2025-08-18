@@ -948,3 +948,9 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+74859073[ 	]+csrw[ 	]+mwiddeleg,a1
 [ 	]+[0-9a-f]+:[ 	]+18102573[ 	]+csrr[ 	]+a0,srmcfg
 [ 	]+[0-9a-f]+:[ 	]+18159073[ 	]+csrw[ 	]+srmcfg,a1
+[ 	]+[0-9a-f]+:[ 	]+7ca02573[ 	]+csrr[ 	]+a0,mpmpdeleg
+[ 	]+[0-9a-f]+:[ 	]+7ca59073[ 	]+csrw[ 	]+mpmpdeleg,a1
+[ 	]+[0-9a-f]+:[ 	]+5c002573[ 	]+csrr[ 	]+a0,spmpswitch
+[ 	]+[0-9a-f]+:[ 	]+5c059073[ 	]+csrw[ 	]+spmpswitch,a1
+[ 	]+[0-9a-f]+:[ 	]+5c102573[ 	]+csrr[ 	]+a0,spmpswitchh
+[ 	]+[0-9a-f]+:[ 	]+5c159073[ 	]+csrw[ 	]+spmpswitchh,a1

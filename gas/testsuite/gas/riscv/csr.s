@@ -555,3 +555,8 @@
 
         # Ssqosid
 	csr srmcfg
+
+	# Sspmp
+	csr mpmpdeleg
+	csr spmpswitch
+	csr spmpswitchh
