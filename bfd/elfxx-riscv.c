@@ -1542,7 +1542,7 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"xsfvfexp16e", "+zvfh",	check_implicit_always},
   {"xsfvfbfexp16e", "+zve32f",	check_implicit_always},
 
-  {"xsfvfbfa", "+zve32f,+zfbfmin", check_implicit_always},
+  {"xsfvfbfa", "+zfbfmin,+zve32f,+zvfbfmin,+zvfbfwma", check_implicit_always},
 
   /* Mammoth */
   /* TEW=32-bit Accumulation */
