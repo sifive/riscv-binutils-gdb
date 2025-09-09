@@ -1567,6 +1567,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zvfbfmin", "+zve32f", check_implicit_always},
   {"zvfofp8min", "+zve32f", check_implicit_always},
   {"zvfofp4min", "+zve32f", check_implicit_always},
+  {"zvqdotq", "+zve32x", check_implicit_always},
+
   {"zve64d", "+d,+zve64f", check_implicit_always},
   {"zve64f", "+zve32f,+zve64x,+zvl64b", check_implicit_always},
   {"zve32f", "+f,+zve32x,+zvl32b", check_implicit_always},
@@ -1785,6 +1787,8 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zve64f",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zve64d",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvbb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvqdotq",		ISA_SPEC_CLASS_DRAFT,		0, 0,  0 },
+
   {"zvbc",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvfbfmin",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvfbfmin",		ISA_SPEC_CLASS_DRAFT,		0, 8,  0 },
@@ -3217,6 +3221,9 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zvbb");
     case INSN_CLASS_ZVBC:
       return riscv_subset_supports (rps, "zvbc");
+    case INSN_CLASS_ZVQDOTQ:
+      return riscv_subset_supports (rps, "zvqdotq");
+
     case INSN_CLASS_ZVFBFMIN:
       return riscv_subset_supports (rps, "zvfbfmin");
     case INSN_CLASS_ZVFBFWMA:
@@ -3586,6 +3593,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zksh";
     case INSN_CLASS_V:
       return _("v' or `zve64x' or `zve32x");
+    case INSN_CLASS_ZVQDOTQ:
+      return "zvqdotq";
     case INSN_CLASS_ZVEF:
       return _("v' or `zve64d' or `zve64f' or `zve32f");
     case INSN_CLASS_ZVBB:
