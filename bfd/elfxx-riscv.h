@@ -34,12 +34,23 @@ typedef enum
     PLT_ZICFILP_FUNC_SIG  = 0x2   /* Function-signature based landing pad plts.  */
 } riscv_plt_type;
 
+typedef enum
+{
+    CFI_REPORT_NONE  = 0x0,
+    CFI_REPORT_WARN  = 0x1,
+    CFI_REPORT_ERROR = 0x2,
+} riscv_cfi_report_type;
+
 struct riscv_elf_params
 {
   /* Whether to relax code sequences to GP-relative addressing.  */
   bool relax_gp;
   /* Whether to check if SUB_ULEB128 relocation has non-zero addend.  */
   bool check_uleb128;
+
+  riscv_cfi_report_type report_zicfilp_unlabeled;
+  riscv_cfi_report_type report_zicfilp_func_sig;
+  riscv_cfi_report_type report_zicfiss;
 };
 
 extern void riscv_elf32_set_options (struct bfd_link_info *,

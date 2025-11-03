@@ -26,7 +26,10 @@ fragment <<EOF
 #include "elfxx-riscv.h"
 
 static struct riscv_elf_params params = { .relax_gp = 1,
-					  .check_uleb128 = 0};
+					  .check_uleb128 = 0,
+					  .report_zicfilp_unlabeled = CFI_REPORT_NONE,
+					  .report_zicfilp_func_sig = CFI_REPORT_NONE,
+					  .report_zicfiss = CFI_REPORT_NONE};
 EOF
 
 # Define some shell vars to insert bits of code into the standard elf
@@ -43,6 +46,27 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   fprintf (file, _("  --no-relax-gp               Don'\''t perform GP relaxation\n"));
   fprintf (file, _("  --check-uleb128             Check if SUB_ULEB128 has non-zero addend\n"));
   fprintf (file, _("  --no-check-uleb128          Don'\''t check if SUB_ULEB128 has non-zero addend\n"));
+  fprintf (file, _("\
+  -z zicfilp-unlabeled-report[=none|warning|error]   Emit warning/error on mismatch of CFI_LP_UNLABELED markings between input objects and ouput.\n\
+                                         none: Does not emit any warning/error messages.\n\
+                                         warning (default): Emit warning when the input objects are missing CFI_LP_UNLABELED markings\n\
+                                           and output have CFI_LP_UNLABELED marking.\n\
+                                         error: Emit error when the input objects are missing CFI_LP_UNLABELED markings\n\
+                                           and output have CFI_LP_UNLABELED marking.\n"));
+  fprintf (file, _("\
+  -z zicfilp-func-sig-report[=none|warning|error]   Emit warning/error on mismatch of CFI_LP_FUNC_SIG markings between input objects and ouput.\n\
+                                         none: Does not emit any warning/error messages.\n\
+                                         warning (default): Emit warning when the input objects are missing CFI_LP_FUNC_SIG markings\n\
+                                           and output have CFI_LP_FUNC_SIG marking.\n\
+                                         error: Emit error when the input objects are missing CFI_LP_FUNC_SIG markings\n\
+                                           and output have CFI_LP_FUNC_SIG marking.\n"));
+  fprintf (file, _("\
+  -z zicfiss-report[=none|warning|error]   Emit warning/error on mismatch of CFI_SS markings between input objects and ouput.\n\
+                                         none: Does not emit any warning/error messages.\n\
+                                         warning (default): Emit warning when the input objects are missing CFI_SS markings\n\
+                                           and output have CFI_SS marking.\n\
+                                         error: Emit error when the input objects are missing CFI_SS markings\n\
+                                           and output have CFI_SS marking.\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
@@ -63,7 +87,83 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
       break;
 '
 
+PARSE_AND_LIST_ARGS_CASE_Z='
+     else if (riscv_parse_zicfilp_unlabeled_report_option (optarg))
+	{}
+     else if (riscv_parse_zicfilp_func_sig_report_option (optarg))
+	{}
+     else if (riscv_parse_zicfiss_report_option (optarg))
+	{}
+'
+
 fragment <<EOF
+
+#define COMPILE_TIME_STRLEN(s) \
+  (sizeof(s) - 1)
+
+static bool
+riscv_parse_cfi_report_option (const char *_optarg,
+			       const char *report_opt,
+			       const size_t report_opt_len,
+			       bool allow_empty_value,
+			       riscv_cfi_report_type *type)
+{
+  if (strncmp (_optarg, report_opt, report_opt_len) != 0)
+    return false;
+
+  if (strcmp (_optarg + report_opt_len, "=warning") == 0)
+    *type = CFI_REPORT_WARN;
+  else if (strcmp (_optarg + report_opt_len, "=none") == 0)
+    *type = CFI_REPORT_NONE;
+  else if (strcmp (_optarg + report_opt_len, "=error") == 0)
+    *type = CFI_REPORT_ERROR;
+  else if (allow_empty_value && strlen (_optarg) == report_opt_len)
+    *type = CFI_REPORT_WARN;
+  else
+    einfo (_("%X%P: error: unrecognized value '-z %s'\n"), _optarg);
+
+  return true;
+}
+
+static bool
+riscv_parse_zicfilp_unlabeled_report_option (const char *_optarg)
+{
+  #define CFI_LP_UNLABELED_REPORT      "zicfilp-unlabeled-report"
+  #define CFI_LP_UNLABELED_REPORT_LEN  COMPILE_TIME_STRLEN (CFI_LP_UNLABELED_REPORT)
+
+  return riscv_parse_cfi_report_option (_optarg, CFI_LP_UNLABELED_REPORT,
+    CFI_LP_UNLABELED_REPORT_LEN, true, &params.report_zicfilp_unlabeled);
+
+  #undef CFI_LP_UNLABELED_REPORT
+  #undef CFI_LP_UNLABELED_REPORT_LEN
+}
+
+static bool
+riscv_parse_zicfilp_func_sig_report_option (const char *_optarg)
+{
+  #define CFI_LP_FUNC_SIG_REPORT      "zicfilp-func-sig-report"
+  #define CFI_LP_FUNC_SIG_REPORT_LEN  COMPILE_TIME_STRLEN (CFI_LP_FUNC_SIG_REPORT)
+
+  return riscv_parse_cfi_report_option (_optarg, CFI_LP_FUNC_SIG_REPORT,
+    CFI_LP_FUNC_SIG_REPORT_LEN, true, &params.report_zicfilp_func_sig);
+
+  #undef CFI_LP_FUNC_SIG_REPORT
+  #undef CFI_LP_FUNC_SIG_REPORT
+}
+
+static bool
+riscv_parse_zicfiss_report_option (const char *_optarg)
+{
+  #define CFI_SS_REPORT      "zicfiss-report"
+  #define CFI_SS_REPORT_LEN  COMPILE_TIME_STRLEN (CFI_SS_REPORT)
+
+  return riscv_parse_cfi_report_option (_optarg, CFI_SS_REPORT,
+    CFI_SS_REPORT_LEN, true, &params.report_zicfiss);
+
+  #undef CFI_SS_REPORT
+  #undef CFI_SS_REPORT_LEN
+}
+
 static void
 riscv_elf_before_allocation (void)
 {

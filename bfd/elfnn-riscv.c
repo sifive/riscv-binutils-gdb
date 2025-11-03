@@ -282,7 +282,18 @@ riscv_elfNN_set_options (struct bfd_link_info *link_info,
   riscv_elf_hash_table (link_info)->params = params;
   struct _bfd_riscv_elf_obj_tdata *tdata = _bfd_riscv_elf_tdata (link_info->output_bfd);
   tdata->gnu_and_prop = 0;
+
+#define CHECK_AND_INIT_PROP(PROP, OPT_NAME) \
+  if (params->OPT_NAME != CFI_REPORT_NONE) \
+    tdata->gnu_and_prop |= GNU_PROPERTY_RISCV_FEATURE_1_CFI_##PROP;
+
+  CHECK_AND_INIT_PROP (LP_UNLABELED, report_zicfilp_unlabeled);
+  CHECK_AND_INIT_PROP (LP_FUNC_SIG, report_zicfilp_func_sig);
+  CHECK_AND_INIT_PROP (SS, report_zicfiss);
+
+#undef CHECK_AND_INIT_PROP
 }
+
 
 static bool
 riscv_info_to_howto_rela (bfd *abfd,
@@ -6085,6 +6096,27 @@ elfNN_riscv_link_setup_gnu_properties (struct bfd_link_info *info)
   return pbfd;
 }
 
+static void
+riscv_warn_and_prop (const elf_property* prop, const bfd *abfd,
+		     unsigned prop_mask, const char *prop_name,
+		     const char *option_name, riscv_cfi_report_type report_type)
+{
+  if (report_type == CFI_REPORT_NONE)
+    return;
+
+  if ((prop && !(prop->u.number & prop_mask))
+      || !prop)
+      {
+	_bfd_error_handler (_("%pB: warning: -z %s file does not have"
+			      " GNU_PROPERTY_RISCV_FEATURE_1_CFI_%s property"
+			      "section."),
+			    abfd, option_name, prop_name);
+	if (report_type == CFI_REPORT_ERROR)
+	  bfd_set_error (bfd_error_bad_value);
+      }
+}
+#define STRINGIFY(X) #X
+
 /* Implement elf_backend_merge_gnu_properties for RISC-V.  It serves as a
    wrapper function for _bfd_riscv_elf_merge_gnu_properties to account
    for the effect of GNU properties of the output_bfd.  */
@@ -6094,8 +6126,38 @@ elfNN_riscv_merge_gnu_properties (struct bfd_link_info *info,
 				  elf_property *aprop,
 				  elf_property *bprop)
 {
+  struct riscv_elf_params *params = riscv_elf_hash_table (info)->params;
   uint32_t and_prop
     = _bfd_riscv_elf_tdata (info->output_bfd)->gnu_and_prop;
+
+#define CHECK_AND_PROP_WARN(PROP, OPT_NAME, OPT_VAL)                       \
+  do {                                                                     \
+    if (((aprop && aprop->pr_type == GNU_PROPERTY_RISCV_FEATURE_1_AND)     \
+	 || (bprop && bprop->pr_type == GNU_PROPERTY_RISCV_FEATURE_1_AND)) \
+	&& (and_prop & GNU_PROPERTY_RISCV_FEATURE_1_CFI_##PROP))           \
+      {                                                                    \
+	riscv_warn_and_prop (aprop, abfd,                                  \
+	  GNU_PROPERTY_RISCV_FEATURE_1_CFI_##PROP,                         \
+	  STRINGIFY(GNU_PROPERTY_RISCV_FEATURE_1_CFI_##PROP),              \
+	  OPT_NAME, OPT_VAL);                                              \
+	riscv_warn_and_prop (bprop, bbfd,                                  \
+	  GNU_PROPERTY_RISCV_FEATURE_1_CFI_##PROP,                         \
+	  STRINGIFY(GNU_PROPERTY_RISCV_FEATURE_1_CFI_##PROP),              \
+	  OPT_NAME, OPT_VAL);                                              \
+      }                                                                    \
+  } while (0)
+
+  CHECK_AND_PROP_WARN (LP_UNLABELED,
+		       "zicfilp-unlabeled-report",
+		       params->report_zicfilp_unlabeled);
+  CHECK_AND_PROP_WARN (LP_FUNC_SIG,
+		       "zicfilp-func-sig-report",
+		       params->report_zicfilp_func_sig);
+  CHECK_AND_PROP_WARN (SS,
+		       "zicfiss-report",
+		       params->report_zicfiss);
+
+#undef CHECK_AND_PROP_WARN
 
   return _bfd_riscv_elf_merge_gnu_properties (info, abfd, aprop, bprop,
 					      and_prop);
