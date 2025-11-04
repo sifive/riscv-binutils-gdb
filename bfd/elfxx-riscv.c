@@ -3755,6 +3755,17 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "xsfvqmaccdod";
     case INSN_CLASS_XSFVFNRCLIPXFQF:
       return "xsfvfnrclipxfqf";
+    case INSN_CLASS_XSFVFHBFMIN:
+      return "xsfvfhbfmin";
+    case INSN_CLASS_V_AND_XSFVFWNACCQQQ:
+      if (!riscv_subset_supports (rps, "v"))
+	return "v";
+      else
+	return "xsfvfwmaccqqq";
+    case INSN_CLASS_XSFPGFLUSHDLONE:
+      return "xsfpgflushdlone";
+    case INSN_CLASS_XSFVQDOTQ:
+      return "xsfvqdotq";
     case INSN_CLASS_XSFVFBFA:
       return "xsfvfbfa";
     case INSN_CLASS_XSFMMBASE:
