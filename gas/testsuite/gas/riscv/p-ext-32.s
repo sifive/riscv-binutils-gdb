@@ -64,16 +64,16 @@ target:
 	paaddu.h	a0, a1, a2
 	psub.b	a0, a1, a2
 	psub.h	a0, a1, a2
-	pdif.b	a0, a1, a2
-	pdif.h	a0, a1, a2
+	pabd.b	a0, a1, a2
+	pabd.h	a0, a1, a2
 	ssub	a0, a1, a2
 	pssub.b	a0, a1, a2
 	pssub.h	a0, a1, a2
 	asub	a0, a1, a2
 	pasub.b	a0, a1, a2
 	pasub.h	a0, a1, a2
-	pdifu.b	a0, a1, a2
-	pdifu.h	a0, a1, a2
+	pabdu.b	a0, a1, a2
+	pabdu.h	a0, a1, a2
 	ssubu	a0, a1, a2
 	pssubu.b	a0, a1, a2
 	pssubu.h	a0, a1, a2
@@ -89,9 +89,9 @@ target:
 	merge	a0, a1, a2
 	srx	a0, a1, a2
 	pmulu.h.b01	a0, a1, a2
-	pdifsumu.b	a0, a1, a2
+	pabdsumu.b	a0, a1, a2
 	mulu.h01	a0, a1, a2
-	pdifsumau.b	a0, a1, a2
+	pabdsumau.b	a0, a1, a2
 	maccu.h01	a0, a1, a2
 	psh1add.h	a0, a1, a2
 	pssh1sadd.h	a0, a1, a2
@@ -114,13 +114,13 @@ target:
 	pmulsu.h.b11	a0, a1, a2
 	mulsu.h11	a0, a1, a2
 	maccsu.h11	a0, a1, a2
-	ppack.h	a0, a1, a2
-	ppackbt.h	a0, a1, a2
-	packbt	a0, a1, a2
-	ppacktb.h	a0, a1, a2
-	packtb	a0, a1, a2
-	ppackt.h	a0, a1, a2
-	packt	a0, a1, a2
+	ppaire.b	a0, a1, a2
+	ppaireo.b	a0, a1, a2
+	ppaireo.h	a0, a1, a2
+	ppairoe.b	a0, a1, a2
+	ppairoe.h	a0, a1, a2
+	ppairo.b	a0, a1, a2
+	ppairo.h	a0, a1, a2
 	pm2add.h	a0, a1, a2
 	pm4add.b	a0, a1, a2
 	pm2adda.h	a0, a1, a2

@@ -163,16 +163,16 @@ target:
 	psub.dh	a0, a2, a4
 	psub.dw	a0, a2, a4
 	subd	a0, a2, a4
-	pdif.db	a0, a2, a4
-	pdif.dh	a0, a2, a4
+	pabd.db	a0, a2, a4
+	pabd.dh	a0, a2, a4
 	pssub.db	a0, a2, a4
 	pssub.dh	a0, a2, a4
 	pssub.dw	a0, a2, a4
 	pasub.db	a0, a2, a4
 	pasub.dh	a0, a2, a4
 	pasub.dw	a0, a2, a4
-	pdifu.db	a0, a2, a4
-	pdifu.dh	a0, a2, a4
+	pabdu.db	a0, a2, a4
+	pabdu.dh	a0, a2, a4
 	pssubu.db	a0, a2, a4
 	pssubu.dh	a0, a2, a4
 	pssubu.dw	a0, a2, a4
@@ -183,14 +183,14 @@ target:
 	psh1add.dw	a0, a2, a4
 	pssh1sadd.dh	a0, a2, a4
 	pssh1sadd.dw	a0, a2, a4
-	ppack.dh	a0, a2, a4
-	ppack.dw	a0, a2, a4
-	ppackbt.dh	a0, a2, a4
-	ppackbt.dw	a0, a2, a4
-	ppacktb.dh	a0, a2, a4
-	ppacktb.dw	a0, a2, a4
-	ppackt.dh	a0, a2, a4
-	ppackt.dw	a0, a2, a4
+	ppaire.db	a0, a2, a4
+	ppaire.dh	a0, a2, a4
+	ppaireo.db	a0, a2, a4
+	ppaireo.dh	a0, a2, a4
+	ppairoe.db	a0, a2, a4
+	ppairoe.dh	a0, a2, a4
+	ppairo.db	a0, a2, a4
+	ppairo.dh	a0, a2, a4
 	pas.dhx	a0, a2, a4
 	psa.dhx	a0, a2, a4
 	psas.dhx	a0, a2, a4
