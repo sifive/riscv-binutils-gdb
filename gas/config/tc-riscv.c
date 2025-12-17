@@ -5458,6 +5458,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
     case BFD_RELOC_RISCV_SUB32:
     case BFD_RELOC_RISCV_SUB64:
     case BFD_RELOC_RISCV_RELAX:
+    case BFD_RELOC_RISCV_VENDOR:
     /* cvt_frag_to_fill () has called output_leb128 ().  */
     case BFD_RELOC_RISCV_SET_ULEB128:
     case BFD_RELOC_RISCV_SUB_ULEB128:

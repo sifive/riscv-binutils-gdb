@@ -922,7 +922,23 @@ static reloc_howto_type howto_table[] =
   EMPTY_HOWTO (178), EMPTY_HOWTO (179), EMPTY_HOWTO (180), EMPTY_HOWTO (181),
   EMPTY_HOWTO (182), EMPTY_HOWTO (183), EMPTY_HOWTO (184), EMPTY_HOWTO (185),
   EMPTY_HOWTO (186), EMPTY_HOWTO (187), EMPTY_HOWTO (188), EMPTY_HOWTO (189),
-  EMPTY_HOWTO (190), EMPTY_HOWTO (191), EMPTY_HOWTO (192), EMPTY_HOWTO (193),
+  EMPTY_HOWTO (190),
+
+  HOWTO (R_RISCV_VENDOR,		/* type */
+	 0,				/* rightshift */
+	 0,				/* size */
+	 0,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_VENDOR",		/* name */
+	 false,				/* partial_inplace */
+	 0,				/* src_mask */
+	 0,				/* dst_mask */
+	 false),			/* pcrel_offset */
+
+  EMPTY_HOWTO (192), EMPTY_HOWTO (193),
 
   /* Compact relocations.  */
   /* High 20 bits of 32-bit GP-relative reference.  */
