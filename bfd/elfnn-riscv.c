@@ -5822,9 +5822,15 @@ _bfd_riscv_jvt_record (bfd *abfd, asection *sec ATTRIBUTE_UNUSED,
 		       bool undefined_weak ATTRIBUTE_UNUSED)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
-  bfd_vma jal = bfd_getl32 (contents + rel->r_offset);
   int type = ELFNN_R_TYPE (rel->r_info);
-  unsigned int rd = (jal >> OP_SH_RD) & OP_MASK_RD;
+  /* For R_RISCV_CALL/CALL_PLT, the rd is in the JALR instruction (offset+4).
+     For R_RISCV_JAL, the rd is in the JAL instruction (offset).  */
+  bfd_vma insn;
+  if (type == R_RISCV_CALL || type == R_RISCV_CALL_PLT)
+    insn = bfd_getl32 (contents + rel->r_offset + 4);  /* JALR instruction.  */
+  else
+    insn = bfd_getl32 (contents + rel->r_offset);  /* JAL instruction.  */
+  unsigned int rd = (insn >> OP_SH_RD) & OP_MASK_RD;
   htab_t tbljal_htab = riscv_get_jvt_htab (link_info, rd);
   const char *name = riscv_get_symbol_name (abfd, ELFNN_R_SYM (rel->r_info));
   unsigned long r_symndx = ELFNN_R_SYM (rel->r_info);
