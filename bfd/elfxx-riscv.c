@@ -1589,6 +1589,10 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zvfwbdota16bf", "+zve32f", check_implicit_always},
   {"zvfqwbdota8f", "+zve32f", check_implicit_always},
   {"zvfbdota32f", "+zve32f", check_implicit_always},
+  {"zvqwdota8i", "+zve32x", check_implicit_always},
+  {"zvqwdota16i", "+zve64x", check_implicit_always},
+  {"zvfqwdota8f", "+zve32f", check_implicit_always},
+  {"zvfwdota16bf", "+zve32f", check_implicit_always},
 
   {"zve64d", "+d,+zve64f", check_implicit_always},
   {"zve64f", "+zve32f,+zve64x,+zvl64b", check_implicit_always},
@@ -1814,6 +1818,10 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zvfwbdota16bf", 	ISA_SPEC_CLASS_DRAFT, 		0, 2,  0 },
   {"zvfqwbdota8f", 	ISA_SPEC_CLASS_DRAFT, 		0, 2,  0 },
   {"zvfbdota32f", 	ISA_SPEC_CLASS_DRAFT, 		0, 2,  0 },
+  {"zvqwdota8i", 	ISA_SPEC_CLASS_DRAFT, 		0, 2,  0 },
+  {"zvqwdota16i", 	ISA_SPEC_CLASS_DRAFT, 		0, 2,  0 },
+  {"zvfqwdota8f", 	ISA_SPEC_CLASS_DRAFT, 		0, 2,  0 },
+  {"zvfwdota16bf", 	ISA_SPEC_CLASS_DRAFT, 		0, 2,  0 },
 
   {"zvbc",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvfbfmin",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -3258,6 +3266,13 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zvfqwbdota8f");
     case INSN_CLASS_ZVFBDOTA32F:
       return riscv_subset_supports (rps, "zvfbdota32f");
+    case INSN_CLASS_ZVQWDOTA8I_OR_ZVQWDOTA16I:
+      return (riscv_subset_supports (rps, "zvqwdota8i")
+              || riscv_subset_supports (rps, "zvqwdota16i"));
+    case INSN_CLASS_ZVFQWDOTA8F:
+      return riscv_subset_supports (rps, "zvfqwdota8f");
+    case INSN_CLASS_ZVFWDOTA16BF:
+      return riscv_subset_supports (rps, "zvfwdota16bf");
 
     case INSN_CLASS_ZVFBFMIN:
       return riscv_subset_supports (rps, "zvfbfmin");
@@ -3647,6 +3662,12 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zvfqwbdota8f";
     case INSN_CLASS_ZVFBDOTA32F:
       return "zvfbdota32f";
+    case INSN_CLASS_ZVQWDOTA8I_OR_ZVQWDOTA16I:
+      return _("zvqwdota8i' or `zvqwdota16i");
+    case INSN_CLASS_ZVFQWDOTA8F:
+      return "zvfqwdota8f";
+    case INSN_CLASS_ZVFWDOTA16BF:
+      return "zvfwdota16bf";
     case INSN_CLASS_ZVEF:
       return _("v' or `zve64d' or `zve64f' or `zve32f");
     case INSN_CLASS_ZVBB:

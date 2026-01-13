@@ -2118,6 +2118,17 @@ const struct riscv_opcode riscv_opcodes[] =
 /* Zvfbdot32f instruction. */
 {"vfbdota.vv", 0, INSN_CLASS_ZVFBDOTA32F, "Vd,Vt,VsVm", MATCH_VFBDOTAVV, MASK_VFBDOTAVV, match_opcode, 0},
 
+/* Zvqwdota8i and Zvqwdota16i instructions. */
+{"vqwdotau.vv", 0, INSN_CLASS_ZVQWDOTA8I_OR_ZVQWDOTA16I, "Vd,Vt,VsVm", MATCH_VQWDOTAUVV, MASK_VQWDOTAUVV, match_opcode, 0},
+{"vqwdotas.vv", 0, INSN_CLASS_ZVQWDOTA8I_OR_ZVQWDOTA16I, "Vd,Vt,VsVm", MATCH_VQWDOTASVV, MASK_VQWDOTASVV, match_opcode, 0},
+
+/* Zvfwdota16bf instruction. */
+{"vfwdota.vv", 0, INSN_CLASS_ZVFWDOTA16BF, "Vd,Vt,VsVm", MATCH_VFWDOTAVV, MASK_VFWDOTAVV, match_opcode, 0},
+
+/* Zvfqwdota8f instructions. */
+{"vfqwdota.vv", 0, INSN_CLASS_ZVFQWDOTA8F, "Vd,Vt,VsVm", MATCH_VFQWDOTAVV, MASK_VFQWDOTAVV, match_opcode, 0},
+{"vfqwdota.alt.vv", 0, INSN_CLASS_ZVFQWDOTA8F, "Vd,Vt,VsVm", MATCH_VFQWDOTAALTVV, MASK_VFQWDOTAALTVV, match_opcode, 0},
+
 {"vwmaccus.vx", 0, INSN_CLASS_V,  "Vd,s,VtVm", MATCH_VWMACCUSVX, MASK_VWMACCUSVX, match_opcode, 0},
 
 {"vdivu.vv",   0, INSN_CLASS_V,  "Vd,Vt,VsVm", MATCH_VDIVUVV, MASK_VDIVUVV, match_opcode, 0 },
