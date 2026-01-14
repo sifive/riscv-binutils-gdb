@@ -1279,6 +1279,9 @@ static reloc_howto_type howto_table_internal[] =
 	 0,				/* src_mask */
 	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
 	 false),			/* pcrel_offset */
+
+  /* R_RISCV_TABLE_JUMP.  */
+  EMPTY_HOWTO (0),
 };
 
 /* A mapping from BFD reloc types to RISC-V ELF reloc types.  */

@@ -5874,8 +5874,9 @@ _bfd_riscv_relax_cm_jalt (bfd *abfd, asection *sec,
       rel->r_info
 	  = ELFNN_R_INFO (ELFNN_R_SYM (rel->r_info), R_RISCV_TABLE_JUMP);
       *again = true;
+
       return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + 2, 2,
-				       link_info, pcgp_relocs, rel, false);
+				       link_info, pcgp_relocs, rel + 1, false);
     }
   return true;
 }
@@ -6196,8 +6197,9 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
 			    "Function call relaxation success to c.j[al]t"
 			    "(pc: %" PRIx64 " target: %s (%" PRIx64 ").",
 			    (uint64_t) pc, sym_str, (uint64_t) symval);
+      /* Use rel + 1 (R_RISCV_RELAX) for the deletion marker.  */
       return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + 2, 6,
-				       link_info, pcgp_relocs, rel, false);
+				       link_info, pcgp_relocs, rel + 1, false);
     }
 
   /* If the call crosses section boundaries, an alignment directive could
@@ -6294,12 +6296,19 @@ _bfd_riscv_relax_jal (bfd *abfd, asection *sec, asection *sym_sec,
   bfd_vma foff = symval - (sec_addr (sec) + rel->r_offset);
   bool rvc = elf_elfheader (abfd)->e_flags & EF_RISCV_RVC;
 
+  bfd_vma jal = bfd_getl32 (contents + rel->r_offset);
+
+  /* If the instruction has already been marked for table-jump (CM_JALT),
+     handle it via cm.jalt relaxation path.  */
+  if (((jal ^ MATCH_CM_JALT) & MASK_CM_JALT) == 0)
+    return _bfd_riscv_relax_cm_jalt (abfd, sec, link_info, rel, again,
+				     pcgp_relocs);
+
   /* Can't relax to compressed instruction without RVC.  */
   if (!rvc)
     return _bfd_riscv_relax_cm_jalt (abfd, sec, link_info, rel, again,
 				     pcgp_relocs);
 
-  bfd_vma jal = bfd_getl32 (contents + rel->r_offset);
   int rd = (jal >> OP_SH_RD) & OP_MASK_RD;
 
   /* C.J exists on RV32 and RV64, but C.JAL is RV32-only.  */
