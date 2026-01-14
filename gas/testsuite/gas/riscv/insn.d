@@ -19,8 +19,10 @@ Disassembly of section .text:
 [^:]+:[ 	]+00fff537[ 	]+lui[ 	]+a0,0xfff
 [^:]+:[ 	]+fe1ff56f[ 	]+jal[ 	]+a0,0 \<target\>
 [^:]+: R_RISCV_JAL[	]+target
+[^:]+: R_RISCV_RELAX[	]+\*ABS\*
 [^:]+:[ 	]+fddff56f[ 	]+jal[ 	]+a0,0 \<target\>
 [^:]+: R_RISCV_JAL[	]+target
+[^:]+: R_RISCV_RELAX[	]+\*ABS\*
 [^:]+:[ 	]+852e[ 	]+mv[ 	]+a0,a1
 [^:]+:[ 	]+0511[ 	]+addi[ 	]+a0,a0,4 # .*
 [^:]+:[ 	]+002c[ 	]+addi[ 	]+a1,sp,8
@@ -43,8 +45,10 @@ Disassembly of section .text:
 [^:]+:[ 	]+00fff537[ 	]+lui[ 	]+a0,0xfff
 [^:]+:[ 	]+fa9ff56f[ 	]+jal[ 	]+a0,0 \<target\>
 [^:]+: R_RISCV_JAL[	]+target
+[^:]+: R_RISCV_RELAX[	]+\*ABS\*
 [^:]+:[ 	]+fa5ff56f[ 	]+jal[ 	]+a0,0 \<target\>
 [^:]+: R_RISCV_JAL[	]+target
+[^:]+: R_RISCV_RELAX[	]+\*ABS\*
 [^:]+:[ 	]+852e[ 	]+mv[ 	]+a0,a1
 [^:]+:[ 	]+0511[ 	]+addi[ 	]+a0,a0,4 # .*
 [^:]+:[ 	]+002c[ 	]+addi[ 	]+a1,sp,8

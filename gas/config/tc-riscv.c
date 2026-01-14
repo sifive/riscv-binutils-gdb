@@ -5631,6 +5631,7 @@ reloc_diff:
 	  if (!riscv_opts.relax && S_IS_LOCAL (fixP->fx_addsy))
 	    fixP->fx_done = 1;
 	}
+      relaxable = true;
       break;
 
     case BFD_RELOC_12_PCREL:
@@ -6257,6 +6258,7 @@ md_convert_frag_branch (fragS *fragp)
  done:
   fixp->fx_file = fragp->fr_file;
   fixp->fx_line = fragp->fr_line;
+  fixp->fx_tcbit = riscv_opts.relax;
 
   gas_assert (buf == (bfd_byte *)fragp->fr_literal
 	      + fragp->fr_fix + fragp->fr_var);
