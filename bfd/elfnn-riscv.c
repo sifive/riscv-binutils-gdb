@@ -301,6 +301,13 @@ typedef struct
   const char *name;
 } riscv_jvt_htab_entry;
 
+/* Hash table entry for lpadinfo: maps symbol name to lpad value.  */
+typedef struct
+{
+  const char *name;
+  uint32_t lpad_value;
+} riscv_lpadinfo_entry;
+
 struct riscv_elf_link_hash_table
 {
   struct elf_link_hash_table elf;
@@ -336,6 +343,9 @@ struct riscv_elf_link_hash_table
 
   riscv_jvt_htab_t *jvt_htab;
 
+  /* Hash table for lpadinfo: symbol name -> lpad value.  */
+  htab_t lpadinfo_htab;
+
   /* Find compact relocations in check_relocs.  */
   bool compact_relocs;
 
@@ -346,7 +356,9 @@ struct riscv_elf_link_hash_table
   /* Functions to make PLT header and entries.  */
   bool (*make_plt_header) (bfd *output_bfd, struct riscv_elf_link_hash_table *htab);
   bool (*make_plt_entry) (bfd *output_bfd, asection *got, bfd_vma got_offset,
-                          asection *plt, bfd_vma plt_offset);
+                          asection *plt, bfd_vma plt_offset,
+                          struct elf_link_hash_entry *h,
+                          struct bfd_link_info *info);
 };
 
 /* Instruction access functions. */
@@ -378,26 +390,32 @@ static bool
 riscv_make_plt_header (bfd *, struct riscv_elf_link_hash_table *);
 
 static bool
-riscv_make_plt_entry (bfd *, asection *, bfd_vma, asection *, bfd_vma);
+riscv_make_plt_entry (bfd *, asection *, bfd_vma, asection *, bfd_vma,
+		      struct elf_link_hash_entry *, struct bfd_link_info *);
 
 static bool riscv_make_plt_compact_header (bfd *,
 					   struct riscv_elf_link_hash_table *);
 
 static bool riscv_make_plt_compact_entry (bfd *, asection *, bfd_vma,
-					  asection *, bfd_vma);
+					  asection *, bfd_vma,
+					  struct elf_link_hash_entry *,
+					  struct bfd_link_info *);
 
 static bool
 riscv_make_plt_zicfilp_header (bfd *, struct riscv_elf_link_hash_table *);
 
 static bool
-riscv_make_plt_zicfilp_entry (bfd *, asection *, bfd_vma, asection *, bfd_vma);
+riscv_make_plt_zicfilp_entry (bfd *, asection *, bfd_vma, asection *, bfd_vma,
+			      struct elf_link_hash_entry *, struct bfd_link_info *);
 
 static bool
 riscv_make_plt_zicfilp_func_sig_header (bfd *, struct riscv_elf_link_hash_table *);
 
 static bool
-riscv_make_plt_zicfilp_func_sig_entry (bfd *, asection *, bfd_vma, asection *, bfd_vma);
+riscv_make_plt_zicfilp_func_sig_entry (bfd *, asection *, bfd_vma, asection *, bfd_vma,
+				       struct elf_link_hash_entry *, struct bfd_link_info *);
 
+static bool riscv_lpadinfo_lookup (htab_t, const char *, uint32_t *);
 
 static void
 setup_plt_values (struct bfd_link_info *link_info,
@@ -947,7 +965,9 @@ riscv_make_plt_zicfilp_func_sig_header (bfd *output_bfd,
 
 static bool
 riscv_make_plt_entry (bfd *output_bfd, asection *got, bfd_vma got_offset,
-		      asection *plt, bfd_vma plt_offset)
+		      asection *plt, bfd_vma plt_offset,
+		      struct elf_link_hash_entry *h ATTRIBUTE_UNUSED,
+		      struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   bfd_vma got_entry_addr = sec_addr(got) + got_offset;
   /* RVE has no t3 register, so this won't work, and is not supported.  */
@@ -995,7 +1015,9 @@ riscv_make_plt_entry (bfd *output_bfd, asection *got, bfd_vma got_offset,
 static bool
 riscv_make_plt_compact_entry (bfd *output_bfd, asection *got ATTRIBUTE_UNUSED,
 			      bfd_vma got_offset, asection *plt,
-			      bfd_vma plt_offset)
+			      bfd_vma plt_offset,
+			      struct elf_link_hash_entry *h ATTRIBUTE_UNUSED,
+			      struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   bfd_vma plt_addr = sec_addr (plt);
   /* RVE has no t3 register, so this won't work, and is not supported.  */
@@ -1054,7 +1076,9 @@ riscv_make_plt_compact_entry (bfd *output_bfd, asection *got ATTRIBUTE_UNUSED,
 
 static bool
 riscv_make_plt_zicfilp_entry (bfd *output_bfd ATTRIBUTE_UNUSED, asection *got,
-                              bfd_vma got_offset, asection *plt, bfd_vma plt_offset)
+			      bfd_vma got_offset, asection *plt, bfd_vma plt_offset,
+			      struct elf_link_hash_entry *h ATTRIBUTE_UNUSED,
+			      struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   /*    lpad    0
     1:  auipc   t3, %pcrel_hi(function@.got.plt)
@@ -1080,11 +1104,25 @@ riscv_make_plt_zicfilp_entry (bfd *output_bfd ATTRIBUTE_UNUSED, asection *got,
 static bool
 riscv_make_plt_zicfilp_func_sig_entry (bfd *output_bfd ATTRIBUTE_UNUSED, asection *got,
 				       bfd_vma got_offset, asection *plt,
-				       bfd_vma plt_offset)
+				       bfd_vma plt_offset,
+				       struct elf_link_hash_entry *h,
+				       struct bfd_link_info *info)
 {
-  /* FIXME: Use 1 for landing pad label now, need use from
-            .riscv.lpadinfo section.  */
-  int64_t lpl = 1 << 12;
+  struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (info);
+  uint32_t lpad_value = 0;
+
+  /* Look up lpad_value from lpadinfo hash table.  */
+  if (htab->lpadinfo_htab != NULL && h != NULL)
+    {
+      const char *name = h->root.root.string;
+      if (!riscv_lpadinfo_lookup (htab->lpadinfo_htab, name, &lpad_value))
+	_bfd_error_handler
+	  (_("warning: no lpadinfo for PLT symbol `%s', using default value 0"),
+	   name);
+    }
+
+  /* The lpad value is placed in bits [31:12] of the instruction.  */
+  int64_t lpl = (int64_t) lpad_value << 12;
 
   /*  lpad    <value>
       auipc   t3, %hi(function@.got.plt)
@@ -1235,6 +1273,198 @@ riscv_free_jvt_htab (riscv_jvt_htab_t *htab)
   htab_delete (htab->jalt_htab);
 }
 
+/* Hash function for lpadinfo entries (by symbol name).  */
+
+static hashval_t
+riscv_lpadinfo_htab_hash (const void *entry)
+{
+  const riscv_lpadinfo_entry *e = entry;
+  return htab_hash_string (e->name);
+}
+
+/* Equality function for lpadinfo entries.  */
+
+static int
+riscv_lpadinfo_htab_eq (const void *entry1, const void *entry2)
+{
+  const riscv_lpadinfo_entry *e1 = entry1, *e2 = entry2;
+  return strcmp (e1->name, e2->name) == 0;
+}
+
+/* Look up lpad_value for a symbol in the lpadinfo hash table.
+   Returns true if found, false otherwise.  The lpad_value is stored
+   in *VALUE_OUT if found.  */
+
+static bool
+riscv_lpadinfo_lookup (htab_t htab, const char *name, uint32_t *value_out)
+{
+  if (htab == NULL || name == NULL)
+    return false;
+
+  riscv_lpadinfo_entry search = { .name = name, .lpad_value = 0 };
+  riscv_lpadinfo_entry *entry = htab_find (htab, &search);
+
+  if (entry != NULL)
+    {
+      *value_out = entry->lpad_value;
+      return true;
+    }
+  return false;
+}
+
+/* Read .riscv.lpadinfo section from an input BFD and populate the
+   lpadinfo hash table with symbol name -> lpad_value mappings.  */
+
+static bool
+riscv_read_lpadinfo_section (bfd *abfd, struct bfd_link_info *info)
+{
+  struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (info);
+  asection *sec;
+  bfd_byte *contents = NULL;
+  Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Sym *isymbuf = NULL;
+  char *strtab = NULL;
+  size_t strtab_size = 0;
+  uint32_t num_entries;
+  uint32_t entry_size = RISCV_LPADINFO_ENTRY_SIZE;  /* lpi_sym + lpi_value + lpi_sig */
+  bool ret = true;
+
+  if (htab == NULL)
+    return false;
+
+  /* Find the .riscv.lpadinfo section.  */
+  sec = bfd_get_section_by_name (abfd, ".riscv.lpadinfo");
+  if (sec == NULL || sec->size == 0)
+    return true;  /* No lpadinfo section, not an error.  */
+
+  /* Verify section type.  */
+  if (elf_section_data (sec)->this_hdr.sh_type != SHT_RISCV_LANDING_PAD_INFO)
+    return true;
+
+  /* Create the hash table if needed.  */
+  if (htab->lpadinfo_htab == NULL)
+    {
+      htab->lpadinfo_htab = htab_try_create (64, riscv_lpadinfo_htab_hash,
+					     riscv_lpadinfo_htab_eq, free);
+      if (htab->lpadinfo_htab == NULL)
+	return false;
+    }
+
+  /* Read section contents.  */
+  if (!bfd_malloc_and_get_section (abfd, sec, &contents))
+    {
+      ret = false;
+      goto cleanup;
+    }
+
+  /* Get number of entries from sh_info.  */
+  num_entries = elf_section_data (sec)->this_hdr.sh_info;
+  if (num_entries == 0 || num_entries * entry_size > sec->size)
+    goto cleanup;
+
+  /* Read the symbol table.  */
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  if (symtab_hdr->sh_info != 0)
+    {
+      isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
+      if (isymbuf == NULL)
+	isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
+					symtab_hdr->sh_info, 0,
+					NULL, NULL, NULL);
+    }
+
+  /* Read the string table.  */
+  if (symtab_hdr->sh_link != 0)
+    {
+      unsigned int strndx = symtab_hdr->sh_link;
+      Elf_Internal_Shdr *strtab_hdr = elf_elfsections (abfd)[strndx];
+      strtab = (char *) bfd_elf_get_str_section (abfd, strndx);
+      strtab_size = strtab_hdr->sh_size;
+    }
+
+  /* Process each entry.  */
+  for (uint32_t i = 0; i < num_entries; i++)
+    {
+      bfd_byte *ptr = contents + i * entry_size;
+      uint32_t sym_index = bfd_get_32 (abfd, ptr);
+      uint32_t lpad_value = bfd_get_32 (abfd, ptr + 4);
+      const char *sym_name = NULL;
+
+      /* Get symbol name.  */
+      if (sym_index < symtab_hdr->sh_info && isymbuf != NULL)
+	{
+	  /* Local symbol.  */
+	  Elf_Internal_Sym *isym = isymbuf + sym_index;
+	  if (isym->st_name < strtab_size && strtab != NULL)
+	    sym_name = strtab + isym->st_name;
+	}
+      else
+	{
+	  /* Global symbol - look up in hash table.  */
+	  unsigned int sym_hash_idx = sym_index - symtab_hdr->sh_info;
+	  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (abfd);
+	  unsigned int symcount = ((symtab_hdr->sh_size / sizeof (ElfNN_External_Sym))
+				   - symtab_hdr->sh_info);
+	  if (sym_hashes != NULL && sym_hash_idx < symcount)
+	    {
+	      struct elf_link_hash_entry *h = sym_hashes[sym_hash_idx];
+	      if (h != NULL)
+		sym_name = h->root.root.string;
+	    }
+	}
+
+      if (sym_name == NULL || sym_name[0] == '\0')
+	continue;
+
+      /* Check if entry already exists.  */
+      riscv_lpadinfo_entry search = { .name = sym_name, .lpad_value = 0 };
+      riscv_lpadinfo_entry *existing = htab_find (htab->lpadinfo_htab, &search);
+
+      if (existing != NULL)
+	{
+	  /* Entry exists, check for conflict.  */
+	  if (existing->lpad_value != lpad_value)
+	    {
+	      _bfd_error_handler
+		(_("%pB: conflicting lpadinfo values for `%s': "
+		   "0x%x vs 0x%x"),
+		 abfd, sym_name, existing->lpad_value, lpad_value);
+	    }
+	  continue;
+	}
+
+      /* Insert new entry.  */
+      riscv_lpadinfo_entry **slot = (riscv_lpadinfo_entry **)
+	htab_find_slot (htab->lpadinfo_htab, &search, INSERT);
+
+      if (*slot == NULL)
+	{
+	  *slot = (riscv_lpadinfo_entry *) bfd_malloc (sizeof (riscv_lpadinfo_entry));
+	  if (*slot == NULL)
+	    {
+	      ret = false;
+	      goto cleanup;
+	    }
+	  (*slot)->name = bfd_strdup (sym_name);
+	  if ((*slot)->name == NULL)
+	    {
+	      free (*slot);
+	      *slot = NULL;
+	      ret = false;
+	      goto cleanup;
+	    }
+	  (*slot)->lpad_value = lpad_value;
+	}
+    }
+
+ cleanup:
+  free (contents);
+  if (isymbuf != NULL && isymbuf != (Elf_Internal_Sym *) symtab_hdr->contents)
+    free (isymbuf);
+
+  return ret;
+}
+
 /* Update table jump hash entry.  */
 
 static bool
@@ -1353,6 +1583,9 @@ riscv_elf_link_hash_table_free (bfd *obfd)
       riscv_free_jvt_htab (ret->jvt_htab);
       free (ret->jvt_htab);
     }
+
+  if (ret->lpadinfo_htab)
+    htab_delete (ret->lpadinfo_htab);
 
   _bfd_elf_link_hash_table_free (obfd);
 }
@@ -4445,7 +4678,7 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       /* Fill in the PLT entry itself.  */
       if (! htab->make_plt_entry (output_bfd, gotplt, got_offset,
-                                  plt, h->plt.offset))
+                                  plt, h->plt.offset, h, info))
 	return false;
 
 
@@ -5397,7 +5630,8 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
     {
       elf_flags_init (obfd) = true;
       elf_elfheader (obfd)->e_flags = new_flags;
-      return true;
+      /* Still need to read lpadinfo section.  */
+      return riscv_read_lpadinfo_section (ibfd, info);
     }
 
   /* Disallow linking different float ABIs.  */
@@ -5423,6 +5657,10 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
   /* Allow linking TSO and non-TSO, and keep the TSO flag.  */
   elf_elfheader (obfd)->e_flags |= new_flags & EF_RISCV_TSO;
+
+  /* Read lpadinfo section for PLT generation.  */
+  if (!riscv_read_lpadinfo_section (ibfd, info))
+    goto fail;
 
   return true;
 
