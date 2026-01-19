@@ -204,6 +204,20 @@ static bool start_assemble = false;
 static bool probing_insn_operands;
 static bool parsing_lpad_hash = false;
 
+/* Landing pad info entry for .lpad_info directive.  */
+struct riscv_lpadinfo_entry
+{
+  struct riscv_lpadinfo_entry *next;
+  symbolS *sym;           /* Symbol for this entry.  */
+  char *signature;        /* Function signature string.  */
+  uint32_t lpad_value;    /* Landing pad hash value.  */
+};
+
+/* Head of the lpadinfo entry list.  */
+static struct riscv_lpadinfo_entry *riscv_lpadinfo_list = NULL;
+/* Tail of the lpadinfo entry list for efficient appending.  */
+static struct riscv_lpadinfo_entry **riscv_lpadinfo_tail = &riscv_lpadinfo_list;
+
 /* Set the default_isa_spec.  Return 0 if the spec isn't supported.
    Otherwise, return 1.  */
 
@@ -5425,6 +5439,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
       fixP->fx_offset = 0;
       relaxable = true;
       break;
+
+    case BFD_RELOC_RISCV_LPADINFO_SYMIDX:
+      /* Internal relocation for lpadinfo symbol index.
+	 The symbol index will be resolved in tc_frob_file.  */
+      break;
+
     case BFD_RELOC_RISCV_HI20:
     case BFD_RELOC_RISCV_LO12_I:
     case BFD_RELOC_RISCV_LO12_S:
@@ -6556,14 +6576,253 @@ riscv_insert_uleb128_fixes (bfd *abfd ATTRIBUTE_UNUSED,
     }
 }
 
+/* Free all entries in the lpadinfo list.  */
+
+static void
+riscv_free_lpadinfo_list (void)
+{
+  struct riscv_lpadinfo_entry *entry, *next;
+
+  for (entry = riscv_lpadinfo_list; entry != NULL; entry = next)
+    {
+      next = entry->next;
+      free (entry->signature);
+      free (entry);
+    }
+
+  riscv_lpadinfo_list = NULL;
+  riscv_lpadinfo_tail = &riscv_lpadinfo_list;
+}
+
+/* Generate .riscv.lpadinfo section from collected .lpad_info entries.  */
+
+static void
+riscv_generate_lpadinfo_section (void)
+{
+  struct riscv_lpadinfo_entry *entry;
+  segT lpadinfo_seg;
+  size_t strtab_size;
+  size_t num_entries;
+  char *p;
+  char *strtab;
+  size_t strtab_offset;
+
+  /* Return early if no lpadinfo entries.  */
+  if (riscv_lpadinfo_list == NULL)
+    return;
+
+  /* First pass: calculate string table size and count entries.  */
+  strtab_size = 1;  /* Start with 1 for empty string at offset 0.  */
+  num_entries = 0;
+  for (entry = riscv_lpadinfo_list; entry != NULL; entry = entry->next)
+    {
+      if (entry->signature != NULL && entry->signature[0] != '\0')
+	strtab_size += strlen (entry->signature) + 1;
+      num_entries++;
+    }
+
+  /* Build the string table.  */
+  strtab = (char *) xmalloc (strtab_size);
+  strtab[0] = '\0';  /* Empty string at offset 0.  */
+  strtab_offset = 1;
+
+  for (entry = riscv_lpadinfo_list; entry != NULL; entry = entry->next)
+    {
+      if (entry->signature != NULL && entry->signature[0] != '\0')
+	{
+	  size_t len = strlen (entry->signature) + 1;
+	  memcpy (strtab + strtab_offset, entry->signature, len);
+	  strtab_offset += len;
+	}
+    }
+
+  /* Create the .riscv.lpadinfo section.  */
+  lpadinfo_seg = subseg_new (".riscv.lpadinfo", 0);
+  bfd_set_section_flags (lpadinfo_seg,
+			 SEC_READONLY | SEC_DATA | SEC_HAS_CONTENTS);
+
+  /* Write entries.  */
+  strtab_offset = 1;  /* Reset for second pass.  */
+  for (entry = riscv_lpadinfo_list; entry != NULL; entry = entry->next)
+    {
+      uint32_t sig_offset;
+
+      /* Allocate space for this entry.  */
+      p = frag_more (RISCV_LPADINFO_ENTRY_SIZE);
+
+      /* lpi_sym: placeholder 0 for now, will be resolved by internal reloc.  */
+      md_number_to_chars (p, 0, 4);
+
+      /* Create an internal fixup to resolve the symbol index later.  */
+      fix_new (frag_now, p - frag_now->fr_literal, 4,
+	       entry->sym, 0, false, BFD_RELOC_RISCV_LPADINFO_SYMIDX);
+
+      /* lpi_value: the landing pad hash value.  */
+      md_number_to_chars (p + 4, entry->lpad_value, 4);
+
+      /* lpi_sig: string table offset.  */
+      if (entry->signature != NULL && entry->signature[0] != '\0')
+	{
+	  sig_offset = strtab_offset;
+	  strtab_offset += strlen (entry->signature) + 1;
+	}
+      else
+	sig_offset = 0;  /* Empty string at offset 0.  */
+      md_number_to_chars (p + 8, sig_offset, 4);
+    }
+
+  /* Append the string table.  */
+  p = frag_more (strtab_size);
+  memcpy (p, strtab, strtab_size);
+  free (strtab);
+
+  /* Set section type and sh_info.  */
+  elf_section_type (lpadinfo_seg) = SHT_RISCV_LANDING_PAD_INFO;
+  elf_section_data (lpadinfo_seg)->this_hdr.sh_info = num_entries;
+
+  /* Finish the section.  */
+  subseg_set (now_seg, now_subseg);
+}
+
 /* Called after all assembly has been done.  */
 
 void
 riscv_md_finish (void)
 {
+  segT saved_seg = now_seg;
+  subsegT saved_subseg = now_subseg;
+
+  riscv_generate_lpadinfo_section ();
+
+  /* Free the lpadinfo list now that we're done with it.  */
+  riscv_free_lpadinfo_list ();
+
+  /* Restore the original segment.  */
+  subseg_set (saved_seg, saved_subseg);
+
   riscv_set_public_attributes ();
   if (riscv_opts.relax)
     bfd_map_over_sections (stdoutput, riscv_insert_uleb128_fixes, NULL);
+}
+
+/* Calculate the final ELF symbol table index for a symbol.
+   ELF symbol table is ordered: NULL (0), locals, then globals.
+   BFD adds section symbols for each section, so we need to account for
+   section symbols that exist in the output but not yet in asympp.  */
+
+static unsigned int
+riscv_get_symbol_index (asymbol *target_sym)
+{
+  asymbol **symtab;
+  unsigned int sym_count;
+  unsigned int i;
+  unsigned int num_locals_in_asympp = 0;
+  unsigned int num_section_syms_in_asympp = 0;
+  unsigned int num_sections;
+  unsigned int extra_section_syms;
+  unsigned int total_locals;
+  unsigned int global_pos;
+  bool target_is_global;
+
+  symtab = bfd_get_outsymbols (stdoutput);
+  sym_count = bfd_get_symcount (stdoutput);
+
+  if (symtab == NULL || target_sym == NULL)
+    return 0;
+
+  /* Determine if target symbol is global.  */
+  target_is_global = (target_sym->flags & (BSF_GLOBAL | BSF_WEAK)) != 0;
+
+  /* Count local symbols and section symbols in the current asympp.  */
+  for (i = 0; i < sym_count; i++)
+    {
+      if ((symtab[i]->flags & (BSF_GLOBAL | BSF_WEAK)) == 0)
+	{
+	  num_locals_in_asympp++;
+	  if (symtab[i]->flags & BSF_SECTION_SYM)
+	    num_section_syms_in_asympp++;
+	}
+    }
+
+  /* Count sections in the output.  BFD will create a section symbol for
+     each section that doesn't already have one.  */
+  num_sections = bfd_count_sections (stdoutput);
+  extra_section_syms = (num_sections > num_section_syms_in_asympp)
+		       ? (num_sections - num_section_syms_in_asympp) : 0;
+
+  /* Total local symbols in final ELF = locals in asympp + extra section syms.  */
+  total_locals = num_locals_in_asympp + extra_section_syms;
+
+  if (target_is_global)
+    {
+      /* Find target's position among global symbols.  */
+      global_pos = 0;
+      for (i = 0; i < sym_count; i++)
+	{
+	  if ((symtab[i]->flags & (BSF_GLOBAL | BSF_WEAK)) != 0)
+	    {
+	      global_pos++;
+	      if (symtab[i] == target_sym)
+		return total_locals + global_pos;  /* Globals follow locals; global_pos is 1-based. NULL symbol is at index 0.  */
+	    }
+	}
+    }
+  else
+    {
+      /* For local symbols, find position among locals.  */
+      unsigned int local_pos = 1;
+      for (i = 0; i < sym_count; i++)
+	{
+	  if ((symtab[i]->flags & (BSF_GLOBAL | BSF_WEAK)) == 0)
+	    {
+	      if (symtab[i] == target_sym)
+		return local_pos;  /* Locals start at index 1 (index 0 is the NULL symbol).  */
+	      local_pos++;
+	    }
+	}
+    }
+
+  return 0;
+}
+
+/* Resolve symbol indices for .riscv.lpadinfo section.
+   Called before relocations are written, to mark internal fixups as done.  */
+
+void
+riscv_frob_file (void)
+{
+  segT s;
+  segment_info_type *seginfo;
+  fixS *fixp;
+
+  /* Iterate over all sections to find LPADINFO_SYMIDX fixups.  */
+  for (s = stdoutput->sections; s; s = s->next)
+    {
+      seginfo = seg_info (s);
+      if (seginfo == NULL || seginfo->frchainP == NULL)
+	continue;
+
+      for (fixp = seginfo->frchainP->fix_root; fixp; fixp = fixp->fx_next)
+	{
+	  if (fixp->fx_r_type == BFD_RELOC_RISCV_LPADINFO_SYMIDX)
+	    {
+	      unsigned int index = 0;
+	      bfd_byte *buf;
+
+	      if (fixp->fx_addsy != NULL)
+		{
+		  asymbol *bsym = symbol_get_bfdsym (fixp->fx_addsy);
+		  index = riscv_get_symbol_index (bsym);
+		}
+
+	      buf = (bfd_byte *) (fixp->fx_frag->fr_literal + fixp->fx_where);
+	      bfd_putl32 (index, buf);
+
+	      /* Mark fixup as done so it won't be emitted as a relocation.  */
+	      fixp->fx_done = true;
+	    }
+	}
+    }
 }
 
 /* Called just before the assembler exits.  */
@@ -6688,6 +6947,113 @@ s_variant_cc (int ignored ATTRIBUTE_UNUSED)
   elfsym->internal_elf_sym.st_other |= STO_RISCV_VARIANT_CC;
 }
 
+/* Parse a .lpad_info directive.
+   Syntax: .lpad_info symbol_name, "function-sig", lpad-value  */
+
+static void
+s_riscv_lpad_info (int ignored ATTRIBUTE_UNUSED)
+{
+  char *name;
+  char c;
+  symbolS *sym;
+  char *signature = NULL;
+  expressionS exp;
+  struct riscv_lpadinfo_entry *entry;
+
+  /* Parse symbol name.  */
+  c = get_symbol_name (&name);
+  if (!*name)
+    {
+      as_bad (_("missing symbol name for .lpad_info directive"));
+      ignore_rest_of_line ();
+      return;
+    }
+  sym = symbol_find_or_make (name);
+  restore_line_pointer (c);
+
+  /* Expect comma.  */
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad (_("expected comma after symbol name in .lpad_info"));
+      ignore_rest_of_line ();
+      return;
+    }
+  input_line_pointer++;
+  SKIP_WHITESPACE ();
+
+  /* Parse function signature string.  */
+  if (*input_line_pointer == '"')
+    {
+      char *sig_start;
+      size_t sig_len;
+
+      input_line_pointer++;
+      sig_start = input_line_pointer;
+
+      while (*input_line_pointer && *input_line_pointer != '"')
+	input_line_pointer++;
+
+      if (*input_line_pointer != '"')
+	{
+	  as_bad (_("unterminated string in .lpad_info"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      sig_len = input_line_pointer - sig_start;
+      signature = xmemdup0 (sig_start, sig_len);
+      input_line_pointer++;
+    }
+  else
+    {
+      as_bad (_("expected quoted string for function signature in .lpad_info"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  /* Expect comma.  */
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad (_("expected comma after function signature in .lpad_info"));
+      free (signature);
+      ignore_rest_of_line ();
+      return;
+    }
+  input_line_pointer++;
+  SKIP_WHITESPACE ();
+
+  /* Parse lpad value (supports %lpad_hash("...") or numeric).  */
+  {
+    bfd_reloc_code_real_type reloc = BFD_RELOC_NONE;
+
+    my_getSmallExpression (&exp, &reloc, input_line_pointer, percent_op_utype);
+    input_line_pointer = expr_parse_end;
+
+    /* If %lpad_hash was used, it's already resolved to a constant.  */
+    if (exp.X_op != O_constant)
+      {
+	as_bad (_("lpad value must be a constant in .lpad_info"));
+	free (signature);
+	ignore_rest_of_line ();
+	return;
+      }
+  }
+
+  demand_empty_rest_of_line ();
+
+  /* Create and add a new lpadinfo entry.  */
+  entry = XNEW (struct riscv_lpadinfo_entry);
+  entry->next = NULL;
+  entry->sym = sym;
+  entry->signature = signature;
+  entry->lpad_value = (uint32_t) exp.X_add_number;
+
+  *riscv_lpadinfo_tail = entry;
+  riscv_lpadinfo_tail = &entry->next;
+}
+
 /* Same as elf_copy_symbol_attributes, but without copying st_other.
    This is needed so RISC-V specific st_other values can be independently
    specified for an IFUNC resolver (that is called by the dynamic linker)
@@ -6731,6 +7097,7 @@ static const pseudo_typeS riscv_pseudo_table[] =
   {"insn", s_riscv_insn, 0},
   {"attribute", s_riscv_attribute, 0},
   {"variant_cc", s_variant_cc, 0},
+  {"lpad_info", s_riscv_lpad_info, 0},
   {"float16", float_cons, 'h'},
   {"bfloat16", float_cons, 'b'},
 

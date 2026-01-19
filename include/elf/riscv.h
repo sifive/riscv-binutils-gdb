@@ -128,6 +128,7 @@ END_RELOC_NUMBERS (R_RISCV_max)
 #define R_RISCV_TPREL_I           (R_RISCV_max + 5)
 #define R_RISCV_TPREL_S           (R_RISCV_max + 6)
 #define R_RISCV_TABLE_JUMP        (R_RISCV_max + 7)
+#define R_RISCV_LPADINFO_SYMIDX   (R_RISCV_max + 8)
 
 /* Processor specific flags for the ELF header e_flags field.  */
 
@@ -170,6 +171,10 @@ END_RELOC_NUMBERS (R_RISCV_max)
 
 /* Additional section types.  */
 #define SHT_RISCV_ATTRIBUTES (SHT_LOPROC + 3) /* Section holds attributes.  */
+#define SHT_RISCV_LANDING_PAD_INFO (SHT_LOPROC + 4) /* Section holds landing pad info.  */
+
+/* Size of each entry in .riscv.lpadinfo section (lpi_sym + lpi_value + lpi_sig).  */
+#define RISCV_LPADINFO_ENTRY_SIZE 12
 
 /* Processor specific program header types.  */
 

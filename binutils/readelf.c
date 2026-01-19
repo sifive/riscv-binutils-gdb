@@ -5799,7 +5799,8 @@ get_riscv_section_type_name (unsigned int sh_type)
 {
   switch (sh_type)
     {
-    case SHT_RISCV_ATTRIBUTES:  return "RISCV_ATTRIBUTES";
+    case SHT_RISCV_ATTRIBUTES:       return "RISCV_ATTRIBUTES";
+    case SHT_RISCV_LANDING_PAD_INFO: return "RISCV_LPADINFO";
     default: return NULL;
     }
 }
@@ -23489,6 +23490,161 @@ display_generic_attribute (unsigned char * start,
   return display_tag_value (tag, start, end);
 }
 
+/* Process RISC-V specific lpadinfo section.  */
+
+static bool
+process_riscv_lpadinfo (Filedata * filedata)
+{
+  Elf_Internal_Shdr * section;
+  Elf_Internal_Shdr * symtab_sec = NULL;
+  Elf_Internal_Sym * symtab = NULL;
+  uint64_t nsyms = 0;
+  char * strtab = NULL;
+  uint64_t strtab_size = 0;
+  unsigned int i;
+  bool found = false;
+  bool res = true;
+
+  /* Find the symbol table section.  */
+  for (i = 0; i < filedata->file_header.e_shnum; i++)
+    {
+      section = filedata->section_headers + i;
+      if (section->sh_type == SHT_SYMTAB)
+	{
+	  symtab_sec = section;
+	  break;
+	}
+    }
+
+  /* Get the symbol table if found.  */
+  if (symtab_sec != NULL)
+    {
+      if (!get_symtab (filedata, symtab_sec, &symtab, &nsyms,
+		       &strtab, &strtab_size))
+	{
+	  symtab = NULL;
+	  nsyms = 0;
+	  strtab = NULL;
+	  strtab_size = 0;
+	}
+    }
+
+  for (i = 0, section = filedata->section_headers;
+       i < filedata->file_header.e_shnum;
+       i++, section++)
+    {
+      if (section->sh_type == SHT_RISCV_LANDING_PAD_INFO)
+	{
+	  unsigned char * data;
+	  unsigned char * ptr;
+	  uint64_t num_entries;
+	  unsigned int j;
+
+	  found = true;
+
+	  if (section->sh_size == 0)
+	    {
+	      printf (_("\nLanding Pad Information Section '%s' is empty.\n"),
+		      printable_section_name (filedata, section));
+	      continue;
+	    }
+
+	  data = (unsigned char *) get_section_contents (section, filedata);
+	  if (data == NULL)
+	    {
+	      error (_("Unable to read landing pad info section '%s'\n"),
+		     printable_section_name (filedata, section));
+	      res = false;
+	      continue;
+	    }
+
+	  num_entries = section->sh_info;
+
+	  printf (_("\nLanding Pad Information Section '%s':\n"),
+		  printable_section_name (filedata, section));
+	  printf (_("  %-24s %-24s %s\n"),
+		  "Symbol Name", "Signature", "Lpad Value");
+
+	  ptr = data;
+	  for (j = 0; j < num_entries; j++)
+	    {
+	      uint32_t sym_index;
+	      uint32_t lpad_value;
+	      uint32_t sig_offset;
+	      const char *sym_name = NULL;
+	      const char *signature = NULL;
+
+	      if (ptr + RISCV_LPADINFO_ENTRY_SIZE > data + section->sh_size)
+		{
+		  error (_("Truncated lpadinfo entry\n"));
+		  res = false;
+		  break;
+		}
+
+	      sym_index = byte_get_little_endian (ptr, 4);
+	      ptr += 4;
+	      lpad_value = byte_get_little_endian (ptr, 4);
+	      ptr += 4;
+	      sig_offset = byte_get_little_endian (ptr, 4);
+	      ptr += 4;
+
+	      /* Get symbol name from symtab.  */
+	      if (symtab != NULL && sym_index < nsyms)
+		{
+		  if (symtab[sym_index].st_name < strtab_size)
+		    sym_name = strtab + symtab[sym_index].st_name;
+		  else
+		    sym_name = _("<corrupt>");
+		}
+
+	      /* Get signature string.  The string table starts after all entries.  */
+	      {
+		uint64_t strtab_start = num_entries * RISCV_LPADINFO_ENTRY_SIZE;
+		if (sig_offset > 0 && strtab_start + sig_offset < section->sh_size)
+		  signature = (const char *) (data + strtab_start + sig_offset);
+	      }
+
+	      if (sym_name)
+		printf ("  %-24s", sym_name);
+	      else
+		printf ("  <symbol index: %u>     ", sym_index);
+
+	      if (signature && signature[0])
+		printf (" %-24s", signature);
+	      else
+		printf (" %-24s", "(none)");
+
+	      printf (" 0x%08x\n", lpad_value);
+	    }
+
+	  free (data);
+	}
+    }
+
+  free (symtab);
+  free (strtab);
+
+  return res;
+}
+
+/* Process RISC-V specific sections.  */
+
+static bool
+process_riscv_specific (Filedata * filedata)
+{
+  bool res = true;
+
+  if (! process_attributes (filedata, "riscv", SHT_RISCV_ATTRIBUTES,
+			    display_riscv_attribute,
+			    display_generic_attribute))
+    res = false;
+
+  if (! process_riscv_lpadinfo (filedata))
+    res = false;
+
+  return res;
+}
+
 static bool
 process_arch_specific (Filedata * filedata)
 {
@@ -23520,9 +23676,7 @@ process_arch_specific (Filedata * filedata)
 				display_msp430_gnu_attribute);
 
     case EM_RISCV:
-     return process_attributes (filedata, "riscv", SHT_RISCV_ATTRIBUTES,
-				display_riscv_attribute,
-				display_generic_attribute);
+      return process_riscv_specific (filedata);
 
     case EM_NDS32:
       return process_nds32_specific (filedata);
