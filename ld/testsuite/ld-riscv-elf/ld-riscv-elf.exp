@@ -399,4 +399,5 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "table-jump-relax-zcmt"
     run_dump_test "table-jump-no-relax-zcmt"
     run_dump_test "table-jump-multiple-local-sym"
+    run_dump_test "table-jump-norelax"
 }

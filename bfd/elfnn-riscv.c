@@ -7139,16 +7139,44 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	    {
 	      if (type == R_RISCV_CALL || type == R_RISCV_CALL_PLT
 		  || type == R_RISCV_JAL)
-		relax_func = _bfd_riscv_jvt_record;
+		{
+		  /* Only process CALL/CALL_PLT/JAL if paired with R_RISCV_RELAX
+		     or R_RISCV_DELETE_AND_RELAX.  This matches
+		     the check in RELAX_PASS_SHORTEN_LUI_CALL_TRREL_PCREL.
+		     Without this check, we would mark calls that have .option
+		     norelax (no R_RISCV_RELAX), but _bfd_riscv_relax_call would
+		     skip them, leaving the AUIPC corrupted with the CM_JALT
+		     marker.  */
+		  if (i == sec->reloc_count - 1
+		      || rel->r_offset != (rel + 1)->r_offset)
+		    continue;
+		  unsigned int next_type = ELFNN_R_TYPE ((rel + 1)->r_info);
+		  if (next_type != R_RISCV_RELAX
+		      && next_type != R_RISCV_DELETE_AND_RELAX)
+		    continue;
+		  relax_func = _bfd_riscv_jvt_record;
+		}
 	      else
 		continue;
+
 	      *again = true;
 	    }
 	  else if (info->relax_trip == JVT_PROFILING_DETERMINE)
 	    {
 	      if (type == R_RISCV_CALL || type == R_RISCV_CALL_PLT
 		  || type == R_RISCV_JAL)
-		relax_func = _bfd_riscv_jvt_mark;
+		{
+		  /* Only process CALL/CALL_PLT/JAL if paired with R_RISCV_RELAX
+		     or R_RISCV_DELETE_AND_RELAX reloc.  See comment above.  */
+		  if (i == sec->reloc_count - 1
+		      || rel->r_offset != (rel + 1)->r_offset)
+		    continue;
+		  unsigned int next_type = ELFNN_R_TYPE ((rel + 1)->r_info);
+		  if (next_type != R_RISCV_RELAX
+		      && next_type != R_RISCV_DELETE_AND_RELAX)
+		    continue;
+		  relax_func = _bfd_riscv_jvt_mark;
+		}
 	      else
 		continue;
 	    }
