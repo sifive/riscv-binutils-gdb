@@ -149,6 +149,7 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "code-model-compact-02"
     run_dump_test "code-model-compact-weakref-01"
     run_dump_test "code-model-compact-weakref-02"
+    run_dump_test "vendor-reloc"
     run_dump_test "code-model-relax-medlow-01"
     run_dump_test "code-model-relax-medlow-01-norelaxgp"
     run_dump_test "code-model-relax-medlow-02"
