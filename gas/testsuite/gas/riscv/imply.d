@@ -25,7 +25,7 @@ SYMBOL TABLE:
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_d2p2_v1p0_zicsr2p0_zve32f1p0_zve32x1p0_zve64d1p0_zve64f1p0_zve64x1p0_zvl128b1p0_zvl32b1p0_zvl64b1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0_zfhmin1p0_zve32f1p0_zve32x1p0_zvfh1p0_zvfhmin1p0_zvl32b1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0_zve32f1p0_zve32x1p0_zvfhmin1p0_zvl32b1p0
-[0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0_zfbfmin1p0_zfhmin1p0_zve32f1p0_zve32x1p0_zvfbfwma1p0_zvl32b1p0
+[0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0_zfbfmin1p0_zve32f1p0_zve32x1p0_zvfbfwma1p0_zvl32b1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0_zve32f1p0_zve32x1p0_zvfbfmin1p0_zvl32b1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0_zve32f1p0_zve32x1p0_zvfofp8min0p2_zvl32b1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0_zve32f1p0_zve32x1p0_zvfofp4min0p1_zvl32b1p0
@@ -67,7 +67,7 @@ SYMBOL TABLE:
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_d2p2_zicsr2p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_zicsr2p0_zfinx1p0_zdinx1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0_zfa1p0
-[0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0_zfbfmin1p0_zfhmin1p0
+[0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0_zfbfmin1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0_zfh1p0_zfhmin1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0_zfhmin1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_zicsr2p0_zfinx1p0

@@ -975,14 +975,14 @@ const struct riscv_opcode riscv_opcodes[] =
 {"remuw",     64, INSN_CLASS_M,     "d,s,t",     MATCH_REMUW, MASK_REMUW, match_opcode, 0 },
 
 /* Half-precision floating-point instruction subset.  */
-{"flh",        0, INSN_CLASS_ZFHMIN,   "D,o(s)",    MATCH_FLH, MASK_FLH, match_opcode, INSN_DREF|INSN_2_BYTE },
-{"flh",        0, INSN_CLASS_ZFHMIN,   "D,o(s),1i", MATCH_FLH, MASK_FLH, match_opcode, INSN_DREF|INSN_2_BYTE }, /* For compact relaxation.  */
-{"flh",        0, INSN_CLASS_ZFHMIN,   "D,A,s",     0, (int) M_FLx, match_rs1_nonzero, INSN_MACRO },
-{"fsh",        0, INSN_CLASS_ZFHMIN,   "T,q(s)",    MATCH_FSH, MASK_FSH, match_opcode, INSN_DREF|INSN_2_BYTE },
-{"fsh",        0, INSN_CLASS_ZFHMIN,   "T,A,s",     0, (int) M_Sx_FSx, match_rs1_nonzero, INSN_MACRO },
-{"fsh",        0, INSN_CLASS_ZFHMIN,   "T,q(s),1s", MATCH_FSH, MASK_FSH, match_opcode, INSN_DREF|INSN_2_BYTE }, /* For compact relaxation.  */
-{"fmv.x.h",    0, INSN_CLASS_ZFHMIN,   "d,S",       MATCH_FMV_X_H, MASK_FMV_X_H, match_opcode, 0 },
-{"fmv.h.x",    0, INSN_CLASS_ZFHMIN,   "D,s",       MATCH_FMV_H_X, MASK_FMV_H_X, match_opcode, 0 },
+{"flh",        0, INSN_CLASS_ZFHMIN_OR_ZFBFMIN,   "D,o(s)",    MATCH_FLH, MASK_FLH, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"flh",        0, INSN_CLASS_ZFHMIN_OR_ZFBFMIN,   "D,o(s),1i", MATCH_FLH, MASK_FLH, match_opcode, INSN_DREF|INSN_2_BYTE }, /* For compact relaxation.  */
+{"flh",        0, INSN_CLASS_ZFHMIN_OR_ZFBFMIN,   "D,A,s",     0, (int) M_FLx, match_rs1_nonzero, INSN_MACRO },
+{"fsh",        0, INSN_CLASS_ZFHMIN_OR_ZFBFMIN,   "T,q(s)",    MATCH_FSH, MASK_FSH, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"fsh",        0, INSN_CLASS_ZFHMIN_OR_ZFBFMIN,   "T,A,s",     0, (int) M_Sx_FSx, match_rs1_nonzero, INSN_MACRO },
+{"fsh",        0, INSN_CLASS_ZFHMIN_OR_ZFBFMIN,   "T,q(s),1s", MATCH_FSH, MASK_FSH, match_opcode, INSN_DREF|INSN_2_BYTE }, /* For compact relaxation.  */
+{"fmv.x.h",    0, INSN_CLASS_ZFHMIN_OR_ZFBFMIN,   "d,S",       MATCH_FMV_X_H, MASK_FMV_X_H, match_opcode, 0 },
+{"fmv.h.x",    0, INSN_CLASS_ZFHMIN_OR_ZFBFMIN,   "D,s",       MATCH_FMV_H_X, MASK_FMV_H_X, match_opcode, 0 },
 {"fmv.h",      0, INSN_CLASS_ZFH_INX,   "D,U",       MATCH_FSGNJ_H, MASK_FSGNJ_H, match_rs1_eq_rs2, INSN_ALIAS },
 {"fneg.h",     0, INSN_CLASS_ZFH_INX,   "D,U",       MATCH_FSGNJN_H, MASK_FSGNJN_H, match_rs1_eq_rs2, INSN_ALIAS },
 {"fabs.h",     0, INSN_CLASS_ZFH_INX,   "D,U",       MATCH_FSGNJX_H, MASK_FSGNJX_H, match_rs1_eq_rs2, INSN_ALIAS },
@@ -3526,8 +3526,8 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sb.gprel",        0, INSN_CLASS_I,   "t,A,sg", 0, (int) M_SB_GPREL, NULL, INSN_MACRO },
 {"sh.gprel",        0, INSN_CLASS_I,   "t,A,sg", 0, (int) M_SH_GPREL, NULL, INSN_MACRO },
 {"sw.gprel",        0, INSN_CLASS_I,   "t,A,sg", 0, (int) M_SW_GPREL, NULL, INSN_MACRO },
-{"flh.gprel",       0, INSN_CLASS_ZFHMIN, "D,A,sg", 0, (int) M_FLH_GPREL, NULL, INSN_MACRO },
-{"fsh.gprel",       0, INSN_CLASS_ZFHMIN, "T,A,sg", 0, (int) M_FSH_GPREL, NULL, INSN_MACRO },
+{"flh.gprel",       0, INSN_CLASS_ZFHMIN_OR_ZFBFMIN, "D,A,sg", 0, (int) M_FLH_GPREL, NULL, INSN_MACRO },
+{"fsh.gprel",       0, INSN_CLASS_ZFHMIN_OR_ZFBFMIN, "T,A,sg", 0, (int) M_FSH_GPREL, NULL, INSN_MACRO },
 {"flw.gprel",       0, INSN_CLASS_F,   "D,A,sg", 0, (int) M_FLW_GPREL, NULL, INSN_MACRO },
 {"fsw.gprel",       0, INSN_CLASS_F,   "T,A,sg", 0, (int) M_FSW_GPREL, NULL, INSN_MACRO },
 {"fld.gprel",       0, INSN_CLASS_D,   "D,A,sg", 0, (int) M_FLD_GPREL, NULL, INSN_MACRO },

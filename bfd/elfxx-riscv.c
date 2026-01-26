@@ -1650,7 +1650,7 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zdinx", "+zfinx", check_implicit_always},
 
   {"zfa", "+f", check_implicit_always},
-  {"zfbfmin", "+zfhmin", check_implicit_always},
+  {"zfbfmin", "+f", check_implicit_always},
   {"zfh", "+zfhmin", check_implicit_always},
   {"zfhmin", "+f", check_implicit_always},
   {"zfinx", "+zicsr", check_implicit_always},
@@ -3186,6 +3186,9 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
 	      || riscv_subset_supports (rps, "zhinx"));
     case INSN_CLASS_ZFHMIN:
       return riscv_subset_supports (rps, "zfhmin");
+    case INSN_CLASS_ZFHMIN_OR_ZFBFMIN:
+      return (riscv_subset_supports (rps, "zfhmin")
+	      || riscv_subset_supports (rps, "zfbfmin"));
     case INSN_CLASS_ZFHMIN_INX:
       return (riscv_subset_supports (rps, "zfhmin")
 	      || riscv_subset_supports (rps, "zhinxmin"));
@@ -3564,6 +3567,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return _("zfh' or `zhinx");
     case INSN_CLASS_ZFHMIN:
       return "zfhmin";
+    case INSN_CLASS_ZFHMIN_OR_ZFBFMIN:
+      return _("zfhmin' or `zfbfmin");
     case INSN_CLASS_ZFHMIN_INX:
       return _("zfhmin' or `zhinxmin");
     case INSN_CLASS_ZFHMIN_AND_D_INX:
