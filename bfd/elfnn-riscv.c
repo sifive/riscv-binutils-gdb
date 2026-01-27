@@ -1388,7 +1388,24 @@ riscv_read_lpadinfo_section (bfd *abfd, struct bfd_link_info *info)
       bfd_byte *ptr = contents + i * entry_size;
       uint32_t sym_index = bfd_get_32 (abfd, ptr);
       uint32_t lpad_value = bfd_get_32 (abfd, ptr + 4);
+      uint32_t total_syms = symtab_hdr->sh_size / sizeof (ElfNN_External_Sym);
       const char *sym_name = NULL;
+
+      /* Validate symbol index against symbol table bounds.  */
+      if (sym_index == 0)
+	{
+	  /* Index 0 is the NULL symbol; skip silently.  */
+	  continue;
+	}
+
+      if (sym_index >= total_syms)
+	{
+	  _bfd_error_handler
+	    (_("%pB: lpadinfo entry %u has out-of-range symbol index %u "
+	       "(symbol table has %u entries)"),
+	     abfd, i, sym_index, total_syms);
+	  continue;
+	}
 
       /* Get symbol name.  */
       if (sym_index < symtab_hdr->sh_info && isymbuf != NULL)
@@ -1403,8 +1420,7 @@ riscv_read_lpadinfo_section (bfd *abfd, struct bfd_link_info *info)
 	  /* Global symbol - look up in hash table.  */
 	  unsigned int sym_hash_idx = sym_index - symtab_hdr->sh_info;
 	  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (abfd);
-	  unsigned int symcount = ((symtab_hdr->sh_size / sizeof (ElfNN_External_Sym))
-				   - symtab_hdr->sh_info);
+	  unsigned int symcount = total_syms - symtab_hdr->sh_info;
 	  if (sym_hashes != NULL && sym_hash_idx < symcount)
 	    {
 	      struct elf_link_hash_entry *h = sym_hashes[sym_hash_idx];

@@ -6750,7 +6750,8 @@ riscv_get_symbol_index (asymbol *target_sym)
   extra_section_syms = (num_sections > num_section_syms_in_asympp)
 		       ? (num_sections - num_section_syms_in_asympp) : 0;
 
-  /* Total local symbols in final ELF = locals in asympp + extra section syms.  */
+  /* Total local symbols in final ELF = locals in asympp + extra section syms.
+     This count does NOT include the NULL symbol at index 0.  */
   total_locals = num_locals_in_asympp + extra_section_syms;
 
   if (target_is_global)
@@ -6763,25 +6764,30 @@ riscv_get_symbol_index (asymbol *target_sym)
 	    {
 	      global_pos++;
 	      if (symtab[i] == target_sym)
-		return total_locals + global_pos;  /* Globals follow locals; global_pos is 1-based. NULL symbol is at index 0.  */
+		/* ELF index = 1 (NULL) + total_locals + (global_pos - 1)
+		   = total_locals + global_pos.  */
+		return total_locals + global_pos;
 	    }
 	}
     }
   else
     {
-      /* For local symbols, find position among locals.  */
+      /* For local symbols, find position among locals.
+	 ELF index 0 is the NULL symbol, so the first local is at index 1.  */
       unsigned int local_pos = 1;
       for (i = 0; i < sym_count; i++)
 	{
 	  if ((symtab[i]->flags & (BSF_GLOBAL | BSF_WEAK)) == 0)
 	    {
 	      if (symtab[i] == target_sym)
-		return local_pos;  /* Locals start at index 1 (index 0 is the NULL symbol).  */
+		return local_pos;
 	      local_pos++;
 	    }
 	}
     }
 
+  as_warn (_("lpadinfo: could not determine symbol table index for `%s'"),
+	   target_sym->name ? target_sym->name : "<unknown>");
   return 0;
 }
 
@@ -6795,14 +6801,17 @@ riscv_frob_file (void)
   segment_info_type *seginfo;
   fixS *fixp;
 
-  /* Iterate over all sections to find LPADINFO_SYMIDX fixups.  */
+  /* Iterate over all sections to find LPADINFO_SYMIDX fixups.
+     Use seginfo->fix_root (the chained fixup list) rather than
+     seginfo->frchainP->fix_root, since fix_segment() also uses
+     seginfo->fix_root after frags have been chained together.  */
   for (s = stdoutput->sections; s; s = s->next)
     {
       seginfo = seg_info (s);
-      if (seginfo == NULL || seginfo->frchainP == NULL)
+      if (seginfo == NULL)
 	continue;
 
-      for (fixp = seginfo->frchainP->fix_root; fixp; fixp = fixp->fx_next)
+      for (fixp = seginfo->fix_root; fixp; fixp = fixp->fx_next)
 	{
 	  if (fixp->fx_r_type == BFD_RELOC_RISCV_LPADINFO_SYMIDX)
 	    {
@@ -6814,6 +6823,11 @@ riscv_frob_file (void)
 		  asymbol *bsym = symbol_get_bfdsym (fixp->fx_addsy);
 		  index = riscv_get_symbol_index (bsym);
 		}
+
+	      if (index == 0 && fixp->fx_addsy != NULL)
+		as_warn (_("lpadinfo: symbol `%s' resolved to index 0 (NULL); "
+			   "PLT entry may use default lpad value"),
+			 S_GET_NAME (fixp->fx_addsy));
 
 	      buf = (bfd_byte *) (fixp->fx_frag->fr_literal + fixp->fx_where);
 	      bfd_putl32 (index, buf);
