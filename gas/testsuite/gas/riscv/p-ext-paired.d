@@ -76,10 +76,10 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+68c5aa5b[ 	]+pwmaccsu.h[ 	]+a0,a1,a2
 [ 	]+[0-9a-f]+:[ 	]+6ac5aa5b[ 	]+wmaccsu[ 	]+a0,a1,a2
 [ 	]+[0-9a-f]+:[ 	]+6ec5aa5b[ 	]+pm2waddasu.h[ 	]+a0,a1,a2
-[ 	]+[0-9a-f]+:[ 	]+78c5aa5b[ 	]+pmqwacc.h[ 	]+a0,a1,a2
-[ 	]+[0-9a-f]+:[ 	]+7ac5aa5b[ 	]+pmqwacc[ 	]+a0,a1,a2
-[ 	]+[0-9a-f]+:[ 	]+7cc5aa5b[ 	]+pmqrwacc.h[ 	]+a0,a1,a2
-[ 	]+[0-9a-f]+:[ 	]+7ec5aa5b[ 	]+pmqrwacc[ 	]+a0,a1,a2
+[ 	]+[0-9a-f]+:[ 	]+78c5aa5b[ 	]+mqwacc.h[ 	]+a0,a1,a2
+[ 	]+[0-9a-f]+:[ 	]+7ac5aa5b[ 	]+mqwacc[ 	]+a0,a1,a2
+[ 	]+[0-9a-f]+:[ 	]+7cc5aa5b[ 	]+mqrwacc.h[ 	]+a0,a1,a2
+[ 	]+[0-9a-f]+:[ 	]+7ec5aa5b[ 	]+mqrwacc[ 	]+a0,a1,a2
 [ 	]+[0-9a-f]+:[ 	]+1cec451b[ 	]+predsum.dbs[ 	]+a0,a2,a4
 [ 	]+[0-9a-f]+:[ 	]+18dc459b[ 	]+predsum.dhs[ 	]+a1,a2,a3
 [ 	]+[0-9a-f]+:[ 	]+3caa451b[ 	]+predsumu.dbs[ 	]+a0,a0,a0

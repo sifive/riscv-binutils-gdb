@@ -1744,7 +1744,7 @@ static struct riscv_supported_ext riscv_supported_std_ext[] =
   {"c",		ISA_SPEC_CLASS_2P2,		2, 0, 0 },
   {"b",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"v",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
-  {"p",		ISA_SPEC_CLASS_DRAFT,		0, 15, 0 },
+  {"p",		ISA_SPEC_CLASS_DRAFT,		0, 19, 0 },
   {"h",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {NULL, 0, 0, 0, 0}
 };
