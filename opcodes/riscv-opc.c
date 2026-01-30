@@ -2095,14 +2095,14 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vwmaccsu.vv", 0, INSN_CLASS_V,  "Vd,Vs,VtVm", MATCH_VWMACCSUVV, MASK_VWMACCSUVV, match_opcode, 0},
 {"vwmaccsu.vx", 0, INSN_CLASS_V,  "Vd,s,VtVm", MATCH_VWMACCSUVX, MASK_VWMACCSUVX, match_opcode, 0},
 
-/* Zvqdotq instructions.  */
-{"vqdotu.vv",  0, INSN_CLASS_ZVQDOTQ,  "Vd,Vt,VsVm", MATCH_VQDOTUVV, MASK_VQDOTUVV, match_opcode, 0 },
-{"vqdotu.vx",  0, INSN_CLASS_ZVQDOTQ,  "Vd,Vt,sVm", MATCH_VQDOTUVX, MASK_VQDOTUVX, match_opcode, 0 },
-{"vqdotsu.vv", 0, INSN_CLASS_ZVQDOTQ,  "Vd,Vt,VsVm", MATCH_VQDOTSUVV, MASK_VQDOTSUVV, match_opcode, 0 },
-{"vqdotsu.vx", 0, INSN_CLASS_ZVQDOTQ,  "Vd,Vt,sVm", MATCH_VQDOTSUVX, MASK_VQDOTSUVX, match_opcode, 0 },
-{"vqdot.vv",   0, INSN_CLASS_ZVQDOTQ,  "Vd,Vt,VsVm", MATCH_VQDOTVV, MASK_VQDOTVV, match_opcode, 0 },
-{"vqdot.vx",   0, INSN_CLASS_ZVQDOTQ,  "Vd,Vt,sVm", MATCH_VQDOTVX, MASK_VQDOTVX, match_opcode, 0 },
-{"vqdotus.vx", 0, INSN_CLASS_ZVQDOTQ,  "Vd,Vt,sVm", MATCH_VQDOTUSVX, MASK_VQDOTUSVX, match_opcode, 0 },
+/* Zvdot4a8i instructions.  */
+{"vdot4au.vv",  0, INSN_CLASS_ZVDOT4A8I,  "Vd,Vt,VsVm", MATCH_VDOT4AUVV, MASK_VDOT4AUVV, match_opcode, 0 },
+{"vdot4au.vx",  0, INSN_CLASS_ZVDOT4A8I,  "Vd,Vt,sVm", MATCH_VDOT4AUVX, MASK_VDOT4AUVX, match_opcode, 0 },
+{"vdot4asu.vv", 0, INSN_CLASS_ZVDOT4A8I,  "Vd,Vt,VsVm", MATCH_VDOT4ASUVV, MASK_VDOT4ASUVV, match_opcode, 0 },
+{"vdot4asu.vx", 0, INSN_CLASS_ZVDOT4A8I,  "Vd,Vt,sVm", MATCH_VDOT4ASUVX, MASK_VDOT4ASUVX, match_opcode, 0 },
+{"vdot4a.vv",   0, INSN_CLASS_ZVDOT4A8I,  "Vd,Vt,VsVm", MATCH_VDOT4AVV, MASK_VDOT4AVV, match_opcode, 0 },
+{"vdot4a.vx",   0, INSN_CLASS_ZVDOT4A8I,  "Vd,Vt,sVm", MATCH_VDOT4AVX, MASK_VDOT4AVX, match_opcode, 0 },
+{"vdot4aus.vx", 0, INSN_CLASS_ZVDOT4A8I,  "Vd,Vt,sVm", MATCH_VDOT4AUSVX, MASK_VDOT4AUSVX, match_opcode, 0 },
 
 /* Zvqbdot8i and Zvqbdot16i instructions. */
 {"vqwbdotau.vv", 0, INSN_CLASS_ZVQWBDOTA8I_OR_ZVQWBDOTA16I, "Vd,Vt,VsVm", MATCH_VQWBDOTAUVV, MASK_VQWBDOTAUVV, match_opcode, 0},

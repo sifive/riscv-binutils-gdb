@@ -1589,7 +1589,7 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zvfbfmin", "+zve32f", check_implicit_always},
   {"zvfofp8min", "+zve32f", check_implicit_always},
   {"zvfofp4min", "+zve32f", check_implicit_always},
-  {"zvqdotq", "+zve32x", check_implicit_always},
+  {"zvdot4a8i", "+zve32x", check_implicit_always},
   {"zvqwbdota8i", "+zve32x", check_implicit_always},
   {"zvqwbdota16i", "+zve64x", check_implicit_always},
   {"zvfwbdota16bf", "+zve32f", check_implicit_always},
@@ -1818,7 +1818,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zve64f",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zve64d",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvbb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
-  {"zvqdotq",		ISA_SPEC_CLASS_DRAFT,		0, 0,  0 },
+  {"zvdot4a8i", 	ISA_SPEC_CLASS_DRAFT, 		0, 1,  0 },
   {"zvqwbdota8i", 	ISA_SPEC_CLASS_DRAFT, 		0, 2,  0 },
   {"zvqwbdota16i", 	ISA_SPEC_CLASS_DRAFT, 		0, 2,  0 },
   {"zvfwbdota16bf", 	ISA_SPEC_CLASS_DRAFT, 		0, 2,  0 },
@@ -3265,8 +3265,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zvbb");
     case INSN_CLASS_ZVBC:
       return riscv_subset_supports (rps, "zvbc");
-    case INSN_CLASS_ZVQDOTQ:
-      return riscv_subset_supports (rps, "zvqdotq");
+    case INSN_CLASS_ZVDOT4A8I:
+      return riscv_subset_supports (rps, "zvdot4a8i");
     case INSN_CLASS_ZVQWBDOTA8I_OR_ZVQWBDOTA16I:
       return (riscv_subset_supports (rps, "zvqwbdota8i")
               || riscv_subset_supports (rps, "zvqwbdota16i"));
@@ -3664,8 +3664,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zksh";
     case INSN_CLASS_V:
       return _("v' or `zve64x' or `zve32x");
-    case INSN_CLASS_ZVQDOTQ:
-      return "zvqdotq";
+    case INSN_CLASS_ZVDOT4A8I:
+      return "zvdot4a8i";
     case INSN_CLASS_ZVQWBDOTA8I_OR_ZVQWBDOTA16I:
       return _("zvqwbdota8i' or `zvqwbdota16i");
     case INSN_CLASS_ZVFWBDOTA16BF:
