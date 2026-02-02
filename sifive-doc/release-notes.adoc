@@ -1,0 +1,23 @@
+== New Features
+
+* binutils
+** Based on binutils 2.44.
+** Updated P extension to version 0.19.
+** Added support for Zvdot4a8i extension.
+** Added support for Smrnmi 1.0 extension.
+** Added support for Smpmpmt v0.6 extension.
+** Added `.lpad_info` directive for CFI landing pad function signature support.
+** Added R_RISCV_VENDOR relocation support.
+
+== Improvements and Changes
+
+* binutils
+** Improved JAL linker relaxation to further relax to C.J/C.JAL for reduced code size.
+
+== Important bug fixes
+
+* binutils
+** Fixed Zfbfmin incorrectly implying Zfhmin.
+** Fixed Zcmt table jump relaxation issues.
+
+== Known Issues
