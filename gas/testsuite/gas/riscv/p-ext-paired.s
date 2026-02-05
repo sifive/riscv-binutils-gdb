@@ -120,6 +120,18 @@ target:
 	pslli.db	a0, a0, 1
 	pslli.dh	a0, a0, 15
 	pslli.dw	a0, a0, 31
+	psrli.db	a0, a0, 1
+	psrli.dh	a0, a0, 15
+	psrli.dw	a0, a0, 31
+	psrai.db	a0, a0, 1
+	psrai.dh	a0, a0, 15
+	psrai.dw	a0, a0, 31
+	psrari.dh	a0, a0, 15
+	psrari.dw	a0, a0, 31
+	psati.dh	a0, a0, 15
+	psati.dw	a0, a0, 31
+	pusati.dh	a0, a0, 15
+	pusati.dw	a0, a0, 31
 	psslai.dh	a0, a0, 15
 	psslai.dw	a0, a0, 31
 	psext.dh.b	a0, a0
