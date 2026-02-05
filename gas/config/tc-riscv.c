@@ -1778,6 +1778,8 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		case 'd': USE_BITS (OP_MASK_RDP, OP_SH_RDP); break;
 		case 's': USE_BITS (OP_MASK_RS1P, OP_SH_RS1P); break;
 		case 't': USE_BITS (OP_MASK_RS2P, OP_SH_RS2P); break;
+		/* shift amount, 0 - 63 (6-bit for widening shift).  */
+		case 'W': USE_BITS (OP_MASK_SHAMT, OP_SH_SHAMT); break;
 		default:
 		  goto unknown_validate_operand;
 		}
@@ -4645,6 +4647,16 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			    imm_expr->X_add_number);
 			  imm_expr->X_add_number <<= RISCV_PIMM_BITS;
 		      ip->insn_opcode |= ENCODE_PLUI_IMM (imm_expr->X_add_number);
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;
+		    case 'W': /* 6-bit shift amount for widening shift (0-63).  */
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, false);
+		      if ((unsigned long) imm_expr->X_add_number > 63)
+			as_bad (_("improper shift amount (%"PRIu64")"),
+				imm_expr->X_add_number);
+		      INSERT_OPERAND (SHAMT, *ip, imm_expr->X_add_number);
 		      imm_expr->X_op = O_absent;
 		      asarg = expr_parse_end;
 		      continue;

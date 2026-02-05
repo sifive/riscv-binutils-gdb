@@ -868,6 +868,10 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		  print (info->stream, dis_style_register, "%s",
 			 riscv_gpr_names[rs2p]);
 		  break;
+		case 'W': /* 6-bit shift amount for widening shift (0-63).  */
+		  print (info->stream, dis_style_immediate, "0x%x",
+			 (unsigned)EXTRACT_OPERAND (SHAMT, l));
+		  break;
 		default:
 		  goto undefined_modifier;
 		}

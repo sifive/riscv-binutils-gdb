@@ -2,9 +2,11 @@ target:
 	pwslli.b	a0, a0, 1
 	pwslli.h	a2, a0, 31
 	wslli	a4, a2, 31
+	wslli	a4, a2, 63
 	pwslai.b	a0, a0, 1
 	pwslai.h	a2, a0, 31
 	wslai	a4, a2, 31
+	wslai	a4, a2, 63
 	pli.db	a0, 127
 	pli.dh	a0, 511
 	plui.dh	a0, 511
