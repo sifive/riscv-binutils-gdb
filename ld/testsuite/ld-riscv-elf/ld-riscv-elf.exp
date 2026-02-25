@@ -175,6 +175,7 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "attr-merge-stack-align-failed"
     run_dump_test "attr-phdr"
     run_dump_test "relax-max-align-gp"
+    run_dump_test "gp-relax-boundary"
     run_dump_test "relax-data-segment-align"
     run_dump_test "relax-align-1-norvc"
     run_dump_test "relax-align-1-norelax.norvc"

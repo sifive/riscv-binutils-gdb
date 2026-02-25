@@ -6616,6 +6616,13 @@ _bfd_riscv_relax_jal (bfd *abfd, asection *sec, asection *sym_sec,
    If the max alignment is larger than GP_RELAX_MAX_ALIGNMENT, then it is too
    large for the GP-relative relaxation.  In this case, the caller should not
    try to relax the global variable references to GP-relative references.
+
+   When gp is non-zero, we use a two-pass approach to handle boundary
+   conditions (SCT-5044):
+   1. First pass: find the global max alignment across ALL sections
+   2. Second pass: use that alignment as the boundary margin to include
+      sections near the GP boundary that might shift into range during
+      relaxation.
   */
 
 static bfd_vma
@@ -6623,9 +6630,11 @@ _bfd_riscv_get_max_alignment (struct riscv_elf_link_hash_table *htab,
 			      asection *sec, bfd_vma gp)
 {
   unsigned int max_alignment_power = 0;
+  unsigned int boundary_margin_power = 0;
   bool any_valid = false;
   asection *o;
   bfd_vma max_alignment = -1;
+  bfd_vma boundary_margin = 0;
 
   if (gp && htab->max_alignment_too_large_for_gp_p)
     return GP_RELAX_MAX_ALIGNMENT;
@@ -6638,6 +6647,24 @@ _bfd_riscv_get_max_alignment (struct riscv_elf_link_hash_table *htab,
   if (max_alignment != (bfd_vma) -1)
     return max_alignment;
 
+  /* First pass: find max alignment across ALL sections to determine
+     the boundary margin.  This accounts for sections that might shift
+     into GP range during relaxation due to alignment changes.  */
+  if (gp)
+    {
+      for (o = sec->output_section->owner->sections; o != NULL; o = o->next)
+	{
+	  if (strcmp (o->name, TABLE_JUMP_SEC_NAME) == 0)
+	    continue;
+	  if ((o->flags & SEC_ALLOC) == 0)
+	    continue;
+	  if (o->alignment_power > boundary_margin_power)
+	    boundary_margin_power = o->alignment_power;
+	}
+      boundary_margin = (bfd_vma) 1 << boundary_margin_power;
+    }
+
+  /* Second pass: find max alignment within [GP - 2K - margin, GP + 2K + margin].  */
   for (o = sec->output_section->owner->sections; o != NULL; o = o->next)
     {
       bool valid = true;
@@ -6646,10 +6673,17 @@ _bfd_riscv_get_max_alignment (struct riscv_elf_link_hash_table *htab,
       if (strcmp (o->name, TABLE_JUMP_SEC_NAME) == 0)
 	continue;
 
-      if (gp
-	  && !(VALID_ITYPE_IMM (sec_addr (o) - gp)
-	       || VALID_ITYPE_IMM (sec_addr (o) + o->size - gp)))
-	valid = false;
+      /* Include sections within the GP range, plus the boundary margin.
+	 The margin accounts for sections that might shift into range
+	 during relaxation.  */
+      if (gp)
+	{
+	  bfd_signed_vma start_dist = (bfd_signed_vma) (sec_addr (o) - gp);
+	  bfd_signed_vma end_dist = (bfd_signed_vma) (sec_addr (o) + o->size - gp);
+	  if (start_dist > (bfd_signed_vma) (2047 + boundary_margin)
+	      || end_dist < (bfd_signed_vma) (-2048 - boundary_margin))
+	    valid = false;
+	}
 
       if (valid && o->alignment_power > max_alignment_power)
 	max_alignment_power = o->alignment_power;
