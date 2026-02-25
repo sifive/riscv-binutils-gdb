@@ -3466,9 +3466,11 @@ const struct riscv_opcode riscv_opcodes[] =
 {"cv.sub.div8",           0, INSN_CLASS_XCVSIMD, "d,s,t", MATCH_CV_SUB_DIV8, MASK_CV_SUB_DIV8, match_opcode, 0},
 
 /* SiFive cache control instruction.  */
-{"cflush.d.l1",   0, INSN_CLASS_I, "s", MATCH_CFLUSH_D_L1, MASK_CFLUSH_D_L1, match_opcode, 0 },
-{"cdiscard.d.l1", 0, INSN_CLASS_I, "s", MATCH_CDISCARD_D_L1, MASK_CDISCARD_D_L1, match_opcode, 0 },
-{"cflush.i.l1",   0, INSN_CLASS_I, "", MATCH_CFLUSH_I_L1, MASK_CFLUSH_I_L1, match_opcode, 0 },
+{"sf.cflush.d.l1",   0, INSN_CLASS_I, "s", MATCH_CFLUSH_D_L1, MASK_CFLUSH_D_L1, match_opcode, 0 },
+{"cflush.d.l1",      0, INSN_CLASS_I, "s", MATCH_CFLUSH_D_L1, MASK_CFLUSH_D_L1, match_opcode, INSN_ALIAS },
+{"sf.cdiscard.d.l1", 0, INSN_CLASS_I, "s", MATCH_CDISCARD_D_L1, MASK_CDISCARD_D_L1, match_opcode, 0 },
+{"cdiscard.d.l1",    0, INSN_CLASS_I, "s", MATCH_CDISCARD_D_L1, MASK_CDISCARD_D_L1, match_opcode, INSN_ALIAS },
+{"cflush.i.l1",      0, INSN_CLASS_I, "", MATCH_CFLUSH_I_L1, MASK_CFLUSH_I_L1, match_opcode, 0 },
 
 /* SiFive custom minimal bfloat16 vector instructions.  */
 {"sf.vfwcvt.f.bf16.v",0, INSN_CLASS_XSFVFHBFMIN, "Vd,VtVm", MATCH_VFWCVTBF16_F_F_V, MASK_VFWCVTBF16_F_F_V, match_opcode, 0},

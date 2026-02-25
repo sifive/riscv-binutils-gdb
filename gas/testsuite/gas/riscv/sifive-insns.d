@@ -46,11 +46,11 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+bec4225b[ 	]+sf.vqmaccsu.2x8x2[ 	]+v4,v8,v12
 [ 	]+[0-9a-f]+:[ 	]+8a86525b[ 	]+sf.vfnrclip.xu.f.qf[ 	]+v4,v8,fa2
 [ 	]+[0-9a-f]+:[ 	]+8e86525b[ 	]+sf.vfnrclip.x.f.qf[ 	]+v4,v8,fa2
-[ 	]+[0-9a-f]+:[ 	]+fc050073[ 	]+cflush.d.l1[ 	]+a0
-[ 	]+[0-9a-f]+:[ 	]+fc250073[ 	]+cdiscard.d.l1[ 	]+a0
+[ 	]+[0-9a-f]+:[ 	]+fc050073[ 	]+sf.cflush.d.l1[ 	]+a0
+[ 	]+[0-9a-f]+:[ 	]+fc250073[ 	]+sf.cdiscard.d.l1[ 	]+a0
 [ 	]+[0-9a-f]+:[ 	]+fc100073[ 	]+cflush.i.l1
-[ 	]+[0-9a-f]+:[ 	]+fc050073[ 	]+cflush.d.l1[ 	]+a0
-[ 	]+[0-9a-f]+:[ 	]+fc250073[ 	]+cdiscard.d.l1[ 	]+a0
+[ 	]+[0-9a-f]+:[ 	]+fc050073[ 	]+sf.cflush.d.l1[ 	]+a0
+[ 	]+[0-9a-f]+:[ 	]+fc250073[ 	]+sf.cdiscard.d.l1[ 	]+a0
 [ 	]+[0-9a-f]+:[ 	]+fc100073[ 	]+cflush.i.l1
 [ 	]+[0-9a-f]+:[ 	]+4a869257[ 	]+vfwcvtbf16.f.f.v[ 	]+v4,v8
 [ 	]+[0-9a-f]+:[ 	]+4a8e9257[ 	]+vfncvtbf16.f.f.w[ 	]+v4,v8
