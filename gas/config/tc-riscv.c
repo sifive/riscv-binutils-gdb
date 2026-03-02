@@ -834,6 +834,11 @@ add_relaxed_insn (struct riscv_cl_insn *insn, int max_chars, int var,
 {
   frag_grow (max_chars);
   move_insn (insn, frag_now, frag_more (0) - frag_now->fr_literal);
+  /* Save the current relax state into the frag before frag_var creates
+     a new frag.  md_convert_frag_branch will use this later to set
+     fx_tcbit correctly, since .option push/pop may change
+     riscv_opts.relax before fragment conversion.  */
+  frag_now->tc_frag_data.relax = riscv_opts.relax;
   frag_var (rs_machine_dependent, max_chars, var,
 	    subtype, symbol, offset, NULL);
 }
@@ -6290,7 +6295,10 @@ md_convert_frag_branch (fragS *fragp)
  done:
   fixp->fx_file = fragp->fr_file;
   fixp->fx_line = fragp->fr_line;
-  fixp->fx_tcbit = riscv_opts.relax;
+  /* Use the relax state saved at fragment creation time, not the current
+     riscv_opts.relax, because .option push/pop may have changed the relax
+     state between fragment creation and conversion.  */
+  fixp->fx_tcbit = fragp->tc_frag_data.relax;
 
   gas_assert (buf == (bfd_byte *)fragp->fr_literal
 	      + fragp->fr_fix + fragp->fr_var);

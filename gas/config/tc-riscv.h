@@ -176,6 +176,11 @@ struct riscv_segment_info_type
 struct riscv_frag_type
 {
   symbolS *first_map_symbol, *last_map_symbol;
+  /* Record whether relaxation is enabled at fragment creation time.
+     Used by md_convert_frag_branch to correctly set fx_tcbit, since
+     .option push/pop may change riscv_opts.relax before fragment
+     conversion.  */
+  bool relax;
 };
 
 #define TC_FRAG_INIT(fragp, max_bytes) riscv_init_frag (fragp, max_bytes)
