@@ -263,25 +263,24 @@ match_rs1_nonzero_rs2_even (const struct riscv_opcode *op ATTRIBUTE_UNUSED, insn
   return match_rs1_nonzero (op, insn) && match_rs2_even (op, insn);
 }
 
+/* Register pair fields encode register_number / 2, so all encoded values
+   represent even registers.  These match functions now just check opcode.  */
 static int
 match_rdp_even (const struct riscv_opcode *op, insn_t insn)
 {
-  int rdp = (insn & MASK_RDP) >> OP_SH_RDP;
-  return ((rdp & 1) == 0) && match_opcode (op, insn);
+  return match_opcode (op, insn);
 }
 
 static int
 match_rs1p_even (const struct riscv_opcode *op, insn_t insn)
 {
-  int rs1p = (insn & MASK_RS1P) >> OP_SH_RS1P;
-  return ((rs1p & 1) == 0) && match_opcode (op, insn);
+  return match_opcode (op, insn);
 }
 
 static int
 match_rs2p_even (const struct riscv_opcode *op, insn_t insn)
 {
-  int rs2p = (insn & MASK_RS2P) >> OP_SH_RS2P;
-  return ((rs2p & 1) == 0) && match_opcode (op, insn);
+  return match_opcode (op, insn);
 }
 
 static int

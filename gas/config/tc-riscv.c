@@ -4674,18 +4674,23 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			if (ISSPACE (*asarg))
 			  ++asarg;
 
-			/* Now that we have assembled one operand, we use the args
-			 string to figure out where it goes in the instruction.  */
+			/* Register pair operands require even registers and
+			   encode register_number / 2.  */
+			if (regno & 1)
+			  {
+			    as_bad (_("register pair operand must be even"));
+			    break;
+			  }
 			switch (c)
 			{
 			  case 's':
-			    INSERT_OPERAND (RS1P, *ip, regno);
+			    INSERT_OPERAND (RS1P, *ip, regno >> 1);
 			    break;
 			  case 'd':
-			    INSERT_OPERAND (RDP, *ip, regno);
+			    INSERT_OPERAND (RDP, *ip, regno >> 1);
 			    break;
 			  case 't':
-			    INSERT_OPERAND (RS2P, *ip, regno);
+			    INSERT_OPERAND (RS2P, *ip, regno >> 1);
 			    break;
 			}
 			continue;
