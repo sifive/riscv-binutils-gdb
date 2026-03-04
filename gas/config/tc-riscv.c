@@ -4623,7 +4623,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      if (imm_expr->X_add_number > 511
 			|| imm_expr->X_add_number < -512)
 		      as_bad (_("Improper immediate value for 'pli.h/w' (%"PRIi64"). "
-				"(shoud be between -512-511)"),
+				"(should be between -512-511)"),
 				imm_expr->X_add_number);
 		      ip->insn_opcode |= ENCODE_PLI_IMM (imm_expr->X_add_number);
 		      imm_expr->X_op = O_absent;
