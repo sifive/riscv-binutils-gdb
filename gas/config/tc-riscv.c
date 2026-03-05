@@ -4608,10 +4608,12 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    case 'b': /* Immediate field for 'pli.b'.  */
 		      my_getExpression (imm_expr, asarg);
 		      check_absolute_expr (ip, imm_expr, false);
-		      if (imm_expr->X_add_number > 127
+		      /* Accept any constant in the range [-128, 255].
+			 This combines signed [-128, 127] and unsigned [0, 255].  */
+		      if (imm_expr->X_add_number > 255
 			 || imm_expr->X_add_number < -128)
-		      as_bad(_("Improper immediate value for 'pli.b' (%"PRIu64"). "
-			    "(should be between -128-127)"),
+		      as_bad(_("Improper immediate value for 'pli.b' (%"PRIi64"). "
+			    "(should be between -128 and 255)"),
 			    imm_expr->X_add_number);
 		      ip->insn_opcode |= ENCODE_PLI_B_IMM (imm_expr->X_add_number);
 		      imm_expr->X_op = O_absent;
@@ -4630,31 +4632,45 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      asarg = expr_parse_end;
 		      continue;
 		    case 'h': /* Immediate field for 'plui.h'.  */
-		      my_getExpression (imm_expr, asarg);
-		      check_absolute_expr (ip, imm_expr, false);
-		      if (imm_expr->X_add_number > 511
-			 || imm_expr->X_add_number < -512)
-		      as_bad(_("Improper immediate value for 'plui.h' (%"PRIu64"). "
-			    "(should be between -512-511)"),
-			    imm_expr->X_add_number);
-			  imm_expr->X_add_number <<= RISCV_PIMM_H_BITS;
-		      ip->insn_opcode |= ENCODE_PLUI_H_IMM (imm_expr->X_add_number);
-		      imm_expr->X_op = O_absent;
-		      asarg = expr_parse_end;
-		      continue;
+		      {
+			bfd_vma uval;
+			my_getExpression (imm_expr, asarg);
+			check_absolute_expr (ip, imm_expr, false);
+			/* Accept any constant in the range [-512, 1023].
+			   This combines signed [-512, 511] and unsigned [0, 1023].  */
+			if (imm_expr->X_add_number > 1023
+			    || imm_expr->X_add_number < -512)
+			  as_bad(_("Improper immediate value for 'plui.h' (%"PRIi64"). "
+				   "(should be between -512 and 1023)"),
+				 imm_expr->X_add_number);
+			/* Use unsigned type for left shift to avoid undefined
+			   behavior when shifting negative values.  */
+			uval = (bfd_vma) imm_expr->X_add_number << RISCV_PIMM_H_BITS;
+			ip->insn_opcode |= ENCODE_PLUI_H_IMM (uval);
+			imm_expr->X_op = O_absent;
+			asarg = expr_parse_end;
+			continue;
+		      }
 		    case 'u': /* Immediate field for 'plui.w'.  */
-		      my_getExpression (imm_expr, asarg);
-		      check_absolute_expr (ip, imm_expr, false);
-		      if (imm_expr->X_add_number > 511
-			 || imm_expr->X_add_number < -512)
-		      as_bad(_("Improper immediate value for 'plui.w' (%"PRIu64"). "
-			    "(should be between -512-511)"),
-			    imm_expr->X_add_number);
-			  imm_expr->X_add_number <<= RISCV_PIMM_BITS;
-		      ip->insn_opcode |= ENCODE_PLUI_IMM (imm_expr->X_add_number);
-		      imm_expr->X_op = O_absent;
-		      asarg = expr_parse_end;
-		      continue;
+		      {
+			bfd_vma uval;
+			my_getExpression (imm_expr, asarg);
+			check_absolute_expr (ip, imm_expr, false);
+			/* Accept any constant in the range [-512, 1023].
+			   This combines signed [-512, 511] and unsigned [0, 1023].  */
+			if (imm_expr->X_add_number > 1023
+			    || imm_expr->X_add_number < -512)
+			  as_bad(_("Improper immediate value for 'plui.w' (%"PRIi64"). "
+				   "(should be between -512 and 1023)"),
+				 imm_expr->X_add_number);
+			/* Use unsigned type for left shift to avoid undefined
+			   behavior when shifting negative values.  */
+			uval = (bfd_vma) imm_expr->X_add_number << RISCV_PIMM_BITS;
+			ip->insn_opcode |= ENCODE_PLUI_IMM (uval);
+			imm_expr->X_op = O_absent;
+			asarg = expr_parse_end;
+			continue;
+		      }
 		    case 'W': /* 6-bit shift amount for widening shift (0-63).  */
 		      my_getExpression (imm_expr, asarg);
 		      check_absolute_expr (ip, imm_expr, false);

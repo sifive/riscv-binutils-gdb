@@ -13,6 +13,10 @@ target:
 	minu	a0, a1, a2
 	maxu	a0, a1, a2
 	pli.b	a0, 3
+	pli.b	a0, -128	# Test signed min
+	pli.b	a0, 127		# Test signed max
+	pli.b	a0, 128		# Test unsigned extension
+	pli.b	a0, 255		# Test unsigned max
 	pli.h	a0, 10
 	pslli.b	a0, a1, 1
 	pslli.h	a0, a1, 5
@@ -22,6 +26,10 @@ target:
 	psabs.b	a0, a1
 	psabs.h	a0, a1
 	plui.h	a0,0x1f
+	plui.h	a0,-512		# Test signed min
+	plui.h	a0,511		# Test signed max
+	plui.h	a0,512		# Test unsigned extension
+	plui.h	a0,1023		# Test unsigned max
 	psll.bs	a0, a1, a2
 	psll.hs	a0, a1, a2
 	padd.bs	a0, a1, a2
